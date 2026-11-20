@@ -1,5 +1,5 @@
 const CACHE_NAME = "adalex-digital-v2.0";
-const ASSETS = ["./", "./index.html"];
+const ASSETS = ["./", "./index.html", "./logo.png"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(

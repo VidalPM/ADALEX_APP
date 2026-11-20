@@ -634,7 +634,7 @@ footer.adx-foot {
 <!-- Service Worker source para hospedagem offline -->
 <script type="text/plain" id="adalex-sw-code">
 const CACHE_NAME = "adalex-digital-v2.0";
-const ASSETS = ["./", "./index.html"];
+const ASSETS = ["./", "./index.html", "./logo.png"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
@@ -832,7 +832,7 @@ function baseDefaultState(){
       address:"Rua Antonio Mioto, 16, Alexandra - Paranaguá/PR",
       aboutText:"Somos uma igreja acolhedora, fundamentada na Palavra de Deus e no amor ao próximo. Nossas portas estão abertas para receber você e sua família em todos os cultos da semana!",
       sundayWorshipTime:"Domingos às 19h00",
-      logoUrl:"https://drive.google.com/thumbnail?id=10ldPp4h7pIcC3aN7Qz53Wy_rryJqQ5br&sz=w800",
+      logoUrl:"./logo.png",
       theme:"navy",
       customPrimaryHex:"#1e40af",
       customSecondaryHex:"#312e81",
@@ -1268,7 +1268,7 @@ function findUser(id){return state.users.find(function(u){return u.id===id;});}
 function headerHtml(){
   var c=state.church,t=theme();
   var logo=c.logoUrl
-    ?'<img src="'+esc(driveLink(c.logoUrl))+'" alt="Logo da igreja" style="width:84px;height:84px;border-radius:22px;border:3px solid #fff;object-fit:cover;background:#fff;box-shadow:0 6px 18px rgba(0,0,0,.22)">'
+    ?'<img src="'+esc(driveLink(c.logoUrl))+'" alt="Logo da igreja" style="width:84px;height:84px;border-radius:22px;border:3px solid #fff;object-fit:contain;padding:4px;background:#fff;box-shadow:0 6px 18px rgba(0,0,0,.22)">'
     :'<div style="width:84px;height:84px;border-radius:22px;border:3px solid #fff;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.15);color:#fff">'+ico("church",36)+"</div>";
   var cnpj=can("verCnpj")&&c.cnpj
     ?'<button data-act="copyCnpj" style="display:inline-flex;align-items:center;gap:.35rem;background:rgba(255,255,255,.16);color:#fff;border-radius:999px;padding:.35rem .75rem;font-size:.72rem;font-weight:700;border:0;cursor:pointer">'+ico("copy",13)+'<span>CNPJ '+esc(c.cnpj)+"</span></button>"
