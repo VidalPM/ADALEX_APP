@@ -1,0 +1,2774 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" id="metaThemeColor" content="#1e40af">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="ADALEX Digital">
+<meta name="mobile-web-app-capable" content="yes">
+<link id="pwaManifest" rel="manifest">
+<link id="appleTouchIcon" rel="apple-touch-icon">
+<title>ADALEX Digital — v2.0 Personalizável</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap">
+<style>
+:root {
+  color-scheme: light;
+  --accent: #1e40af;
+  --accent-contrast: #ffffff;
+  --bg: #f5f5f4;
+  --surface: #ffffff;
+  --text: #1c1917;
+  --text-muted: #57534e;
+  --border: rgba(20, 23, 31, 0.12);
+  --radius: 14px;
+  --shadow: 0 2px 8px rgba(20, 23, 31, 0.06);
+  --space: 16px;
+  --success: #0a7a35;
+  --danger: #be123c;
+  --warning: #8a5300;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+*, *::before, *::after, ::backdrop {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  border: 0 solid;
+}
+
+[hidden]:where(:not([hidden="until-found"])) { display: none !important; }
+.hidden { display: none !important; }
+h1, h2, h3, h4, h5, h6 { font-size: inherit; font-weight: inherit; }
+a { color: inherit; text-decoration: inherit; }
+b, strong { font-weight: 700; }
+ol, ul, menu { list-style: none; }
+svg, video, canvas, iframe { display: block; vertical-align: middle; }
+button, input, select, textarea { font: inherit; color: inherit; background-color: transparent; border-radius: 0; }
+button, a { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+table { border-collapse: collapse; }
+img { max-width: 100%; display: block; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  overflow-x: hidden;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  -webkit-font-smoothing: antialiased;
+}
+
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-thumb { background: #d6d3d1; border-radius: 6px; }
+
+@keyframes fadeInScale {
+  from { opacity: 0; transform: scale(.97); }
+  to { opacity: 1; transform: scale(1); }
+}
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(28px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-modal { animation: fadeInScale .2s ease-out both; }
+
+/* Top build & status banner */
+.build-banner {
+  background: #f59e0b;
+  color: #1c1917;
+  font-size: .68rem;
+  font-weight: 800;
+  text-align: center;
+  padding: calc(.28rem + var(--safe-top)) .5rem .28rem;
+  letter-spacing: .04em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: .5rem;
+}
+.offline-chip {
+  background: #1c1917;
+  color: #fde68a;
+  padding: .1rem .45rem;
+  border-radius: 999px;
+  font-size: .62rem;
+}
+
+/* Sticky mobile-first navigation */
+nav.top-nav {
+  background: #0c0a09;
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, .22);
+}
+.nav-inner {
+  max-width: 56rem;
+  margin: 0 auto;
+  padding: .5rem .75rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .45rem;
+}
+.nav-scroll {
+  display: flex;
+  align-items: center;
+  gap: .35rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  flex: 1;
+  min-width: 0;
+}
+.nav-scroll::-webkit-scrollbar { display: none; }
+
+.nav-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .35rem;
+  min-height: 38px;
+  padding: .42rem .75rem;
+  border-radius: 12px;
+  font-size: .75rem;
+  font-weight: 700;
+  color: #e7e5e4;
+  white-space: nowrap;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: transform .12s ease, background-color .15s ease;
+}
+.nav-btn:active { transform: scale(.97); }
+.nav-btn.on { background: #fff; color: #0c0a09; }
+.nav-btn.gold { background: #f59e0b; color: #0c0a09; }
+.nav-btn.install { background: #16a34a; color: #fff; }
+
+.profile-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  min-height: 38px;
+  background: #1c1917;
+  border: 1px solid #44403c;
+  border-radius: 12px;
+  padding: .35rem .6rem;
+  color: #fff;
+  font-weight: 700;
+  font-size: .75rem;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.profile-btn:active { transform: scale(.97); }
+
+/* Simulator bar */
+.sim-bar {
+  background: #451a03;
+  color: #fef3c7;
+  font-size: .7rem;
+  padding: .4rem .75rem;
+  display: flex;
+  align-items: center;
+  gap: .35rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+  white-space: nowrap;
+}
+.sim-bar::-webkit-scrollbar { display: none; }
+
+/* Dialog / Bottom sheet */
+dialog.adalex {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  max-width: 100%;
+  height: 100%;
+  max-height: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  overflow: hidden;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  z-index: 40;
+}
+dialog.adalex::backdrop {
+  background: rgba(12, 10, 9, .75);
+  backdrop-filter: blur(5px);
+}
+@media (min-width: 640px) {
+  dialog.adalex { align-items: center; padding: 1rem; }
+}
+.adalex-panel {
+  background: #fff;
+  width: 100%;
+  max-width: 34rem;
+  max-height: 90dvh;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  border-radius: 24px 24px 0 0;
+  padding-bottom: calc(.5rem + var(--safe-bottom));
+  animation: slideUp .25s ease-out both;
+  position: relative;
+  box-shadow: 0 -8px 30px rgba(0, 0, 0, .22);
+}
+.sheet-handle {
+  width: 38px;
+  height: 4px;
+  background: #d6d3d1;
+  border-radius: 999px;
+  margin: .55rem auto .15rem;
+}
+@media (min-width: 640px) {
+  .adalex-panel { border-radius: 24px; padding-bottom: 0; }
+  .sheet-handle { display: none; }
+}
+.dialog-close-btn {
+  position: absolute;
+  top: .65rem;
+  right: .65rem;
+  z-index: 3;
+  background: rgba(245, 245, 244, .95);
+  color: #1c1917;
+  border: 1px solid #e7e5e4;
+  border-radius: 999px;
+  width: 38px;
+  height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+.dialog-close-btn:active { transform: scale(.94); }
+
+/* Toast */
+.toast-container {
+  position: fixed;
+  top: calc(.75rem + var(--safe-top));
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 60;
+  width: 92%;
+  max-width: 28rem;
+  pointer-events: none;
+  display: none;
+}
+.toast-container.show { display: block; }
+.toast-item {
+  background: #1c1917;
+  color: #fff;
+  padding: .75rem 1rem;
+  border-radius: 14px;
+  font-size: .82rem;
+  font-weight: 600;
+  margin-bottom: .5rem;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, .24);
+  text-align: center;
+  animation: slideUp .18s ease-out both;
+}
+
+/* Cards & Buttons */
+.card {
+  background: #fff;
+  border-radius: 20px;
+  box-shadow: var(--shadow);
+  border: 1px solid rgba(231, 229, 228, .75);
+  padding: 1rem;
+}
+@media (min-width: 640px) {
+  .card { border-radius: 24px; padding: 1.2rem; }
+}
+
+.btn-main, .btn-soft, .btn-danger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .4rem;
+  min-height: 42px;
+  border-radius: 12px;
+  cursor: pointer;
+  text-align: center;
+  line-height: 1.2;
+  transition: transform .12s ease, opacity .15s ease;
+}
+.btn-main:active, .btn-soft:active, .btn-danger:active { transform: scale(.98); }
+
+.btn-main {
+  background: linear-gradient(90deg, #1e40af, #3730a3);
+  color: #fff;
+  font-weight: 800;
+  padding: .65rem 1rem;
+  font-size: .84rem;
+}
+.btn-soft {
+  background: #f5f5f4;
+  color: #1c1917;
+  border: 1px solid #e7e5e4;
+  font-weight: 700;
+  padding: .55rem .85rem;
+  font-size: .78rem;
+}
+.btn-danger {
+  background: #fff1f2;
+  color: #9f1239;
+  border: 1px solid #fecdd3;
+  font-weight: 700;
+  padding: .55rem .85rem;
+  font-size: .78rem;
+}
+.btn-sm {
+  min-height: 36px;
+  padding: .4rem .65rem;
+  font-size: .74rem;
+}
+
+/* Inputs: 16px prevents automatic zoom on mobile Safari/Chrome */
+.fld {
+  width: 100%;
+  min-height: 44px;
+  border: 1px solid #d6d3d1;
+  border-radius: 12px;
+  padding: .6rem .75rem;
+  font-size: 16px;
+  background: #fff;
+  color: #1c1917;
+}
+input[type="color"].fld {
+  padding: .25rem;
+  cursor: pointer;
+}
+textarea.fld { min-height: 84px; resize: vertical; }
+.fld:focus {
+  outline: none;
+  border-color: #1e40af;
+  box-shadow: 0 0 0 3px rgba(30, 64, 175, .15);
+}
+input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: #1e40af;
+  vertical-align: middle;
+}
+
+.lbl {
+  font-size: .76rem;
+  font-weight: 700;
+  color: #44403c;
+  display: block;
+  margin-bottom: .3rem;
+}
+.help {
+  font-size: .74rem;
+  color: #78716c;
+  margin-top: .25rem;
+  line-height: 1.4;
+}
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: .25rem;
+  font-size: .66rem;
+  font-weight: 700;
+  padding: .18rem .55rem;
+  border-radius: 999px;
+  border: 1px solid;
+  white-space: nowrap;
+}
+
+/* Role & Status badge colors */
+.b-sky { background: #e0f2fe; color: #0c4a6e; border-color: #7dd3fc; }
+.b-emerald { background: #d1fae5; color: #064e3b; border-color: #6ee7b7; }
+.b-purple { background: #f3e8ff; color: #581c87; border-color: #d8b4fe; }
+.b-amber { background: #fef3c7; color: #78350f; border-color: #fcd34d; }
+.b-rose { background: #ffe4e6; color: #881337; border-color: #fda4af; }
+.b-stone { background: #f5f5f4; color: #292524; border-color: #d6d3d1; }
+.b-indigo { background: #e0e7ff; color: #1e1b4b; border-color: #a5b4fc; }
+.b-teal { background: #ccfbf1; color: #134e4a; border-color: #5eead4; }
+.b-white { background: #ffffff; color: #44403c; border-color: #d6d3d1; }
+
+/* Selectable function chips */
+.func-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: .3rem;
+  min-height: 36px;
+  padding: .35rem .7rem;
+  border-radius: 999px;
+  font-size: .75rem;
+  font-weight: 700;
+  border: 1px solid #d6d3d1;
+  background: #fafaf9;
+  color: #44403c;
+  cursor: pointer;
+  transition: all .12s ease;
+}
+.func-chip.on {
+  background: #1e40af;
+  color: #fff;
+  border-color: #1e40af;
+}
+
+/* Collapsible sections in Admin */
+details.adx-acc {
+  background: #fff;
+  border-radius: 20px;
+  box-shadow: var(--shadow);
+  border: 1px solid rgba(231, 229, 228, .85);
+  margin-bottom: .85rem;
+  overflow: hidden;
+}
+details.adx-acc > summary {
+  list-style: none;
+  cursor: pointer;
+  padding: .95rem 1rem;
+  font-weight: 800;
+  font-size: .9rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .5rem;
+  background: #fafaf9;
+}
+details.adx-acc > summary::-webkit-details-marker { display: none; }
+details.adx-acc > summary::after {
+  content: "▾";
+  font-size: 1rem;
+  color: #57534e;
+  transition: transform .15s ease;
+}
+details.adx-acc[open] > summary::after { transform: rotate(180deg); }
+details.adx-acc > .acc-body {
+  padding: 1rem;
+  border-top: 1px solid #e7e5e4;
+  display: grid;
+  gap: .8rem;
+}
+
+/* Admin horizontal tabs */
+.tabs-row {
+  display: flex;
+  gap: .4rem;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  padding: .65rem .75rem;
+  border-bottom: 1px solid #e7e5e4;
+}
+.tabs-row::-webkit-scrollbar { display: none; }
+.tab-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+  white-space: nowrap;
+  min-height: 38px;
+  padding: .45rem .8rem;
+  border-radius: 999px;
+  font-size: .75rem;
+  font-weight: 700;
+  color: #57534e;
+  background: #f5f5f4;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.tab-btn.on { background: #1c1917; color: #fff; }
+
+/* Responsive grids tailored for smartphones */
+.dept-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: .65rem;
+}
+@media (max-width: 339px) {
+  .dept-grid { grid-template-columns: minmax(0, 1fr); }
+}
+@media (min-width: 640px) {
+  .dept-grid { grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: .85rem; }
+}
+
+.dept-card {
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: var(--shadow);
+  border: 1px solid rgba(231, 229, 228, .85);
+  padding: .85rem .65rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  gap: .6rem;
+  text-align: center;
+}
+.dept-title {
+  font-weight: 800;
+  font-size: .82rem;
+  line-height: 1.25;
+  color: #1c1917;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+@media (min-width: 640px) {
+  .dept-card { padding: 1.05rem; border-radius: 22px; }
+  .dept-title { font-size: .9rem; }
+}
+
+.safe-grid-2 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+  gap: .85rem;
+}
+.safe-grid-sm {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+  gap: .75rem;
+}
+
+/* Tables with sticky first column on mobile */
+.table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+table.adx {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: .76rem;
+}
+table.adx th {
+  background: #1c1917;
+  color: #fff;
+  padding: .55rem .5rem;
+  text-align: center;
+  white-space: nowrap;
+}
+table.adx td {
+  padding: .55rem .5rem;
+  border-bottom: 1px solid #e7e5e4;
+  text-align: center;
+}
+table.adx th.nm, table.adx td.nm {
+  text-align: left;
+  position: sticky;
+  left: 0;
+  z-index: 1;
+}
+table.adx th.nm { background: #1c1917; }
+table.adx td.nm { background: #fff; min-width: 165px; }
+
+/* Footer */
+footer.adx-foot {
+  background: #1c1917;
+  color: #d6d3d1;
+  font-size: .75rem;
+  padding: 1.35rem 1rem calc(1.35rem + var(--safe-bottom));
+}
+
+/* Header hero */
+.hero-header {
+  max-width: 56rem;
+  margin: 0 auto;
+  padding: 1.4rem 1rem 2.2rem;
+  text-align: center;
+  color: #fff;
+}
+.hero-title {
+  font-size: clamp(1.25rem, 4.5vw, 1.65rem);
+  font-weight: 800;
+  line-height: 1.2;
+  margin: .65rem 0 .25rem;
+}
+@media (min-width: 640px) {
+  .hero-header { padding: 2rem 1rem 2.6rem; }
+}
+</style>
+</head>
+<body>
+<div class="build-banner" id="buildBanner">
+  <span id="buildBannerText">ADALEX DIGITAL • v2.0 PERSONALIZÁVEL</span>
+  <span class="offline-chip" id="offlineChip" hidden>MODO OFFLINE</span>
+</div>
+
+<div class="toast-container" id="toastContainer" role="status" aria-live="polite"></div>
+
+<nav class="top-nav" id="topNav">
+  <div class="nav-inner">
+    <div id="navLeft" class="nav-scroll"></div>
+    <div id="navRight"></div>
+  </div>
+  <div id="simBar"></div>
+</nav>
+
+<main class="app-root" id="appRoot" style="flex:1;display:flex;flex-direction:column;padding-bottom:1.5rem"></main>
+
+<footer class="adx-foot" id="adxFoot">
+  <div style="max-width:56rem;margin:0 auto;display:flex;flex-direction:column;gap:.55rem">
+    <div style="font-weight:800;color:#fff;font-size:.85rem" id="footName"></div>
+    <div id="footInfo"></div>
+    <div style="display:flex;flex-wrap:wrap;gap:1rem">
+      <a href="#" data-nav="home" id="footNavHome" style="color:#fcd34d;font-weight:700;padding:.2rem 0">Início &amp; Pix</a>
+      <a href="#" data-nav="prayer" id="footNavPrayer" style="color:#fcd34d;font-weight:700;padding:.2rem 0">Administração &amp; Oração</a>
+    </div>
+    <div style="opacity:.75" id="footNote">v2.0 • Dados salvos localmente neste navegador</div>
+  </div>
+</footer>
+
+<!-- Service Worker source para hospedagem offline -->
+<script type="text/plain" id="adalex-sw-code">
+const CACHE_NAME = "adalex-digital-v2.0";
+const ASSETS = ["./", "./index.html"];
+
+self.addEventListener("install", (event) => {
+  event.waitUntil(
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS)).catch(() => {})
+  );
+  self.skipWaiting();
+});
+
+self.addEventListener("activate", (event) => {
+  event.waitUntil(
+    caches.keys().then((keys) =>
+      Promise.all(keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k)))
+    )
+  );
+  self.clients.claim();
+});
+
+self.addEventListener("fetch", (event) => {
+  if (event.request.method !== "GET") return;
+  event.respondWith(
+    caches.match(event.request).then((cached) => {
+      const networkFetch = fetch(event.request)
+        .then((response) => {
+          if (response && response.status === 200) {
+            const copy = response.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
+          }
+          return response;
+        })
+        .catch(() => cached);
+      return cached || networkFetch;
+    })
+  );
+});
+</script>
+
+<script>
+/*__CUSTOM_STATE_START__*/var EMBEDDED_STATE=null;/*__CUSTOM_STATE_END__*/
+(function(){
+"use strict";
+
+/* ---------- inline SVG icon helper ---------- */
+var ICONS={
+  church:'<path d="M10 9h4"/><path d="M12 7v5"/><path d="M14 22v-4a2 2 0 0 0-4 0v4"/><path d="M18 22V5.618a1 1 0 0 0-.553-.894l-4.553-2.277a2 2 0 0 0-1.788 0L6.553 4.724A1 1 0 0 0 6 5.618V22"/><path d="m18 7 3.447 1.724a1 1 0 0 1 .553.894V20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9.618a1 1 0 0 1 .553-.894L6 7"/>',
+  "heart-handshake":'<path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/><path d="M12 5 9.04 7.96a2.17 2.17 0 0 0 0 3.08c.82.82 2.13.85 3 .07l2.07-1.9a2.82 2.82 0 0 1 3.79 0l2.96 2.66"/><path d="m18 15-2-2"/><path d="m15 18-2-2"/>',
+  settings:'<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/>',
+  copy:'<rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>',
+  "map-pin":'<path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/>',
+  pencil:'<path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/>',
+  "external-link":'<path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>',
+  "clipboard-paste":'<path d="M15 2H9a1 1 0 0 0-1 1v2c0 .6.4 1 1 1h6c.6 0 1-.4 1-1V3c0-.6-.4-1-1-1Z"/><path d="M8 4H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2M16 4h2a2 2 0 0 1 2 2v2M11 14h10"/><path d="m17 10 4 4-4 4"/>',
+  "qr-code":'<rect width="5" height="5" x="3" y="3" rx="1"/><rect width="5" height="5" x="16" y="3" rx="1"/><rect width="5" height="5" x="3" y="16" rx="1"/><path d="M21 16h-3a2 2 0 0 0-2 2v3"/><path d="M21 21v.01"/><path d="M12 7v3a2 2 0 0 1-2 2H7"/><path d="M3 12h.01"/><path d="M12 3h.01"/><path d="M12 16v.01"/><path d="M16 12h1"/><path d="M21 12v.01"/><path d="M12 21v-1"/>',
+  users:'<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
+  sliders:'<line x1="4" x2="4" y1="21" y2="14"/><line x1="4" x2="4" y1="10" y2="3"/><line x1="12" x2="12" y1="21" y2="12"/><line x1="12" x2="12" y1="8" y2="3"/><line x1="20" x2="20" y1="21" y2="16"/><line x1="20" x2="20" y1="12" y2="3"/><line x1="2" x2="6" y1="14" y2="14"/><line x1="10" x2="14" y1="8" y2="8"/><line x1="18" x2="22" y1="16" y2="16"/>',
+  calendar:'<path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/>',
+  bell:'<path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>',
+  "users-round":'<path d="M18 21a8 8 0 0 0-16 0"/><circle cx="10" cy="8" r="5"/><path d="M22 20c0-3.37-2-6.5-4-8a5 5 0 0 0-.45-8.3"/>',
+  inbox:'<polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/>',
+  "share-2":'<circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" x2="15.42" y1="13.51" y2="17.49"/><line x1="15.41" x2="8.59" y1="6.51" y2="10.49"/>',
+  download:'<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/>',
+  smartphone:'<rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path d="M12 18h.01"/>',
+  plus:'<line x1="12" x2="12" y1="5" y2="19"/><line x1="5" x2="19" y1="12" y2="12"/>'
+};
+function ico(name,size){
+  size=size||15;
+  var p=ICONS[name]||"";
+  return '<svg width="'+size+'" height="'+size+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;flex-shrink:0" aria-hidden="true">'+p+"</svg>";
+}
+
+/* ---------- constants ---------- */
+var KEY="adalex_v1";
+var THEMES={
+  navy:{label:"Azul Marinho",hex:"#1e40af",hex2:"#312e81",hexLight:"#eff6ff"},
+  gold:{label:"Dourado",hex:"#b45309",hex2:"#78350f",hexLight:"#fef3c7"},
+  emerald:{label:"Esmeralda",hex:"#047857",hex2:"#064e3b",hexLight:"#ecfdf5"},
+  burgundy:{label:"Bordô",hex:"#9f1239",hex2:"#881337",hexLight:"#fff1f2"},
+  purple:{label:"Roxo",hex:"#6b21a8",hex2:"#4c1d95",hexLight:"#faf5ff"},
+  custom:{label:"Cor Personalizada",hex:"#1e40af",hex2:"#312e81",hexLight:"#eff6ff"}
+};
+var BADGE_COLORS=[
+  ["b-sky","Azul Claro"],
+  ["b-emerald","Verde"],
+  ["b-purple","Roxo"],
+  ["b-amber","Dourado"],
+  ["b-rose","Bordô"],
+  ["b-indigo","Índigo"],
+  ["b-teal","Turquesa"],
+  ["b-stone","Neutro"]
+];
+var DEFAULT_ROLES=[
+  {id:"visitante",label:"Visitante",cls:"b-sky",level:0,system:true},
+  {id:"membro",label:"Membro",cls:"b-emerald",level:1,system:true},
+  {id:"lideranca",label:"Liderança",cls:"b-purple",level:2,system:true},
+  {id:"diretoria",label:"Diretoria",cls:"b-amber",level:3,system:true},
+  {id:"admin_geral",label:"Administrador",cls:"b-rose",level:4,system:true}
+];
+var DEFAULT_FUNCTIONS=[
+  "Regente",
+  "Músico / Instrumentista",
+  "Sonoplasta / Mídia",
+  "Professor(a) EBD",
+  "Recepção / Boas-vindas",
+  "Intercessão",
+  "Diácono de Apoio",
+  "Porteiro / Segurança",
+  "Zeladoria / Limpeza",
+  "Evangelismo"
+];
+var VIS_OPTIONS={
+  todos:"Público: Todos",
+  visitantes:"Exclusivo para Visitantes",
+  membros_acima:"Apenas Membros e acima",
+  lideranca_acima:"Apenas Liderança e acima",
+  diretoria_acima:"Apenas Diretoria e Administrador",
+  personalizado:"Escolher cargos manualmente"
+};
+var VIS_MIN={todos:0,visitantes:0,membros_acima:1,lideranca_acima:2,diretoria_acima:3};
+var PERM_VIEW=[
+  {k:"verBotaoEntregarVida",n:"Botão Entregar a Vida",d:"Cartão de decisão por Cristo",def:[1,1,1,1,1]},
+  {k:"verInfoIgreja",n:"Informações da Igreja",d:"Seção sobre a igreja",def:[1,1,1,1,1]},
+  {k:"verCultos",n:"Dias de Cultos",d:"Seção de cultos",def:[1,1,1,1,1]},
+  {k:"verLinks",n:"Redes & Links",d:"Redes sociais e links",def:[1,1,1,1,1]},
+  {k:"fazerPedidoOracaoEmail",n:"Pedido de oração",d:"Enviar pedido pela central",def:[1,1,1,1,1]},
+  {k:"verWhatsappSecretaria",n:"WhatsApp da Secretaria",d:"Botão de contato direto",def:[0,1,1,1,1]},
+  {k:"verGabinetePastoral",n:"Gabinete Pastoral",d:"Botões do gabinete",def:[0,1,1,1,1]},
+  {k:"verDepartamentosPix",n:"Departamentos & Pix",d:"Cartões de contribuição",def:[1,1,1,1,1]},
+  {k:"verCnpj",n:"CNPJ",d:"Exibir CNPJ da igreja",def:[0,1,1,1,1]},
+  {k:"verAvisos",n:"Mural de Avisos",d:"Avisos publicados",def:[0,1,1,1,1]},
+  {k:"verPaginaSecretaria",n:"Página da Secretaria",d:"Links administrativos",def:[1,1,1,1,1]},
+  {k:"verDiretoria",n:"Nossa Diretoria",d:"Cargos da diretoria",def:[1,1,1,1,1]},
+  {k:"verEquipes",n:"Equipes",d:"Equipes dos departamentos",def:[1,1,1,1,1]}
+];
+var PERM_MANAGE=[
+  {k:"gerenciarPix",n:"Gerenciar Pix",d:"Departamentos e chaves",def:[0,0,0,1,1]},
+  {k:"gerenciarIdentidade",n:"Gerenciar Identidade",d:"Dados, cores e textos",def:[0,0,0,1,1]},
+  {k:"gerenciarSecretaria",n:"Gerenciar Secretaria",d:"Botões de gabinete e secretaria",def:[0,0,0,1,1]},
+  {k:"gerenciarCultos",n:"Gerenciar Cultos",d:"Horários da semana",def:[0,0,1,1,1]},
+  {k:"gerenciarAvisosLinks",n:"Gerenciar Avisos & Links",d:"Mural e redes",def:[0,0,1,1,1]},
+  {k:"gerenciarUsuarios",n:"Gerenciar Usuários",d:"Pessoas, cargos e funções",def:[0,0,0,1,1]},
+  {k:"gerenciarDiretoria",n:"Gerenciar Diretoria",d:"Cargos e equipes",def:[0,0,0,1,1]},
+  {k:"verDiretoriaAdmin",n:"Ver painel do gestor",d:"Acesso ao painel",def:[0,0,1,1,1]}
+];
+var DEP_ICONS={
+  landmark:"🏛️",heart:"❤️",book:"📖",globe:"🌍",hand:"🤲",baby:"🧒",flame:"🔥",hammer:"🔨",
+  music:"🎵",users:"👥","book-open":"📖",bandeira:"🚩",mic:"🎤",teatro:"🎭",danca:"💃",esporte:"⚽",cross:"✝️"
+};
+var DEP_ICON_OPTS=[
+  ["landmark","Templo"],["heart","Coração"],["globe","Globo"],["hand","Mão com coração"],["baby","Criança"],
+  ["flame","Chama"],["hammer","Martelo"],["music","Música"],["users","Pessoas"],["book-open","Livro aberto"],
+  ["bandeira","Bandeira"],["mic","Microfone"],["teatro","Teatro"],["danca","Dança"],["esporte","Esporte"],["cross","Cruz"]
+];
+var DIR_ROLES=[
+  ["dirigente","Dirigente"],["vice_dirigente","2º Dirigente"],["sec_1","1º Secretário(a)"],["sec_2","2º Secretário(a)"],
+  ["sec_adj","Secretário(a) Adjunto"],["cont_1","1º Gestor Contábil"],["cont_2","2º Gestor Contábil"],
+  ["patrimonio","Diretor de Patrimônios"],["ensino_1","1º Superintendente de Ensino"],["ensino_2","2º Superintendente de Ensino"]
+];
+var SEC_DEPTS=[
+  ["Dízimos","adalex.financeiro@gmail.com","landmark","Devolução de dízimos para a Casa do Senhor.","membros_acima"],
+  ["Oferta Geral Igreja","adalex.financeiro@gmail.com","heart","Contribuição livre para membros, visitantes e amigos da obra do Senhor.","todos"],
+  ["Escola Bíblica Dominical","adalex.ebd@gmail.com","book-open","Contribuição para material didático, revistas e confraternizações.","todos"],
+  ["Oferta Especial de Generosidade e Gratidão","adalex.financeiro@gmail.com","heart","Oferta voluntária como gratidão por bênção recebida.","todos"],
+  ["Departamento de Missões","adalex.missoes@gmail.com","globe","Oferta destinada à manutenção dos nossos missionários.","todos"],
+  ["Departamento de Evangelismo","adalex.financeiro@gmail.com","globe","Oferta destinada ao Dep. de Evangelismo.","todos"],
+  ["Departamento Infantil - Louvores de Sião","adalex.infantil@gmail.com","baby","Investindo na vida espiritual das nossas crianças.","todos"],
+  ["Departamento de Adolescentes - Kemuel","adalex.adolescentes@gmail.com","flame","Congressos, acampamentos e ações dos adolescentes.","todos"],
+  ["Departamento de Jovens - Filhos da Promessa","adalex.jovens@gmail.com","flame","Congressos, acampamentos e ações da juventude.","todos"],
+  ["Departamento da Família","adalex.financeiro@gmail.com","users","Investindo nos trabalhos direcionados às Famílias.","todos"],
+  ["Departamento de Assistência Social","adalex.financeiro@gmail.com","hand","Amparo a famílias em vulnerabilidade e doações sociais.","todos"],
+  ["Obras e Reformas","adalex.financeiro@gmail.com","hammer","Manutenções, pintura e reparos estruturais do Templo.","todos"],
+  ["Departamento de Louvor","adalex.financeiro@gmail.com","music","Manutenção dos instrumentos e equipamentos.","todos"]
+];
+var DAYS=["Domingo","Segunda","Terça","Quarta","Quinta","Sexta","Sábado"];
+
+/* ---------- defaults ---------- */
+function defaultPerms(){
+  var p={};
+  PERM_VIEW.concat(PERM_MANAGE).forEach(function(x){
+    p[x.k]={};
+    DEFAULT_ROLES.forEach(function(r,i){p[x.k][r.id]=!!x.def[i];});
+  });
+  return p;
+}
+function baseDefaultState(){
+  var deps=SEC_DEPTS.map(function(d,i){
+    return {id:"dep"+(i+1),name:d[0],pixType:"E-mail",pixKey:d[1],icon:d[2],description:d[3],visibility:d[4],visibleTo:[],active:true,photo:"",team:[],leader:"",btnLabel:""};
+  });
+  var dir={};
+  DIR_ROLES.forEach(function(r){dir[r[0]]={id:r[0],role:r[1],name:"",phone:"",photo:"",memberCodeRef:"",visible:true};});
+  return {
+    version:2,
+    church:{
+      name:"Igreja Evangélica Assembleia de Deus - Alexandra",
+      subtitle:"Unidos em Cristo, para fazermos muito mais.",
+      cnpj:"78.180.510/0001-85",
+      address:"Rua Antonio Mioto, 16, Alexandra - Paranaguá/PR",
+      aboutText:"Somos uma igreja acolhedora, fundamentada na Palavra de Deus e no amor ao próximo. Nossas portas estão abertas para receber você e sua família em todos os cultos da semana!",
+      sundayWorshipTime:"Domingos às 19h00",
+      logoUrl:"https://drive.google.com/thumbnail?id=10ldPp4h7pIcC3aN7Qz53Wy_rryJqQ5br&sz=w800",
+      theme:"navy",
+      customPrimaryHex:"#1e40af",
+      customSecondaryHex:"#312e81",
+      customBgHex:"#f5f5f4",
+      showTopBanner:true,
+      topBannerText:"ADALEX DIGITAL • CONECTANDO A IGREJA",
+      topBannerBg:"#f59e0b",
+      topBannerColor:"#1c1917",
+      masterAdminPin:"Vidal1506@",
+      masterAdminEmail:"vidal.myphone@gmail.com",
+      christDecisionEmail:"diretoria.adalexandra@gmail.com",
+      prayerVisitorEmail:"diretoria.adalexandra@gmail.com",
+      secretaryWhatsapp:"41984253365",
+      accountingWhatsapp:"41984253365",
+      prayerWhatsapp:"41984253365",
+      showWelcomeCard:true,
+      welcomeGreeting:"Paz do Senhor, {nome}!",
+      welcomeSubtext:"Seu nível define os recursos visíveis.",
+      welcomeBtnText:"Trocar acesso",
+      christEyebrow:"DECISÃO IMPORTANTE",
+      christButtonTitle:"Desejo entregar minha vida a Cristo",
+      christButtonSubtitle:"Tome a decisão mais importante da sua vida! Clique aqui para preencher seus dados e receber nosso convite especial.",
+      christActionLabel:"Quero dar este passo",
+      christInviteTitle:"Convite Especial para o Culto de Domingo!",
+      prayerTitle:"Central de Pedidos de Oração & Mensagens",
+      prayerDescription:"Nossa equipe pastoral e de intercessão estará orando pela sua vida e família.",
+      prayerBtnLabel:"Enviar pedido de oração",
+      prayerDefaultGreeting:"Olá, Paz do Senhor! Gostaria de deixar um pedido de oração na Secretaria da Igreja:",
+      infoSectionTitle:"Informações sobre a Igreja",
+      infoSectionSubtitle:"Conheça nossa igreja e nossos horários.",
+      directorateTitle:"Nossa Diretoria",
+      directorateSubtitle:"Quem cuida da obra no dia a dia.",
+      deptsTitle:"Departamentos & Contribuições Pix",
+      deptsSubtitle:"Toque em copiar e cole no aplicativo do seu banco.",
+      pixCopyBtnLabel:"COPIAR PIX",
+      servicesTitle:"Dias de Cultos",
+      servicesSubtitle:"Horários da semana. O dia de hoje aparece destacado.",
+      noticesTitle:"Mural de Avisos",
+      noticesSubtitle:"Comunicados da igreja.",
+      linksTitle:"Redes Sociais & Links",
+      linksSubtitle:"Acompanhe a igreja e fale com a secretaria.",
+      footerNote:"v2.0 • Dados salvos localmente neste navegador",
+      pixThankYouTitle:"Deus abençoe sua generosidade!",
+      pixThankYouMessage:"Sua chave Pix foi copiada. Abra o aplicativo do seu banco e cole a chave.",
+      pixBibleVerse:"Cada um contribua segundo propôs no seu coração; não com tristeza, ou por necessidade; porque Deus ama ao que dá com alegria. (2 Coríntios 9:7)",
+      accountingReceiptMessage:"Após realizar o Pix no aplicativo do seu banco, encaminhe o comprovante para o WhatsApp do Departamento de Gestão Contábil.",
+      showSendReceiptButton:true,
+      requireLoginGate:false
+    },
+    roles:JSON.parse(JSON.stringify(DEFAULT_ROLES)),
+    functions:DEFAULT_FUNCTIONS.slice(),
+    departments:deps,
+    directorate:DIR_ROLES.map(function(r){return dir[r[0]];}),
+    services:[{id:"s1",day:"Domingo",time:"19:00",title:"Culto de Celebração",description:"Presencial e transmitido ao vivo",visibility:"todos",active:true}],
+    notices:[{id:"n1",title:"Seja Muito Bem-Vindo(a) à Nossa Igreja!",date:"Especial Visitantes",content:"Que alegria receber você! Confira nossos horários de cultos, redes sociais e deixe seu pedido de oração.",highlight:true,visibility:"visitantes"}],
+    quickLinks:[
+      {id:"q1",title:"Instagram",url:"https://www.instagram.com/adalexandra/",icon:"instagram",visibility:"todos"},
+      {id:"q2",title:"YouTube",url:"https://www.youtube.com/@adalexandra",icon:"youtube",visibility:"todos"},
+      {id:"q3",title:"Localização",url:"https://www.google.com/maps/search/?api=1&query=Rua+Antonio+Mioto+16+Alexandra+Paranagua",icon:"map-pin",visibility:"todos"}
+    ],
+    adminButtons:[
+      {id:"b1",title:"Falar com a Secretaria AD Alexandra",type:"whatsapp",link:"https://wa.me/5541984253365",visibility:"membros_acima",icon:"message-circle",badge:"Secretaria",isGabinetePastoral:true,active:true},
+      {id:"b2",title:"CARTA DE RECOMENDAÇÃO",type:"link",link:"https://docs.google.com/forms/d/e/1FAIpQLSfe79poZZbOz9Ll8F-nfcBGreeBo2CpB-kVvJhQmE85YXAVJg/viewform",visibility:"diretoria_acima",icon:"file-text",badge:"Secretaria",isGabinetePastoral:false,active:true},
+      {id:"b3",title:"SIGLOC",type:"link",link:"https://www.sigloc.com.br/sigloc/",visibility:"diretoria_acima",icon:"user-plus",badge:"Secretaria/Tesouraria",isGabinetePastoral:false,active:true}
+    ],
+    users:[{id:"u1",name:"Edson Rodrigues Vidal Pinto",role:"admin_geral",functions:["Administração Geral"],email:"vidal.myphone@gmail.com",whatsapp:"",memberCode:"",accessPassword:"Vidal1506@",department:"Administração Geral"}],
+    submissions:[],
+    permissions:defaultPerms()
+  };
+}
+function defaultState(){
+  var base=baseDefaultState();
+  if(EMBEDDED_STATE&&typeof EMBEDDED_STATE==="object"){
+    return migrate(merge(base,EMBEDDED_STATE));
+  }
+  return base;
+}
+
+/* ---------- state ---------- */
+var state=load();
+var session={role:"visitante",userId:null,realRole:"visitante"};
+var ui={
+  page:"home",adminTab:"church",loginError:"",selectedDepId:null,
+  depEditId:null,userEditId:null,userFilter:"todos",funcFilter:"todas",userSearch:"",
+  teamOpen:{},pendingImport:null,
+  depForm:{},userForm:{functions:[]},showNewRoleBox:false
+};
+var pwa={deferredPrompt:null,swStatus:"Aguardando hospedagem HTTPS"};
+
+function load(){
+  var base=defaultState();
+  try{
+    var raw=localStorage.getItem(KEY);
+    if(!raw) return base;
+    var parsed=JSON.parse(raw);
+    return migrate(merge(base,parsed));
+  }catch(e){return base;}
+}
+function merge(a,b){
+  if(b===null||typeof b!=="object"||Array.isArray(b)) return b===undefined?a:b;
+  var out=Array.isArray(a)?a.slice():Object.assign({},a);
+  Object.keys(b).forEach(function(k){
+    if(Array.isArray(b[k])) out[k]=b[k];
+    else if(b[k]&&typeof b[k]==="object"&&a[k]&&typeof a[k]==="object"&&!Array.isArray(a[k])) out[k]=merge(a[k],b[k]);
+    else out[k]=b[k];
+  });
+  return out;
+}
+function migrate(s){
+  if(!Array.isArray(s.roles)||!s.roles.length) s.roles=JSON.parse(JSON.stringify(DEFAULT_ROLES));
+  DEFAULT_ROLES.forEach(function(dr){
+    if(!s.roles.find(function(r){return r.id===dr.id;})) s.roles.push(Object.assign({},dr));
+  });
+  if(!Array.isArray(s.functions)) s.functions=DEFAULT_FUNCTIONS.slice();
+
+  var d=defaultPerms();
+  s.permissions=s.permissions||{};
+  Object.keys(d).forEach(function(k){
+    s.permissions[k]=s.permissions[k]||{};
+    s.roles.forEach(function(r,idx){
+      if(typeof s.permissions[k][r.id]!=="boolean"){
+        var baseIdx=Math.min(Math.max(r.level||0,0),4);
+        s.permissions[k][r.id]=!!(d[k][DEFAULT_ROLES[baseIdx].id]);
+      }
+    });
+  });
+
+  ["departments","directorate","services","notices","quickLinks","adminButtons","users","submissions"].forEach(function(k){if(!Array.isArray(s[k])) s[k]=[];});
+  s.users.forEach(function(u){
+    if(!Array.isArray(u.functions)) u.functions=[];
+    if(!roleObj(u.role,s)) u.role="membro";
+  });
+  s.departments.forEach(function(dp){if(!Array.isArray(dp.team)) dp.team=[]; if(!dp.visibility) dp.visibility="todos";});
+  if(!THEMES[s.church.theme]) s.church.theme="navy";
+  return s;
+}
+function save(){
+  try{localStorage.setItem(KEY,JSON.stringify(state));}
+  catch(e){toast("Armazenamento cheio ou bloqueado neste navegador.","error");}
+}
+
+/* ---------- Role & Theme helpers ---------- */
+function roleObj(id,st){
+  st=st||state;
+  return (st.roles||DEFAULT_ROLES).find(function(r){return r.id===id;})||DEFAULT_ROLES[0];
+}
+function allRoles(){return state.roles||DEFAULT_ROLES;}
+function roleLevel(id){return roleObj(id).level||0;}
+function theme(){
+  var c=state.church;
+  if(c.theme==="custom"){
+    var hex=c.customPrimaryHex||"#1e40af";
+    var hex2=c.customSecondaryHex||"#312e81";
+    return {label:"Cor Personalizada",hex:hex,hex2:hex2,hexLight:hex+"18"};
+  }
+  return THEMES[c.theme]||THEMES.navy;
+}
+
+/* ---------- PWA: Inline Manifest + PNG Icons + Service Worker ---------- */
+function buildAppIconPng(size,bgHex){
+  var c=document.createElement("canvas");
+  c.width=size;c.height=size;
+  var ctx=c.getContext("2d");
+  var r=Math.round(size*0.22);
+
+  ctx.beginPath();
+  ctx.moveTo(r,0);
+  ctx.arcTo(size,0,size,size,r);
+  ctx.arcTo(size,size,0,size,r);
+  ctx.arcTo(0,size,0,0,r);
+  ctx.arcTo(0,0,size,0,r);
+  ctx.closePath();
+  var grad=ctx.createLinearGradient(0,0,size,size);
+  grad.addColorStop(0,"#0f172a");
+  grad.addColorStop(1,bgHex||"#1e40af");
+  ctx.fillStyle=grad;
+  ctx.fill();
+
+  ctx.fillStyle="#ffffff";
+  var cw=Math.round(size*0.1);
+  var ch=Math.round(size*0.44);
+  var cx=Math.round((size-cw)/2);
+  var cy=Math.round(size*0.18);
+  ctx.fillRect(cx,cy,cw,ch);
+  ctx.fillRect(Math.round(size*0.33),Math.round(size*0.3),Math.round(size*0.34),cw);
+
+  ctx.fillStyle="#fcd34d";
+  ctx.font="900 "+Math.round(size*0.145)+"px Inter, system-ui, sans-serif";
+  ctx.textAlign="center";
+  ctx.textBaseline="middle";
+  ctx.fillText("ADALEX",size/2,size*0.76);
+
+  return c.toDataURL("image/png");
+}
+
+function setupPwa(){
+  var t=theme();
+  var meta=document.getElementById("metaThemeColor");
+  if(meta) meta.setAttribute("content",t.hex);
+
+  var icon192=buildAppIconPng(192,t.hex);
+  var icon512=buildAppIconPng(512,t.hex);
+  var appleIcon=document.getElementById("appleTouchIcon");
+  if(appleIcon) appleIcon.href=icon192;
+
+  var startUrl="./";
+  try{
+    if(location.protocol==="http:"||location.protocol==="https:"){
+      startUrl=location.pathname||"./";
+    }
+  }catch(e){}
+
+  var manifest={
+    name:state.church.name||"ADALEX Digital",
+    short_name:"ADALEX",
+    description:state.church.subtitle||"Aplicativo oficial da igreja",
+    start_url:startUrl,
+    scope:"./",
+    display:"standalone",
+    orientation:"portrait",
+    background_color:"#0c0a09",
+    theme_color:t.hex,
+    icons:[
+      {src:icon192,sizes:"192x192",type:"image/png",purpose:"any maskable"},
+      {src:icon512,sizes:"512x512",type:"image/png",purpose:"any maskable"}
+    ]
+  };
+  var link=document.getElementById("pwaManifest");
+  if(link){
+    link.href="data:application/manifest+json;charset=utf-8,"+encodeURIComponent(JSON.stringify(manifest));
+  }
+}
+
+function registerInlineServiceWorker(){
+  if(!("serviceWorker" in navigator)){
+    pwa.swStatus="Navegador sem suporte a Service Worker";
+    return;
+  }
+  if(location.protocol!=="https:"&&location.hostname!=="localhost"&&location.hostname!=="127.0.0.1"){
+    pwa.swStatus="Requer HTTPS ou localhost (baixe o sw.js na aba Backup)";
+    return;
+  }
+  navigator.serviceWorker.register("./sw.js").then(function(){
+    pwa.swStatus="Ativo (./sw.js registrado)";
+    if(ui.page==="admin-panel"&&ui.adminTab==="backup") render();
+  }).catch(function(){
+    pwa.swStatus="Aguardando ./sw.js na raiz do site (baixe na aba Backup)";
+  });
+}
+
+function isStandalone(){
+  return window.matchMedia("(display-mode: standalone)").matches||window.navigator.standalone===true;
+}
+function isIos(){
+  return /iphone|ipad|ipod/i.test(navigator.userAgent);
+}
+function openIosInstallHelp(){
+  openDialog(
+    '<div style="padding:1.25rem;display:grid;gap:.75rem">'+
+      '<div style="font-weight:900;font-size:1.05rem;padding-right:2.2rem">Instalar no iPhone / iPad</div>'+
+      '<p class="help" style="margin:0;font-size:.82rem">Siga estes 2 passos no Safari para adicionar o <b>'+esc(state.church.name)+'</b> na sua tela inicial:</p>'+
+      '<ol style="display:grid;gap:.55rem;font-size:.82rem;background:#f5f5f4;padding:.85rem 1rem;border-radius:14px;list-style:decimal;padding-left:1.5rem">'+
+        '<li>Toque no botão <b>Compartilhar</b> (quadrado com seta para cima) na barra inferior do Safari.</li>'+
+        '<li>Role as opções e toque em <b>Adicionar à Tela de Início</b>, depois confirme em <b>Adicionar</b>.</li>'+
+      '</ol>'+
+      '<button class="btn-main" style="width:100%" data-close>Entendi</button>'+
+    '</div>'
+  );
+}
+
+/* ---------- utils ---------- */
+function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});}
+function plain(s){return String(s||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().trim();}
+function normalizePass(s){return String(s==null?"":s).replace(/[\u200B\u200D\uFEFF\u00A0]/g,"").trim();}
+function initials(n){var p=String(n||"?").trim().split(/\s+/);return ((p[0]||"?")[0]+((p[1]||"")[0]||"")).toUpperCase();}
+function avatar(photo,name,size,bg){
+  size=size||56;
+  var st="width:"+size+"px;height:"+size+"px;border-radius:16px;object-fit:cover;flex-shrink:0";
+  if(photo) return '<img src="'+esc(photo)+'" alt="Foto de '+esc(name)+'" style="'+st+'">';
+  return '<div style="'+st+';display:flex;align-items:center;justify-content:center;font-weight:800;color:#fff;font-size:'+Math.round(size*.32)+'px;background:'+(bg||theme().hex)+'">'+esc(initials(name))+'</div>';
+}
+function toast(msg,type){
+  var c=document.getElementById("toastContainer");
+  var t=document.createElement("div");
+  t.className="toast-item";
+  if(type==="error") t.style.background="#9f1239";
+  else if(type==="success") t.style.background="#065f46";
+  t.textContent=msg;
+  c.appendChild(t);c.classList.add("show");
+  setTimeout(function(){t.remove();if(!c.children.length)c.classList.remove("show");},2600);
+}
+function copyText(txt,cb){
+  if(navigator.clipboard&&window.isSecureContext){
+    navigator.clipboard.writeText(txt).then(function(){cb&&cb(true);},function(){fallbackCopy(txt,cb);});
+    return;
+  }
+  fallbackCopy(txt,cb);
+}
+function fallbackCopy(txt,cb){
+  var ta=document.createElement("textarea");
+  ta.value=txt;ta.style.position="fixed";ta.style.opacity="0";
+  document.body.appendChild(ta);ta.focus();ta.select();
+  var ok=false;
+  try{ok=document.execCommand("copy");}catch(e){}
+  ta.remove();
+  cb&&cb(ok);
+}
+function driveLink(url){
+  var m=String(url||"").match(/drive\.google\.com\/(?:file\/d\/|open\?id=|uc\?id=)?([\w-]{20,})/);
+  if(m) return "https://drive.google.com/thumbnail?id="+m[1]+"&sz=w800";
+  return url;
+}
+function resizePhoto(file,cb){
+  var r=new FileReader();
+  r.onload=function(){
+    var img=new Image();
+    img.onload=function(){
+      var side=Math.min(img.width,img.height);
+      var sx=(img.width-side)/2,sy=(img.height-side)/2;
+      var c=document.createElement("canvas");c.width=320;c.height=320;
+      c.getContext("2d").drawImage(img,sx,sy,side,side,0,0,320,320);
+      cb(c.toDataURL("image/jpeg",0.72));
+    };
+    img.src=r.result;
+  };
+  r.readAsDataURL(file);
+}
+function pickFile(cb){
+  var inp=document.createElement("input");inp.type="file";inp.accept="image/*";
+  inp.onchange=function(){if(inp.files[0]) resizePhoto(inp.files[0],cb);};
+  inp.click();
+}
+
+/* ---------- permissions ---------- */
+function can(key,roleId){
+  roleId=roleId||session.role;
+  var ro=roleObj(roleId);
+  if(roleId==="admin_geral"||ro.level>=4) return true;
+  var v=state.permissions[key]&&state.permissions[key][roleId];
+  if(typeof v==="boolean") return v;
+  var all=PERM_VIEW.concat(PERM_MANAGE).filter(function(x){return x.k===key;})[0];
+  var baseIdx=Math.min(Math.max(ro.level||0,0),4);
+  return all?!!all.def[baseIdx]:false;
+}
+function visible(vis,roleId,dep){
+  roleId=roleId||session.role;
+  var ro=roleObj(roleId);
+  if(roleId==="admin_geral"||ro.level>=4) return true;
+  if(vis==="personalizado") return !!(dep&&dep.visibleTo&&dep.visibleTo.indexOf(roleId)>=0);
+  if(vis==="visitantes") return roleId==="visitante";
+  var min=VIS_MIN[vis];
+  if(min===undefined) return true;
+  return (ro.level||0)>=min;
+}
+function canAdmin(){
+  return session.role==="admin_geral"||roleLevel(session.role)>=4||can("verDiretoriaAdmin")||can("gerenciarPix")||can("gerenciarIdentidade")||can("gerenciarUsuarios")||can("gerenciarCultos")||can("gerenciarAvisosLinks");
+}
+function canAccessAdminPanel(){return canAdmin();}
+function isManager(){return canAccessAdminPanel();}
+
+function visOptions(sel,id){
+  var h="";
+  Object.keys(VIS_OPTIONS).forEach(function(k){
+    h+='<option value="'+k+'"'+(sel===k?" selected":"")+">"+esc(VIS_OPTIONS[k])+"</option>";
+  });
+  return '<select class="fld" id="'+id+'">'+h+"</select>";
+}
+function visCheckboxes(dep,prefix){
+  var h='<div style="display:flex;flex-wrap:wrap;gap:.65rem;margin-top:.45rem">';
+  allRoles().filter(function(r){return r.id!=="admin_geral";}).forEach(function(r){
+    var on=dep&&dep.visibleTo&&dep.visibleTo.indexOf(r.id)>=0;
+    h+='<label style="font-size:.76rem;display:inline-flex;align-items:center;gap:.3rem"><input type="checkbox" data-vis="'+prefix+'" value="'+esc(r.id)+'"'+(on?" checked":"")+"> "+esc(r.label)+"</label>";
+  });
+  return h+"</div>";
+}
+function visLabel(v){return VIS_OPTIONS[v]||VIS_OPTIONS.todos;}
+function pill(text,cls){return '<span class="pill '+cls+'">'+esc(text)+"</span>";}
+function roleBadge(rId){var i=roleObj(rId);return pill(i.label,i.cls||"b-sky");}
+
+/* ---------- dialog helper ---------- */
+function openDialog(innerHtml,onOpen){
+  var d=document.createElement("dialog");
+  d.className="adalex";
+  d.innerHTML='<div class="adalex-panel animate-modal" role="document">'+
+    '<div class="sheet-handle" aria-hidden="true"></div>'+
+    '<button type="button" class="dialog-close-btn" data-close aria-label="Fechar">✕</button>'+
+    innerHtml+"</div>";
+  document.body.appendChild(d);
+  d.addEventListener("close",function(){d.remove();});
+  d.addEventListener("click",function(e){
+    if(e.target===d){d.close();return;}
+    if(e.target.closest("[data-close]")){d.close();return;}
+  });
+  d.showModal();
+  if(onOpen) onOpen(d);
+  return d;
+}
+function closeAllDialogs(){document.querySelectorAll("dialog.adalex").forEach(function(d){d.close();});}
+
+/* ---------- actions registry ---------- */
+window.appActions={};
+var A=window.appActions;
+
+/* ---------- nav ---------- */
+function renderNav(){
+  var left='<button class="nav-btn '+(ui.page==="home"?"on":"")+'" data-act="go" data-page="home">'+ico("church",15)+'<span>Início &amp; Pix</span></button>'+
+    '<button class="nav-btn '+(ui.page==="prayer"?"on":"")+'" data-act="go" data-page="prayer">'+ico("heart-handshake",15)+'<span>Oração &amp; Sec.</span></button>';
+  if(canAccessAdminPanel()){
+    left+='<button class="nav-btn '+(ui.page==="admin-panel"?"gold":"")+'" data-act="go" data-page="admin-panel">'+ico("settings",15)+'<span>'+(ui.page==="admin-panel"?"Fechar Gestor":"Gestor")+"</span></button>";
+  }
+  if(!isStandalone()&&(pwa.deferredPrompt||isIos())){
+    left+='<button class="nav-btn install" data-act="installPwa">'+ico("smartphone",15)+'<span>Instalar App</span></button>';
+  }
+  document.getElementById("navLeft").innerHTML=left;
+  var name=session.userId?(findUser(session.userId)||{}).name:"";
+  var role=session.role;
+  var label=session.userId&&name?name.split(" ")[0]:"Entrar";
+  document.getElementById("navRight").innerHTML='<button class="profile-btn" data-act="profile"><span>'+esc(label)+'</span>'+roleBadge(role)+"</button>";
+
+  var sim="";
+  if(session.realRole==="admin_geral"){
+    sim='<div class="sim-bar"><span style="font-weight:700">Simulador:</span>';
+    allRoles().forEach(function(r){
+      sim+='<button data-act="simRole" data-role="'+esc(r.id)+'" style="padding:.28rem .55rem;border-radius:8px;font-weight:700;cursor:pointer;border:1px solid #92400e;background:'+(session.role===r.id?"#fcd34d;color:#1c1917":"transparent;color:#fef3c7")+'">'+esc(r.label)+"</button>";
+    });
+    sim+="</div>";
+  }
+  document.getElementById("simBar").innerHTML=sim;
+}
+function findUser(id){return state.users.find(function(u){return u.id===id;});}
+
+/* ---------- header ---------- */
+function headerHtml(){
+  var c=state.church,t=theme();
+  var logo=c.logoUrl
+    ?'<img src="'+esc(driveLink(c.logoUrl))+'" alt="Logo da igreja" style="width:84px;height:84px;border-radius:22px;border:3px solid #fff;object-fit:cover;background:#fff;box-shadow:0 6px 18px rgba(0,0,0,.22)">'
+    :'<div style="width:84px;height:84px;border-radius:22px;border:3px solid #fff;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.15);color:#fff">'+ico("church",36)+"</div>";
+  var cnpj=can("verCnpj")&&c.cnpj
+    ?'<button data-act="copyCnpj" style="display:inline-flex;align-items:center;gap:.35rem;background:rgba(255,255,255,.16);color:#fff;border-radius:999px;padding:.35rem .75rem;font-size:.72rem;font-weight:700;border:0;cursor:pointer">'+ico("copy",13)+'<span>CNPJ '+esc(c.cnpj)+"</span></button>"
+    :"";
+  var addr=c.address
+    ?'<span style="display:inline-flex;align-items:center;gap:.35rem;background:rgba(255,255,255,.16);border-radius:999px;padding:.35rem .75rem;font-size:.72rem;font-weight:600">'+ico("map-pin",13)+'<span>'+esc(c.address)+"</span></span>"
+    :"";
+  return '<header style="background:linear-gradient(135deg,#0f172a,'+t.hex+')">'+
+    '<div class="hero-header">'+
+      '<div style="display:inline-block">'+logo+"</div>"+
+      '<h1 class="hero-title">'+esc(c.name)+"</h1>"+
+      '<p style="font-size:.84rem;opacity:.92;margin:0">'+esc(c.subtitle)+"</p>"+
+      '<div style="display:flex;flex-wrap:wrap;justify-content:center;gap:.45rem;margin-top:.85rem">'+
+        cnpj+addr+
+      "</div>"+
+    "</div>"+
+  "</header>";
+}
+
+/* ---------- login gate ---------- */
+function loginGateHtml(){
+  var c=state.church,t=theme();
+  return '<section style="max-width:30rem;margin:-1.35rem auto 0;padding:0 .85rem;width:100%">'+
+    '<div class="card" style="display:grid;gap:.75rem;text-align:center">'+
+      '<div style="font-weight:900;font-size:1.1rem">Acesso Restrito à Comunidade</div>'+
+      '<p class="help" style="margin:0">Informe seu código de membro ou senha de liderança para acessar o aplicativo.</p>'+
+      '<button class="btn-main" style="width:100%;background:linear-gradient(90deg,'+t.hex+','+t.hex2+')" data-act="changeAccess">Entrar com meu código</button>'+
+    '</div>'+
+  '</section>';
+}
+
+/* ---------- home ---------- */
+function homeHtml(){
+  var c=state.church,t=theme(),h="";
+  if(c.requireLoginGate&&session.role==="visitante"&&!session.userId){
+    return loginGateHtml();
+  }
+  h+='<section style="max-width:56rem;margin:-1.35rem auto 0;padding:0 .85rem;width:100%;display:flex;flex-direction:column;gap:.9rem">';
+
+  /* Welcome card */
+  if(c.showWelcomeCard!==false){
+    var uObj=session.userId?findUser(session.userId):null;
+    var greet=(c.welcomeGreeting||"Paz do Senhor, {nome}!").replace("{nome}",currentName());
+    var funcsHtml=(uObj&&uObj.functions&&uObj.functions.length)
+      ?'<div style="display:flex;flex-wrap:wrap;gap:.25rem;margin-top:.3rem">'+uObj.functions.map(function(fn){return pill(fn,"b-stone");}).join("")+"</div>"
+      :"";
+    h+='<div class="card" style="display:flex;flex-wrap:wrap;gap:.75rem;align-items:center;justify-content:space-between">'+
+      '<div style="display:flex;align-items:center;gap:.6rem;min-width:0;flex:1">'+roleBadge(session.role)+
+        '<div style="min-width:0"><div style="font-weight:800;font-size:.92rem">'+esc(greet)+'</div><div class="help" style="margin:0">'+esc(c.welcomeSubtext||"Seu nível define os recursos visíveis.")+'</div>'+funcsHtml+'</div>'+
+      '</div>'+
+      '<button class="btn-soft btn-sm" data-act="changeAccess">'+esc(c.welcomeBtnText||"Trocar acesso")+'</button>'+
+    '</div>';
+  }
+
+  /* Christ decision CTA */
+  if(can("verBotaoEntregarVida")&&visible("todos")){
+    h+='<button data-act="christDecision" class="card" style="text-align:left;background:linear-gradient(120deg,#be123c,#b45309);color:#fff;border:0;cursor:pointer">'+
+      '<div style="font-size:.66rem;font-weight:800;letter-spacing:.08em;opacity:.9">'+esc(c.christEyebrow||"DECISÃO IMPORTANTE")+'</div>'+
+      '<div style="font-size:1.05rem;font-weight:800;margin:.2rem 0">'+esc(c.christButtonTitle)+'</div>'+
+      '<div style="font-size:.78rem;opacity:.95;line-height:1.4">'+esc(c.christButtonSubtitle)+'</div>'+
+      '<span style="display:inline-block;margin-top:.75rem;background:#fff;color:#9f1239;border-radius:12px;padding:.5rem .9rem;font-weight:800;font-size:.78rem">'+esc(c.christActionLabel||"Quero dar este passo")+'</span>'+
+    '</button>';
+  }
+
+  /* Prayer card */
+  h+='<div class="card">'+
+    '<div style="font-size:1rem;font-weight:800">'+esc(c.prayerTitle)+'</div>'+
+    '<p class="help" style="margin:.25rem 0 .8rem">'+esc(c.prayerDescription)+'</p>'+
+    '<button class="btn-main" style="width:100%;background:linear-gradient(90deg,'+t.hex+','+t.hex2+')" data-act="go" data-page="prayer">'+esc(c.prayerBtnLabel||"Enviar pedido de oração")+'</button>'+
+  '</div>';
+
+  /* Info card */
+  if(can("verInfoIgreja")){
+    h+='<div class="card">'+
+      '<div style="font-size:1rem;font-weight:800">'+esc(c.infoSectionTitle||"Informações sobre a Igreja")+'</div>'+
+      '<p class="help" style="margin:.2rem 0 .6rem">'+esc(c.infoSectionSubtitle||"Conheça nossa igreja e nossos horários.")+'</p>'+
+      '<p style="font-size:.84rem;line-height:1.55;margin:0 0 .7rem">'+esc(c.aboutText)+'</p>'+
+      '<span class="pill" style="background:'+t.hexLight+';color:'+t.hex+';border-color:'+t.hex+'">'+esc(c.sundayWorshipTime)+"</span>"+
+    "</div>";
+  }
+
+  h+=directorateSectionHtml();
+  h+=departmentsSectionHtml();
+  h+=cultosSectionHtml();
+  h+='<div class="safe-grid-2">'+(can("verAvisos")?avisosHtml():"")+(can("verLinks")?linksHtml():"")+"</div>";
+  h+="</section>";
+  return h;
+}
+function currentName(){
+  if(session.userId){var u=findUser(session.userId);if(u) return u.name.split(" ")[0];}
+  return "visitante";
+}
+
+function directorateSectionHtml(){
+  if(!can("verDiretoria")) return "";
+  var c=state.church,t=theme();
+  var filled=state.directorate.filter(function(d){return d.name&&d.visible;});
+  if(!filled.length){
+    if(can("gerenciarDiretoria")){
+      return '<div class="card"><div style="font-weight:800">'+esc(c.directorateTitle||"Nossa Diretoria")+'</div><p class="help" style="margin:.2rem 0 .7rem">A diretoria ainda não foi cadastrada.</p><button class="btn-main" data-act="go" data-page="admin-panel" data-tab="directorate">Cadastrar diretoria</button></div>';
+    }
+    return "";
+  }
+  var list=filled.slice(0,6).map(function(d){
+    var wa=d.phone?'<a href="https://wa.me/55'+esc(String(d.phone).replace(/\D/g,""))+'" target="_blank" rel="noopener noreferrer" style="display:inline-block;margin-top:.15rem;font-size:.74rem;color:#15803d;font-weight:700">WhatsApp</a>':"";
+    return '<div style="display:flex;gap:.65rem;align-items:center;padding:.35rem;border-radius:14px;background:#fafaf9">'+avatar(d.photo,d.name,56)+'<div style="min-width:0"><div style="font-weight:700;font-size:.85rem">'+esc(d.name)+'</div><div style="font-size:.72rem;font-weight:600;color:'+t.hex+'">'+esc(d.role)+"</div>"+wa+"</div></div>";
+  }).join("");
+  return '<div class="card"><div style="font-size:1rem;font-weight:800">'+esc(c.directorateTitle||"Nossa Diretoria")+'</div><p class="help" style="margin:.2rem 0 .75rem">'+esc(c.directorateSubtitle||"Quem cuida da obra no dia a dia.")+'</p><div class="safe-grid-sm">'+list+"</div>"+
+    (filled.length>6?'<button class="btn-soft" style="width:100%;margin-top:.75rem" data-act="showFullDirectorate">Ver toda a diretoria</button>':"")+"</div>";
+}
+
+function departmentsSectionHtml(){
+  if(!can("verDepartamentosPix")) return "";
+  var c=state.church,t=theme();
+  var deps=state.departments.filter(function(d){return d.active&&visible(d.visibility,session.role,d);});
+  if(!deps.length){
+    return '<div class="card"><div style="font-weight:800">'+esc(c.deptsTitle||"Departamentos & Contribuições Pix")+'</div><p class="help">Nenhum departamento disponível para o seu acesso.</p></div>';
+  }
+  var cards=deps.map(function(d){
+    var icon=DEP_ICONS[d.icon]||"🏛️";
+    var logo=d.photo
+      ?'<img src="'+esc(d.photo)+'" alt="Logo de '+esc(d.name)+'" style="width:56px;height:56px;border-radius:16px;object-fit:cover">'
+      :'<div style="width:56px;height:56px;border-radius:16px;background:'+t.hexLight+';display:flex;align-items:center;justify-content:center;font-size:1.65rem">'+icon+"</div>";
+    var btnTxt=d.btnLabel||c.pixCopyBtnLabel||"COPIAR PIX";
+    var pixBtn=d.pixKey
+      ?'<button data-act="pixCopy" data-id="'+d.id+'" class="btn-main btn-sm" style="width:100%;background:linear-gradient(90deg,'+t.hex+','+t.hex2+');font-weight:800">'+ico("copy",13)+'<span>'+esc(btnTxt)+'</span></button>'
+      :'<button data-act="depTeam" data-id="'+d.id+'" class="btn-soft btn-sm" style="width:100%">Ver equipe</button>';
+    var edit=isManager()&&can("gerenciarPix")
+      ?'<button data-act="depPhoto" data-id="'+d.id+'" title="Trocar logo" aria-label="Trocar logo" style="position:absolute;top:-4px;right:-6px;background:#fff;border:1px solid #d6d3d1;border-radius:999px;width:28px;height:28px;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,.12)">'+ico("pencil",13)+"</button>"
+      :"";
+    return '<div class="dept-card"><div style="position:relative">'+logo+edit+'</div><div class="dept-title">'+esc(d.name)+"</div>"+pixBtn+"</div>";
+  }).join("");
+  return '<section><div style="padding:0 .15rem"><div style="font-size:1rem;font-weight:800">'+esc(c.deptsTitle||"Departamentos & Contribuições Pix")+'</div><p class="help" style="margin:.2rem 0 .75rem">'+esc(c.deptsSubtitle||"Toque em copiar e cole no aplicativo do seu banco.")+'</p></div><div class="dept-grid">'+cards+"</div></section>";
+}
+
+function cultosSectionHtml(){
+  if(!can("verCultos")) return "";
+  var c=state.church,t=theme();
+  var today=DAYS[new Date().getDay()];
+  var items=state.services.filter(function(s){return s.active&&visible(s.visibility,session.role);});
+  if(!items.length) return '<div class="card"><div style="font-weight:800">'+esc(c.servicesTitle||"Dias de Cultos")+'</div><p class="help">Nenhum culto cadastrado.</p></div>';
+  var rows=items.map(function(s){
+    var isToday=s.day===today;
+    return '<div style="display:flex;justify-content:space-between;align-items:center;gap:.5rem;padding:.7rem;border-radius:14px;background:'+(isToday?t.hexLight:"#fafaf9")+';border:1px solid '+(isToday?t.hex:"#e7e5e4")+'"><div><div style="font-weight:700;font-size:.86rem">'+esc(s.day)+' • '+esc(s.time)+'</div><div class="help">'+esc(s.title)+" • "+esc(s.description)+"</div></div>"+(isToday?pill("Hoje","b-emerald"):"")+"</div>";
+  }).join("");
+  return '<div class="card"><div style="font-weight:800;font-size:1rem">'+esc(c.servicesTitle||"Dias de Cultos")+'</div><p class="help" style="margin:.2rem 0 .75rem">'+esc(c.servicesSubtitle||"Horários da semana. O dia de hoje aparece destacado.")+'</p><div style="display:flex;flex-direction:column;gap:.5rem">'+rows+"</div></div>";
+}
+
+function avisosHtml(){
+  var c=state.church;
+  var items=state.notices.filter(function(n){return visible(n.visibility,session.role);});
+  var body=items.length
+    ?items.map(function(n){return '<div style="border-radius:14px;padding:.75rem;background:'+(n.highlight?"#fffbeb":"#fafaf9")+';border:1px solid #e7e5e4"><div style="font-weight:700;font-size:.86rem">'+esc(n.title)+'</div><div class="help">'+esc(n.date)+'</div><p style="font-size:.82rem;margin:.35rem 0 0;line-height:1.45">'+esc(n.content)+"</p></div>";}).join("")
+    :'<p class="help">Nenhum aviso publicado para o seu acesso ainda.</p>';
+  return '<div class="card"><div style="font-weight:800;font-size:1rem">'+esc(c.noticesTitle||"Mural de Avisos")+'</div><p class="help" style="margin:.2rem 0 .7rem">'+esc(c.noticesSubtitle||"Comunicados da igreja.")+'</p><div style="display:flex;flex-direction:column;gap:.55rem">'+body+"</div></div>";
+}
+function linksHtml(){
+  var c=state.church,t=theme();
+  var items=state.quickLinks.filter(function(l){return visible(l.visibility,session.role);});
+  var body=items.map(function(l){
+    return '<a href="'+esc(l.url)+'" target="_blank" rel="noopener noreferrer" style="display:flex;justify-content:space-between;align-items:center;min-height:44px;padding:.65rem .8rem;border-radius:14px;border:1px solid #e7e5e4;color:#1c1917;text-decoration:none;font-weight:700;font-size:.82rem"><span>'+esc(l.title)+"</span>"+ico("external-link",15)+"</a>";
+  }).join("");
+  var gab=state.adminButtons.filter(function(b){return b.active&&visible(b.visibility,session.role)&&(b.isGabinetePastoral?can("verGabinetePastoral"):true);});
+  var gabHtml=gab.map(function(b){
+    return '<a href="'+esc(b.link)+'" target="_blank" rel="noopener noreferrer" style="display:flex;justify-content:space-between;align-items:center;gap:.5rem;min-height:44px;padding:.65rem .8rem;border-radius:14px;background:'+t.hexLight+';color:'+t.hex+';text-decoration:none;font-weight:700;font-size:.82rem"><span>'+esc(b.title)+"</span>"+pill(b.badge,"b-white")+"</a>";
+  }).join("");
+  return '<div class="card"><div style="font-weight:800;font-size:1rem">'+esc(c.linksTitle||"Redes Sociais & Links")+'</div><p class="help" style="margin:.2rem 0 .7rem">'+esc(c.linksSubtitle||"Acompanhe a igreja e fale com a secretaria.")+'</p><div style="display:flex;flex-direction:column;gap:.55rem">'+body+gabHtml+"</div></div>";
+}
+
+/* ---------- prayer page ---------- */
+function prayerHtml(){
+  var c=state.church,t=theme();
+  var h='<section style="max-width:56rem;margin:-1.35rem auto 0;padding:0 .85rem;width:100%;display:flex;flex-direction:column;gap:.9rem">';
+  h+='<div class="card"><div style="font-size:1rem;font-weight:800">'+esc(c.prayerTitle)+'</div><p class="help" style="margin:.2rem 0 .8rem">'+esc(c.prayerDescription)+'</p>'+
+    '<div class="safe-grid-sm">'+
+    '<button class="btn-main" style="background:linear-gradient(90deg,'+t.hex+','+t.hex2+')" data-act="prayerSend" data-kind="oracao">Pedido de oração no app</button>'+
+    '<button class="btn-soft" data-act="prayerSend" data-kind="whatsapp">Falar pelo WhatsApp</button></div></div>';
+  if(state.adminButtons.length){
+    var btns=state.adminButtons.filter(function(b){return b.active&&visible(b.visibility,session.role);});
+    h+='<div class="card"><div style="font-weight:800">Secretaria &amp; Gabinete</div><p class="help" style="margin:.2rem 0 .75rem">Atalhos administrativos disponíveis para o seu acesso.</p><div style="display:flex;flex-direction:column;gap:.55rem">'+
+      (btns.length?btns.map(function(b){return '<a href="'+esc(b.link)+'" target="_blank" rel="noopener noreferrer" style="display:flex;justify-content:space-between;align-items:center;gap:.5rem;min-height:44px;padding:.7rem .85rem;border-radius:14px;border:1px solid '+t.hex+';color:'+t.hex+';text-decoration:none;font-weight:700;font-size:.82rem"><span>'+esc(b.title)+"</span>"+pill(b.badge,"b-white")+"</a>";}).join(""):'<p class="help">Nenhum atalho disponível para o seu acesso. Entre com um código para ver mais.</p>')+"</div></div>";
+  }
+  h+='<div class="card"><div style="font-weight:800">Acesso da equipe</div><p class="help" style="margin:.2rem 0 .75rem">Use o código de acesso para liberar áreas restritas.</p><button class="btn-soft" style="width:100%" data-act="changeAccess">Entrar com código</button></div>';
+  h+="</section>";
+  return h;
+}
+
+/* ---------- admin panel ---------- */
+var ADMIN_TABS=[
+  ["church","1. Personalização & Igreja","church"],
+  ["depts","2. Departamentos & Pix","qr-code"],
+  ["users","3. Usuários, Cargos & Funções","users"],
+  ["perms","4. Permissões por Cargo","sliders"],
+  ["buttons","5. Botões Secretaria","heart-handshake"],
+  ["services","6. Cultos","calendar"],
+  ["notices","7. Avisos & Links","bell"],
+  ["directorate","8. Diretoria & Equipes","users-round"],
+  ["records","Registros ("+state.submissions.length+")","inbox"],
+  ["backup","Backup & Publicar","share-2"]
+];
+function adminHtml(){
+  if(!canAccessAdminPanel()){
+    return '<div class="card" style="max-width:40rem;margin:1rem auto"><div style="font-weight:800">Acesso restrito</div><p class="help">Entre como gestor para acessar o painel.</p></div>';
+  }
+  var tabs=ADMIN_TABS.map(function(t){
+    return '<button class="tab-btn '+(ui.adminTab===t[0]?"on":"")+'" data-act="adminTab" data-tab="'+t[0]+'">'+ico(t[2],13)+'<span>'+esc(t[1])+"</span></button>";
+  }).join("");
+  var body="";
+  try{body=adminTabBody(ui.adminTab);}catch(e){body=errorBox("Erro ao carregar esta aba: "+e.message);}
+  return '<section style="max-width:56rem;margin:.75rem auto 0;padding:0 .75rem 2rem;width:100%">'+
+    '<div style="background:#fff;border-radius:22px;box-shadow:var(--shadow);overflow:hidden">'+
+      '<div style="background:#1c1917;color:#fff;padding:.9rem 1rem;display:flex;flex-wrap:wrap;gap:.6rem;justify-content:space-between;align-items:center">'+
+        '<div><div style="font-size:.68rem;font-weight:700;opacity:.75">Painel Gestor • '+esc(roleObj(session.role).label)+'</div><div style="font-weight:800;font-size:1rem">Personalização Completa</div></div>'+
+        '<div style="display:flex;gap:.45rem"><button class="btn-sm" data-act="copyCode" style="background:#16a34a;color:#fff;border:0;border-radius:10px;font-weight:700;cursor:pointer">Copiar E-mail Admin</button><button class="btn-sm" data-act="go" data-page="home" style="background:#f59e0b;color:#1c1917;border:0;border-radius:10px;font-weight:700;cursor:pointer">Ver App</button></div>'+
+      '</div>'+
+      '<div class="tabs-row">'+tabs+"</div>"+
+      '<div style="padding:.95rem">'+body+"</div>"+
+    "</div>"+
+  "</section>";
+}
+function errorBox(msg){return '<div style="background:#fff1f2;color:#9f1239;padding:.85rem;border-radius:14px;font-size:.82rem">'+esc(msg)+"</div>";}
+function adminTabBody(tab){
+  if(tab==="church") return tabChurch();
+  if(tab==="depts") return tabDepts();
+  if(tab==="users") return tabUsers();
+  if(tab==="perms") return tabPerms();
+  if(tab==="buttons") return tabButtons();
+  if(tab==="services") return tabServices();
+  if(tab==="notices") return tabNotices();
+  if(tab==="directorate") return tabDirectorate();
+  if(tab==="records") return tabRecords();
+  if(tab==="backup") return tabBackup();
+  return "";
+}
+function hd(t,sub){return '<div style="margin-bottom:.8rem"><div style="font-weight:800;font-size:1rem">'+esc(t)+'</div><p class="help" style="margin:.2rem 0 0">'+esc(sub)+"</p></div>";}
+function field(label,id,val,help,type){
+  return '<div><label class="lbl" for="'+id+'">'+esc(label)+'</label><input class="fld" id="'+id+'" type="'+(type||"text")+'" value="'+esc(val)+'">'+(help?'<div class="help">'+esc(help)+"</div>":"")+"</div>";
+}
+function areaF(label,id,val,help,rows){
+  return '<div><label class="lbl" for="'+id+'">'+esc(label)+'</label><textarea class="fld" id="'+id+'" rows="'+(rows||2)+'">'+esc(val)+'</textarea>'+(help?'<div class="help">'+esc(help)+"</div>":"")+"</div>";
+}
+
+/* tab 1: full customization */
+function tabChurch(){
+  var c=state.church;
+  var themes="";
+  Object.keys(THEMES).forEach(function(k){
+    var swHex=k==="custom"?(c.customPrimaryHex||"#1e40af"):THEMES[k].hex;
+    themes+='<button data-act="setTheme" data-theme="'+k+'" style="display:flex;align-items:center;gap:.5rem;min-height:44px;padding:.55rem .7rem;border-radius:14px;border:2px solid '+(c.theme===k?swHex:"#e7e5e4")+';background:#fff;cursor:pointer;font-weight:700;font-size:.78rem"><span style="width:20px;height:20px;border-radius:999px;background:'+swHex+';flex-shrink:0"></span><span>'+esc(THEMES[k].label)+"</span></button>";
+  });
+
+  return hd("Personalização Total da Igreja","Altere cores, faixa superior, dados institucionais, textos dos cartões e comportamento.")+
+    '<details class="adx-acc" open><summary>🎨 Cores, Tema &amp; Faixa Superior</summary><div class="acc-body">'+
+      '<div><label class="lbl">Paleta de cores</label><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:.5rem">'+themes+'</div></div>'+
+      '<div class="safe-grid-sm">'+
+        field("Cor Principal (Modo Personalizado)","ch_c1",c.customPrimaryHex||"#1e40af","","color")+
+        field("Cor Secundária / Degradê","ch_c2",c.customSecondaryHex||"#312e81","","color")+
+        field("Cor de Fundo do Aplicativo","ch_cbg",c.customBgHex||"#f5f5f4","","color")+
+      '</div>'+
+      '<hr style="border-top:1px solid #e7e5e4">'+
+      '<label style="font-size:.82rem;display:flex;align-items:center;gap:.45rem"><input type="checkbox" id="ch_showBanner"'+(c.showTopBanner!==false?" checked":"")+'> Exibir faixa superior de aviso no topo</label>'+
+      field("Texto da faixa superior","ch_bannerTxt",c.topBannerText||"ADALEX DIGITAL • CONECTANDO A IGREJA")+
+      '<div class="safe-grid-sm">'+
+        field("Cor de fundo da faixa","ch_bannerBg",c.topBannerBg||"#f59e0b","","color")+
+        field("Cor do texto da faixa","ch_bannerClr",c.topBannerColor||"#1c1917","","color")+
+      '</div>'+
+    '</div></details>'+
+
+    '<details class="adx-acc" open><summary>🏛️ Identidade, Logo &amp; Contatos</summary><div class="acc-body">'+
+      field("Nome da igreja","ch_name",c.name)+
+      field("Subtítulo / Lema","ch_subtitle",c.subtitle)+
+      field("CNPJ","ch_cnpj",c.cnpj)+
+      field("Endereço","ch_address",c.address)+
+      areaF("Sobre a igreja","ch_about",c.aboutText,"Texto exibido em Informações sobre a Igreja.",3)+
+      field("Horário principal de culto","ch_sunday",c.sundayWorshipTime)+
+      '<div><label class="lbl" for="ch_logo">Logo por link</label><input class="fld" id="ch_logo" value="'+esc(c.logoUrl)+'"><div class="help">Aceita link direto ou link do Google Drive.</div><div style="display:flex;flex-wrap:wrap;gap:.6rem;margin-top:.55rem;align-items:center">'+avatar(driveLink(c.logoUrl),c.name,56)+'<button class="btn-soft" data-act="logoUpload">Enviar logo do aparelho</button></div></div>'+
+      '<div class="safe-grid-sm">'+
+        field("WhatsApp da Secretaria","ch_wsec",c.secretaryWhatsapp,"Somente números com DDD.","tel")+
+        field("WhatsApp Contábil (Comprovantes)","ch_wacc",c.accountingWhatsapp,"","tel")+
+        field("WhatsApp da Oração","ch_wpray",c.prayerWhatsapp,"","tel")+
+      '</div>'+
+      '<div class="safe-grid-sm">'+
+        field("E-mail da decisão por Cristo","ch_decision",c.christDecisionEmail,"","email")+
+        field("E-mail da central de oração","ch_prayerEmail",c.prayerVisitorEmail,"","email")+
+      '</div>'+
+    '</div></details>'+
+
+    '<details class="adx-acc"><summary>✏️ Personalizar Textos de Todos os Cartões e Botões</summary><div class="acc-body">'+
+      '<div class="safe-grid-sm">'+
+        field("Saudação boas-vindas (use {nome})","ch_wGreet",c.welcomeGreeting||"Paz do Senhor, {nome}!")+
+        field("Subtítulo boas-vindas","ch_wSub",c.welcomeSubtext||"Seu nível define os recursos visíveis.")+
+        field("Botão trocar acesso","ch_wBtn",c.welcomeBtnText||"Trocar acesso")+
+      '</div>'+
+      '<hr style="border-top:1px solid #e7e5e4">'+
+      field("Selo do cartão de decisão","ch_christEye",c.christEyebrow||"DECISÃO IMPORTANTE")+
+      field("Título do botão de decisão","ch_christBtn",c.christButtonTitle)+
+      areaF("Texto do botão de decisão","ch_christSub",c.christButtonSubtitle,"",2)+
+      field("Rótulo do botão de ação","ch_christAct",c.christActionLabel||"Quero dar este passo")+
+      field("Título do convite (modal)","ch_invite",c.christInviteTitle)+
+      '<hr style="border-top:1px solid #e7e5e4">'+
+      field("Título da central de oração","ch_prayTitle",c.prayerTitle)+
+      areaF("Descrição da oração","ch_prayDesc",c.prayerDescription,"",2)+
+      field("Botão de oração","ch_prayBtn",c.prayerBtnLabel||"Enviar pedido de oração")+
+      areaF("Saudação padrão WhatsApp Oração","ch_prayGreet",c.prayerDefaultGreeting,"",2)+
+      '<hr style="border-top:1px solid #e7e5e4">'+
+      '<div class="safe-grid-sm">'+
+        field("Título seção Informações","ch_infoT",c.infoSectionTitle||"Informações sobre a Igreja")+
+        field("Subtítulo Informações","ch_infoS",c.infoSectionSubtitle||"Conheça nossa igreja e nossos horários.")+
+        field("Título seção Diretoria","ch_dirT",c.directorateTitle||"Nossa Diretoria")+
+        field("Subtítulo Diretoria","ch_dirS",c.directorateSubtitle||"Quem cuida da obra no dia a dia.")+
+        field("Título seção Departamentos","ch_depT",c.deptsTitle||"Departamentos & Contribuições Pix")+
+        field("Subtítulo Departamentos","ch_depS",c.deptsSubtitle||"Toque em copiar e cole no aplicativo do seu banco.")+
+        field("Texto padrão botão Pix","ch_pixBtn",c.pixCopyBtnLabel||"COPIAR PIX")+
+        field("Título seção Cultos","ch_svcT",c.servicesTitle||"Dias de Cultos")+
+        field("Subtítulo Cultos","ch_svcS",c.servicesSubtitle||"Horários da semana. O dia de hoje aparece destacado.")+
+        field("Título Mural de Avisos","ch_notT",c.noticesTitle||"Mural de Avisos")+
+        field("Subtítulo Avisos","ch_notS",c.noticesSubtitle||"Comunicados da igreja.")+
+        field("Título Redes & Links","ch_lnkT",c.linksTitle||"Redes Sociais & Links")+
+        field("Subtítulo Redes & Links","ch_lnkS",c.linksSubtitle||"Acompanhe a igreja e fale com a secretaria.")+
+      '</div>'+
+      '<hr style="border-top:1px solid #e7e5e4">'+
+      field("Título do agradecimento Pix","ch_pixTitle",c.pixThankYouTitle)+
+      areaF("Mensagem do Pix","ch_pixMsg",c.pixThankYouMessage,"",2)+
+      areaF("Versículo do Pix","ch_verse",c.pixBibleVerse,"",2)+
+      areaF("Mensagem do comprovante contábil","ch_receipt",c.accountingReceiptMessage,"",2)+
+      field("Nota final do rodapé","ch_footNote",c.footerNote||"v2.0 • Dados salvos localmente neste navegador")+
+    '</div></details>'+
+
+    '<details class="adx-acc"><summary>⚙️ Opções de Exibição &amp; Acesso</summary><div class="acc-body">'+
+      '<label style="font-size:.82rem;display:flex;align-items:center;gap:.45rem"><input type="checkbox" id="ch_showWelcome"'+(c.showWelcomeCard!==false?" checked":"")+'> Exibir cartão de boas-vindas e troca rápida de perfil na tela inicial</label>'+
+      '<label style="font-size:.82rem;display:flex;align-items:center;gap:.45rem"><input type="checkbox" id="ch_showReceipt"'+(c.showSendReceiptButton!==false?" checked":"")+'> Exibir botão "Enviar Comprovante via WhatsApp" no modal Pix</label>'+
+      '<label style="font-size:.82rem;display:flex;align-items:center;gap:.45rem"><input type="checkbox" id="ch_loginGate"'+(c.requireLoginGate?" checked":"")+'> Exigir código de acesso na tela inicial (bloquear modo visitante aberto)</label>'+
+    '</div></details>'+
+
+    '<button class="btn-main" style="width:100%" data-act="saveChurch">Salvar Todas as Personalizações</button>';
+}
+
+/* tab 2 */
+function tabDepts(){
+  var editing=ui.depEditId?state.departments.find(function(d){return d.id===ui.depEditId;}):null;
+  var base=editing||{name:"",pixType:"E-mail",pixKey:"",icon:"landmark",description:"",visibility:"todos",visibleTo:[],active:true,photo:"",leader:"",btnLabel:""};
+  var v=Object.assign({},base,ui.depForm);
+  var currentPhoto=ui.depForm.photo!==undefined?ui.depForm.photo:base.photo;
+
+  var iconOpts=DEP_ICON_OPTS.map(function(o){return '<option value="'+o[0]+'"'+(v.icon===o[0]?" selected":"")+">"+esc(o[1])+"</option>";}).join("");
+  var pixOpts=["E-mail","Telefone","CPF/CNPJ","Chave Aleatória","PIX Copia e Cola"].map(function(p){return '<option'+(v.pixType===p?" selected":"")+">"+p+"</option>";}).join("");
+  var form='<div class="card" style="display:grid;gap:.75rem"><div style="font-weight:800;font-size:.95rem">'+(editing?"Editar departamento":"Cadastrar departamento")+'</div>'+
+    field("Nome do Departamento (obrigatório)","dp_name",v.name)+
+    '<div><label class="lbl" for="dp_type">Tipo da Chave Pix</label><select class="fld" id="dp_type">'+pixOpts+'</select></div>'+
+    '<div><label class="lbl" for="dp_key">Chave Pix (opcional)</label><input class="fld" id="dp_key" value="'+esc(v.pixKey)+'"><div class="help">Se o departamento recebe ofertas, informe a chave Pix. Se não recebe, deixe em branco.</div></div>'+
+    field("Texto do botão (opcional)","dp_btn",v.btnLabel||"","Ex.: OFERTAR AGORA (deixe vazio para usar o padrão)")+
+    '<div><label class="lbl" for="dp_icon">Ícone do Botão</label><select class="fld" id="dp_icon">'+iconOpts+'</select></div>'+
+    areaF("Descrição Curta","dp_desc",v.description,"",2)+
+    '<div><label class="lbl" for="dp_leader">Dirigente</label><input class="fld" id="dp_leader" value="'+esc(v.leader||"")+'"><button class="btn-soft" style="width:100%;margin-top:.45rem" data-act="pickLeader">Escolher da lista de pessoas</button></div>'+
+    '<div><label class="lbl">Foto / Logo</label><div style="display:flex;gap:.65rem;align-items:center"><div id="dp_photo_prev">'+avatar(currentPhoto,v.name||"D",56)+'</div><div style="display:flex;flex-wrap:wrap;gap:.4rem"><button class="btn-soft btn-sm" data-act="depPhotoForm">Do aparelho</button><button class="btn-soft btn-sm" data-act="depPhotoLink">Por link</button><button class="btn-danger btn-sm" data-act="depPhotoRemove">Remover</button></div></div></div>'+
+    '<div><label class="lbl" for="dp_vis">Visibilidade</label>'+visOptions(v.visibility,"dp_vis")+visCheckboxes(v,"dp")+"</div>"+
+    '<label style="font-size:.82rem;display:flex;align-items:center;gap:.45rem"><input type="checkbox" id="dp_active"'+(v.active!==false?" checked":"")+'> Departamento ativo no aplicativo</label>'+
+    '<div style="display:flex;flex-wrap:wrap;gap:.5rem;justify-content:flex-end">'+(editing?'<button class="btn-soft" data-act="depCancel">Cancelar</button>':"")+'<button class="btn-main" style="flex:1" data-act="saveDept">Salvar departamento</button></div></div>';
+
+  var list=state.departments.map(function(d){
+    return '<div class="card" style="display:grid;gap:.65rem;padding:.85rem">'+
+      '<div style="display:flex;gap:.6rem;align-items:center">'+
+        avatar(d.photo,d.name,44)+
+        '<div style="min-width:0;flex:1"><div style="font-weight:800;font-size:.88rem">'+esc(d.name)+'</div><div class="help" style="font-family:monospace;word-break:break-all">'+esc(d.pixKey||"Sem chave Pix")+'</div></div>'+
+      '</div>'+
+      '<div style="display:flex;flex-wrap:wrap;gap:.35rem">'+pill(d.pixType,"b-stone")+pill(visLabel(d.visibility),"b-sky")+pill(d.active?"Ativo":"Oculto",d.active?"b-emerald":"b-rose")+'</div>'+
+      '<div style="display:flex;flex-wrap:wrap;gap:.35rem">'+
+        '<button class="btn-soft btn-sm" data-act="depMove" data-id="'+d.id+'" data-dir="-1" aria-label="Subir">↑</button>'+
+        '<button class="btn-soft btn-sm" data-act="depMove" data-id="'+d.id+'" data-dir="1" aria-label="Descer">↓</button>'+
+        '<button class="btn-soft btn-sm" data-act="depToggle" data-id="'+d.id+'">'+(d.active?"Ocultar":"Ativar")+'</button>'+
+        '<button class="btn-soft btn-sm" data-act="depEdit" data-id="'+d.id+'">Editar</button>'+
+        '<button class="btn-soft btn-sm" data-act="depTeamAdmin" data-id="'+d.id+'">Equipe</button>'+
+        '<button class="btn-danger btn-sm" data-act="depDelete" data-id="'+d.id+'">Excluir</button>'+
+      '</div>'+
+    '</div>';
+  }).join("");
+
+  return hd("Departamentos & Pix","Cadastre as contribuições e defina quem vê cada cartão.")+
+    '<div class="safe-grid-2" style="align-items:start">'+form+'<div style="display:flex;flex-direction:column;gap:.65rem">'+(list||'<p class="help">Nenhum departamento. Cadastre o primeiro acima.</p>')+"</div></div>";
+}
+
+/* tab 3: users + inline creation of Cargos & Funções */
+function tabUsers(){
+  var f=ui.userEditId?findUser(ui.userEditId):null;
+  var base=f||{name:"",role:"membro",functions:[],memberCode:"",accessPassword:"",whatsapp:"",email:"",department:"",photo:""};
+  var v=Object.assign({},base,ui.userForm);
+  var selFuncs=Array.isArray(v.functions)?v.functions:(base.functions||[]);
+  var currentPhoto=ui.userForm.photo!==undefined?ui.userForm.photo:(base.photo||"");
+
+  var roleOpts=allRoles().map(function(r){
+    return '<option value="'+esc(r.id)+'"'+(v.role===r.id?" selected":"")+">"+esc(r.label)+"</option>";
+  }).join("");
+
+  var colorOpts=BADGE_COLORS.map(function(c){
+    return '<option value="'+c[0]+'">'+esc(c[1])+'</option>';
+  }).join("");
+
+  var newRoleBox=ui.showNewRoleBox
+    ?'<div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:14px;padding:.75rem;margin-top:.5rem;display:grid;gap:.5rem">'+
+      '<div style="font-weight:800;font-size:.8rem;color:#1e3a8a">Criar novo Cargo</div>'+
+      '<input class="fld" id="nr_label" placeholder="Ex.: Diácono, Presbítero, Tesoureiro, Regente...">'+
+      '<div class="safe-grid-sm">'+
+        '<div><label class="lbl" for="nr_level">Nível de permissão base</label><select class="fld" id="nr_level"><option value="0">Visitante (Nível 0)</option><option value="1" selected>Membro (Nível 1)</option><option value="2">Liderança (Nível 2)</option><option value="3">Diretoria (Nível 3)</option><option value="4">Administrador (Nível 4)</option></select></div>'+
+        '<div><label class="lbl" for="nr_cls">Cor do selo</label><select class="fld" id="nr_cls">'+colorOpts+'</select></div>'+
+      '</div>'+
+      '<div style="display:flex;gap:.45rem"><button type="button" class="btn-soft btn-sm" data-act="toggleCreateRoleBox">Cancelar</button><button type="button" class="btn-main btn-sm" style="flex:1" data-act="createInlineRole">Criar e selecionar cargo</button></div>'+
+    '</div>'
+    :"";
+
+  var funcChips=(state.functions||[]).map(function(fn){
+    var isOn=selFuncs.indexOf(fn)>=0;
+    return '<button type="button" class="func-chip '+(isOn?"on":"")+'" data-act="toggleUserFunc" data-fn="'+esc(fn)+'">'+(isOn?"✓ ":"+ ")+esc(fn)+"</button>";
+  }).join("");
+
+  var form='<div class="card" style="display:grid;gap:.7rem">'+
+    '<div style="font-weight:800;font-size:.95rem">'+(f?"Editar pessoa":"Cadastrar nova pessoa")+'</div>'+
+    field("Nome Completo","us_name",v.name)+
+    '<div>'+
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.3rem">'+
+        '<label class="lbl" for="us_role" style="margin:0">Cargo / Nível de Acesso</label>'+
+        '<button type="button" class="btn-soft btn-sm" style="min-height:30px;padding:.2rem .55rem;font-size:.7rem" data-act="toggleCreateRoleBox">'+ico("plus",12)+'<span>Criar novo cargo</span></button>'+
+      '</div>'+
+      '<select class="fld" id="us_role">'+roleOpts+'</select>'+
+      newRoleBox+
+    '</div>'+
+    '<div>'+
+      '<label class="lbl">Funções na Igreja / Ministérios (selecione ou crie)</label>'+
+      '<div style="display:flex;flex-wrap:wrap;gap:.35rem;margin-bottom:.5rem">'+(funcChips||'<span class="help">Nenhuma função cadastrada.</span>')+'</div>'+
+      '<div style="display:flex;gap:.4rem">'+
+        '<input class="fld" id="nf_name" placeholder="Nova função (ex.: Coral, Mídia, EBD...)" style="flex:1">'+
+        '<button type="button" class="btn-soft" data-act="createInlineFunc" style="white-space:nowrap">+ Criar</button>'+
+      '</div>'+
+    '</div>'+
+    '<div class="safe-grid-sm">'+
+      field("Código de Membro","us_code",v.memberCode,"Usado para entrar como membro.")+
+      field("Senha de Acesso","us_pass",v.accessPassword,"Usada por liderança e diretoria.")+
+    '</div>'+
+    '<div class="safe-grid-sm">'+
+      field("WhatsApp","us_wa",v.whatsapp,"","tel")+
+      field("E-mail","us_email",v.email,"","email")+
+    '</div>'+
+    field("Departamento principal","us_dept",v.department)+
+    '<div><label class="lbl">Foto (opcional)</label><div style="display:flex;gap:.6rem;align-items:center">'+avatar(currentPhoto,v.name||"P",48)+'<button type="button" class="btn-soft btn-sm" data-act="userPhotoForm">Foto do aparelho</button>'+(currentPhoto?'<button type="button" class="btn-danger btn-sm" data-act="userPhotoRemove">Remover</button>':"")+'</div></div>'+
+    '<div style="display:flex;gap:.5rem;justify-content:flex-end">'+(f?'<button type="button" class="btn-soft" data-act="userCancel">Cancelar</button>':"")+'<button type="button" class="btn-main" style="flex:1" data-act="saveUser">Salvar pessoa</button></div>'+
+  '</div>';
+
+  /* Filter & Search bar */
+  var filt=ui.userFilter;
+  var fl='<div class="tabs-row" style="padding:.25rem 0;border:0"><button class="tab-btn '+(filt==="todos"?"on":"")+'" data-act="userFilter" data-f="todos">Todos ('+state.users.length+')</button>'+
+    allRoles().map(function(r){
+      var cnt=state.users.filter(function(u){return u.role===r.id;}).length;
+      return '<button class="tab-btn '+(filt===r.id?"on":"")+'" data-act="userFilter" data-f="'+esc(r.id)+'">'+esc(r.label)+" ("+cnt+")</button>";
+    }).join("")+"</div>";
+
+  var funcFilterOpts='<option value="todas">Todas as funções</option>'+(state.functions||[]).map(function(fn){
+    return '<option value="'+esc(fn)+'"'+(ui.funcFilter===fn?" selected":"")+'>Função: '+esc(fn)+'</option>';
+  }).join("");
+
+  var qTerm=plain(ui.userSearch);
+  var users=state.users.filter(function(u){
+    if(filt!=="todos"&&u.role!==filt) return false;
+    if(ui.funcFilter!=="todas"&&(!u.functions||u.functions.indexOf(ui.funcFilter)<0)) return false;
+    if(qTerm){
+      var hay=plain(u.name+" "+(u.memberCode||"")+" "+roleObj(u.role).label+" "+(u.functions||[]).join(" ")+" "+(u.department||""));
+      if(hay.indexOf(qTerm)<0) return false;
+    }
+    return true;
+  });
+
+  var list=users.length?users.map(function(u){
+    var uFuncs=(u.functions||[]).map(function(fn){return pill(fn,"b-indigo");}).join("");
+    return '<div class="card" style="display:grid;gap:.55rem;padding:.8rem">'+
+      '<div style="display:flex;gap:.6rem;align-items:center">'+
+        avatar(u.photo,u.name,44)+
+        '<div style="min-width:0;flex:1">'+
+          '<div style="font-weight:700;font-size:.88rem">'+esc(u.name)+'</div>'+
+          '<div style="display:flex;flex-wrap:wrap;gap:.3rem;margin-top:.3rem">'+
+            roleBadge(u.role)+
+            (u.memberCode?pill("Cód. "+u.memberCode,"b-stone"):pill("Sem código","b-amber"))+
+            (u.accessPassword?pill("Com senha","b-emerald"):"")+
+            uFuncs+
+          '</div>'+
+        '</div>'+
+      '</div>'+
+      '<div style="display:flex;flex-wrap:wrap;gap:.4rem;align-items:center">'+
+        '<select class="fld" style="width:auto;min-height:38px;padding:.35rem .6rem;flex:1" data-act="userRole" data-id="'+u.id+'" aria-label="Alterar cargo">'+
+          allRoles().map(function(r){return '<option value="'+esc(r.id)+'"'+(u.role===r.id?" selected":"")+">"+esc(r.label)+"</option>";}).join("")+
+        '</select>'+
+        '<button class="btn-soft btn-sm" data-act="userEdit" data-id="'+u.id+'">Editar</button>'+
+        '<button class="btn-danger btn-sm" data-act="userDelete" data-id="'+u.id+'">Excluir</button>'+
+      '</div>'+
+    '</div>';
+  }).join(""):'<div class="card"><p class="help">Nenhuma pessoa encontrada com os filtros atuais.</p><button class="btn-soft" style="margin-top:.5rem" data-act="userFilterAll">Limpar filtros</button></div>';
+
+  /* Manage custom cargos & functions accordion */
+  var customRolesList=allRoles().map(function(r){
+    return '<div style="display:flex;justify-content:space-between;align-items:center;gap:.4rem;padding:.45rem .6rem;border:1px solid #e7e5e4;border-radius:12px">'+
+      '<div style="display:flex;align-items:center;gap:.45rem">'+roleBadge(r.id)+'<span class="help" style="margin:0">Nível '+r.level+'</span></div>'+
+      '<div style="display:flex;gap:.3rem">'+
+        '<button class="btn-soft btn-sm" data-act="renameRole" data-id="'+esc(r.id)+'">Renomear</button>'+
+        (!r.system?'<button class="btn-danger btn-sm" data-act="deleteCustomRole" data-id="'+esc(r.id)+'">Excluir</button>':"")+
+      '</div>'+
+    '</div>';
+  }).join("");
+
+  var customFuncsList=(state.functions||[]).map(function(fn){
+    return '<span class="pill b-stone" style="padding:.3rem .65rem;font-size:.74rem">'+esc(fn)+
+      ' <button type="button" data-act="deleteCustomFunc" data-fn="'+esc(fn)+'" aria-label="Excluir função" style="margin-left:.3rem;color:#9f1239;font-weight:900;cursor:pointer">✕</button></span>';
+  }).join("");
+
+  var manageBox='<details class="adx-acc" style="margin-top:1rem"><summary>🏷️ Gerenciar Cargos e Funções Cadastrados</summary><div class="acc-body">'+
+    '<div><div style="font-weight:800;font-size:.84rem;margin-bottom:.4rem">Cargos do Sistema &amp; Personalizados</div><div style="display:grid;gap:.4rem">'+customRolesList+'</div></div>'+
+    '<div><div style="font-weight:800;font-size:.84rem;margin-bottom:.4rem">Funções Disponíveis</div><div style="display:flex;flex-wrap:wrap;gap:.4rem">'+(customFuncsList||'<span class="help">Nenhuma função cadastrada.</span>')+'</div></div>'+
+  '</div></details>';
+
+  var importCard='<details class="adx-acc" style="margin-top:.5rem"><summary>📋 Importar Lista de Membros em Lote</summary><div class="acc-body" style="background:#fffbeb">'+
+    '<p class="help" style="margin:0">Cole a lista com um nome por linha. O aplicativo mostra o que entendeu antes de salvar.</p>'+
+    '<textarea id="imp_text" class="fld" style="min-height:130px;font-family:monospace" placeholder="José da Silva | 1001&#10;Maria Souza - 1002"></textarea>'+
+    '<div class="help" style="font-family:monospace;background:#fff;padding:.55rem;border-radius:10px">José da Silva | 1001<br>Maria Souza - 1002<br>1003 - Ana Paula</div>'+
+    '<div><label class="lbl" for="imp_dept">Departamento para todos os importados (opcional)</label><input class="fld" id="imp_dept"></div>'+
+    '<div><label class="lbl" for="imp_role">Cargo dos importados</label><select class="fld" id="imp_role">'+allRoles().map(function(r){return '<option value="'+esc(r.id)+'"'+(r.id==="membro"?" selected":"")+'>'+esc(r.label)+'</option>';}).join("")+'</select></div>'+
+    '<button class="btn-main" style="width:100%" data-act="importCheck">Conferir lista antes de importar</button>'+
+  '</div></details>';
+
+  return hd("Usuários, Cargos & Funções","Cadastre pessoas, crie novos cargos e atribua múltiplas funções na igreja.")+
+    '<div class="safe-grid-2" style="align-items:start">'+
+      form+
+      '<div style="display:flex;flex-direction:column;gap:.55rem">'+
+        '<div class="safe-grid-sm">'+
+          '<input class="fld" id="us_search" placeholder="Buscar por nome, código, cargo ou função..." value="'+esc(ui.userSearch)+'">'+
+          '<select class="fld" id="us_func_filter">'+funcFilterOpts+'</select>'+
+        '</div>'+
+        fl+list+
+      '</div>'+
+    '</div>'+
+    manageBox+importCard;
+}
+
+/* tab 4: dynamic permissions for all roles including custom ones */
+function permTable(list,title,sub){
+  var roles=allRoles();
+  var head='<tr><th class="nm">Permissão</th>'+roles.map(function(r){return "<th>"+esc(r.label)+"</th>";}).join("")+"</tr>";
+  var rows=list.map(function(p){
+    return '<tr><td class="nm"><div style="font-weight:700">'+esc(p.n)+'</div><div class="help">'+esc(p.d)+"</div></td>"+
+      roles.map(function(r){
+        var locked=r.id==="admin_geral"?" disabled":"";
+        return '<td><input type="checkbox" data-perm="'+p.k+'" data-role="'+esc(r.id)+'"'+(can(p.k,r.id)?" checked":"")+locked+"></td>";
+      }).join("")+"</tr>";
+  }).join("");
+  return '<div class="card" style="padding:0;overflow:hidden;margin-bottom:1rem"><div style="padding:.85rem 1rem"><div style="font-weight:800">'+esc(title)+'</div><div class="help">'+esc(sub)+'</div></div><div class="table-wrap"><table class="adx"><thead>'+head+"</thead><tbody>"+rows+"</tbody></table></div></div>";
+}
+function tabPerms(){
+  return hd("O que Aparece p/ Cada Cargo","Inclui automaticamente todos os cargos personalizados criados por você.")+
+    permTable(PERM_VIEW,"Visualização","Itens que cada cargo vê no aplicativo.")+
+    permTable(PERM_MANAGE,"Gestão","Áreas que cada cargo pode alterar.")+
+    '<div class="card" style="display:grid;gap:.65rem"><div style="font-weight:800">Senha do Administrador Master</div><p class="help" style="margin:0">Padrão inicial: <b>Vidal1506@</b>. Altere aqui se desejar.</p>'+
+    '<input class="fld" id="pw_cur" type="password" placeholder="Senha atual" autocomplete="off"><input class="fld" id="pw_new" type="password" placeholder="Nova senha" autocomplete="off"><input class="fld" id="pw_conf" type="password" placeholder="Confirmar nova senha" autocomplete="off">'+
+    '<button class="btn-main" style="width:100%" data-act="savePerms">Salvar permissões e senha</button></div>';
+}
+
+/* tab 5 */
+function tabButtons(){
+  var rows=state.adminButtons.map(function(b){
+    return '<div class="card" style="display:grid;gap:.6rem;margin-bottom:.75rem"><div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:.4rem;align-items:center"><div style="font-weight:800;font-size:.88rem">'+esc(b.title)+'</div><div style="display:flex;gap:.35rem"><button class="btn-soft btn-sm" data-act="btnMove" data-id="'+b.id+'" data-dir="-1">↑</button><button class="btn-soft btn-sm" data-act="btnMove" data-id="'+b.id+'" data-dir="1">↓</button><button class="btn-danger btn-sm" data-act="btnDelete" data-id="'+b.id+'">Excluir</button></div></div>'+
+      '<div class="safe-grid-sm">'+field("Título","bt_t_"+b.id,b.title)+field("Link","bt_l_"+b.id,b.link)+'<div><label class="lbl" for="bt_v_'+b.id+'">Visibilidade</label>'+visOptions(b.visibility,"bt_v_"+b.id)+"</div>"+field("Selo","bt_b_"+b.id,b.badge)+"</div>"+
+      '<div style="display:flex;gap:.75rem;flex-wrap:wrap;align-items:center;justify-content:space-between;font-size:.8rem"><div style="display:flex;gap:.75rem;flex-wrap:wrap"><label><input type="checkbox" id="bt_a_'+b.id+'"'+(b.active?" checked":"")+'> Ativo</label><label><input type="checkbox" id="bt_g_'+b.id+'"'+(b.isGabinetePastoral?" checked":"")+'> Gabinete Pastoral</label></div><button class="btn-main btn-sm" data-act="btnSave" data-id="'+b.id+'">Salvar</button></div></div>';
+  }).join("");
+  var add='<div class="card" style="display:grid;gap:.6rem"><div style="font-weight:800">Novo botão</div>'+field("Título","bt_new_t","")+field("Link","bt_new_l","https://")+'<div><label class="lbl" for="bt_new_v">Visibilidade</label>'+visOptions("membros_acima","bt_new_v")+'</div><button class="btn-main" style="width:100%" data-act="btnAdd">Adicionar botão</button></div>';
+  return hd("Botões (Gabinete / Secretaria)","Atalhos de contato e links administrativos.")+(rows||'<p class="help">Nenhum botão cadastrado.</p>')+add;
+}
+
+/* tab 6 */
+function tabServices(){
+  var rows=state.services.map(function(s){
+    return '<div class="card" style="display:grid;gap:.6rem;margin-bottom:.75rem"><div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.4rem"><div style="font-weight:800;font-size:.88rem">'+esc(s.day)+' • '+esc(s.time)+' • '+esc(s.title)+'</div><div style="display:flex;gap:.35rem"><button class="btn-soft btn-sm" data-act="svcMove" data-id="'+s.id+'" data-dir="-1">↑</button><button class="btn-soft btn-sm" data-act="svcMove" data-id="'+s.id+'" data-dir="1">↓</button><button class="btn-danger btn-sm" data-act="svcDelete" data-id="'+s.id+'">Excluir</button></div></div>'+
+      '<div class="safe-grid-sm"><div><label class="lbl" for="sv_d_'+s.id+'">Dia</label><select class="fld" id="sv_d_'+s.id+'">'+DAYS.map(function(d){return '<option'+(s.day===d?" selected":"")+">"+d+"</option>";}).join("")+"</select></div>"+field("Horário","sv_h_"+s.id,s.time)+field("Título","sv_t_"+s.id,s.title)+field("Descrição","sv_x_"+s.id,s.description)+'<div><label class="lbl" for="sv_v_'+s.id+'">Visibilidade</label>'+visOptions(s.visibility,"sv_v_"+s.id)+"</div></div>"+
+      '<div style="display:flex;gap:.6rem;justify-content:space-between;align-items:center;font-size:.8rem"><label><input type="checkbox" id="sv_a_'+s.id+'"'+(s.active?" checked":"")+'> Ativo</label><button class="btn-main btn-sm" data-act="svcSave" data-id="'+s.id+'">Salvar</button></div></div>';
+  }).join("");
+  var add='<div class="card" style="display:grid;gap:.6rem"><div style="font-weight:800">Novo culto</div><div class="safe-grid-sm"><div><label class="lbl" for="sv_new_d">Dia</label><select class="fld" id="sv_new_d">'+DAYS.map(function(d){return "<option>"+d+"</option>";}).join("")+'</select></div>'+field("Horário","sv_new_h","19:00")+field("Título","sv_new_t","Culto de Oração")+field("Descrição","sv_new_x","Presencial")+'<div><label class="lbl" for="sv_new_v">Visibilidade</label>'+visOptions("todos","sv_new_v")+'</div></div><button class="btn-main" style="width:100%" data-act="svcAdd">Adicionar culto</button></div>';
+  return hd("Cultos da Semana","Os horários exibidos na tela inicial.")+(rows||'<p class="help">Nenhum culto. Adicione o primeiro abaixo.</p>')+add;
+}
+
+/* tab 7 */
+function tabNotices(){
+  var nRows=state.notices.map(function(n){
+    return '<div class="card" style="display:grid;gap:.6rem"><div style="display:flex;justify-content:space-between;gap:.4rem;flex-wrap:wrap"><div style="font-weight:800;font-size:.88rem">'+esc(n.title)+'</div><div style="display:flex;gap:.35rem"><button class="btn-soft btn-sm" data-act="ntMove" data-id="'+n.id+'" data-dir="-1">↑</button><button class="btn-soft btn-sm" data-act="ntMove" data-id="'+n.id+'" data-dir="1">↓</button><button class="btn-danger btn-sm" data-act="ntDelete" data-id="'+n.id+'">Excluir</button></div></div>'+
+      field("Título","nt_t_"+n.id,n.title)+field("Data/Selo","nt_d_"+n.id,n.date)+areaF("Conteúdo","nt_c_"+n.id,n.content,"",2)+'<div><label class="lbl" for="nt_v_'+n.id+'">Visibilidade</label>'+visOptions(n.visibility,"nt_v_"+n.id)+'</div><div style="display:flex;gap:.6rem;justify-content:space-between;align-items:center;font-size:.8rem"><label><input type="checkbox" id="nt_h_'+n.id+'"'+(n.highlight?" checked":"")+'> Destaque</label><button class="btn-main btn-sm" data-act="ntSave" data-id="'+n.id+'">Salvar</button></div></div>';
+  }).join("");
+  var lRows=state.quickLinks.map(function(l){
+    return '<div class="card" style="display:grid;gap:.6rem"><div style="display:flex;justify-content:space-between;gap:.4rem"><div style="font-weight:800;font-size:.88rem">'+esc(l.title)+'</div><div style="display:flex;gap:.35rem"><button class="btn-soft btn-sm" data-act="lkMove" data-id="'+l.id+'" data-dir="-1">↑</button><button class="btn-soft btn-sm" data-act="lkMove" data-id="'+l.id+'" data-dir="1">↓</button><button class="btn-danger btn-sm" data-act="lkDelete" data-id="'+l.id+'">Excluir</button></div></div>'+
+      field("Título","lk_t_"+l.id,l.title)+field("Link","lk_u_"+l.id,l.url)+'<div><label class="lbl" for="lk_v_'+l.id+'">Visibilidade</label>'+visOptions(l.visibility,"lk_v_"+l.id)+'</div><div style="display:flex;justify-content:flex-end"><button class="btn-main btn-sm" data-act="lkSave" data-id="'+l.id+'">Salvar</button></div></div>';
+  }).join("");
+  var addN='<div class="card" style="display:grid;gap:.6rem"><div style="font-weight:800">Novo aviso</div>'+field("Título","nt_new_t","")+field("Data/Selo","nt_new_d","")+areaF("Conteúdo","nt_new_c","","",2)+'<div><label class="lbl" for="nt_new_v">Visibilidade</label>'+visOptions("todos","nt_new_v")+'</div><button class="btn-main" style="width:100%" data-act="ntAdd">Publicar aviso</button></div>';
+  var addL='<div class="card" style="display:grid;gap:.6rem"><div style="font-weight:800">Novo link</div>'+field("Título","lk_new_t","")+field("Link","lk_new_u","https://")+'<div><label class="lbl" for="lk_new_v">Visibilidade</label>'+visOptions("todos","lk_new_v")+'</div><button class="btn-main" style="width:100%" data-act="lkAdd">Adicionar link</button></div>';
+  return hd("Avisos & Redes Sociais","Mural de avisos e links exibidos para cada nível.")+
+    '<div class="safe-grid-2"><div style="display:flex;flex-direction:column;gap:.65rem"><div style="font-weight:800">Avisos</div>'+(nRows||'<p class="help">Nenhum aviso publicado.</p>')+addN+'</div><div style="display:flex;flex-direction:column;gap:.65rem"><div style="font-weight:800">Redes e links</div>'+(lRows||'<p class="help">Nenhum link cadastrado.</p>')+addL+"</div></div>";
+}
+
+/* tab 8: directorate (customizable slots) & teams */
+function tabDirectorate(){
+  var filled=state.directorate.filter(function(d){return d.name;}).length;
+  var depsWithTeam=state.departments.filter(function(d){return d.team&&d.team.length;}).length;
+  var bytes=(localStorage.getItem(KEY)||"").length;
+  var status='<div class="card" style="background:#f5f5f4;font-size:.76rem;font-weight:700;display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:.5rem">'+
+    '<span>Diretoria: '+filled+' de '+state.directorate.length+' cargos • '+depsWithTeam+' equipes • '+(bytes/1024).toFixed(1)+' KB</span>'+
+    '<button class="btn-main btn-sm" data-act="dirAdd">+ Novo cargo na diretoria</button>'+
+  '</div>';
+  var cards=state.directorate.map(function(d){
+    return '<div class="card" style="display:grid;gap:.6rem"><div style="display:flex;justify-content:space-between;gap:.5rem;align-items:flex-start"><div style="display:flex;gap:.65rem;align-items:center;min-width:0">'+avatar(d.photo,d.name||d.role,52)+'<div style="min-width:0"><h3 style="font-weight:800;font-size:.9rem;margin:0">'+esc(d.role)+'</h3><div class="help">'+(d.name?esc(d.name):"Sem nome cadastrado")+"</div></div></div>"+
+      '<div style="display:flex;gap:.25rem"><button class="btn-soft btn-sm" data-act="dirMove" data-id="'+d.id+'" data-dir="-1">↑</button><button class="btn-soft btn-sm" data-act="dirMove" data-id="'+d.id+'" data-dir="1">↓</button><button class="btn-danger btn-sm" data-act="dirDelete" data-id="'+d.id+'">✕</button></div></div>'+
+      '<div><label class="lbl" for="dr_n_'+d.id+'">Nome completo</label><input class="fld" id="dr_n_'+d.id+'" value="'+esc(d.name)+'"><button class="btn-soft btn-sm" style="width:100%;margin-top:.4rem" data-act="pickDir" data-id="'+d.id+'">Escolher da lista de pessoas</button></div>'+
+      field("Telefone","dr_p_"+d.id,d.phone,"","tel")+'<button class="btn-soft btn-sm" data-act="dirRename" data-id="'+d.id+'">Alterar nome do cargo</button>'+
+      '<div style="display:flex;flex-wrap:wrap;gap:.35rem"><button class="btn-soft btn-sm" data-act="dirPhoto" data-id="'+d.id+'" data-mode="file">Enviar foto</button><button class="btn-soft btn-sm" data-act="dirPhoto" data-id="'+d.id+'" data-mode="link">Usar link</button><button class="btn-danger btn-sm" data-act="dirPhotoRemove" data-id="'+d.id+'">Remover</button></div>'+
+      '<label style="font-size:.8rem;display:flex;align-items:center;gap:.4rem"><input type="checkbox" id="dr_v_'+d.id+'"'+(d.visible?" checked":"")+'> Aparece no aplicativo</label><button class="btn-main" style="width:100%" data-act="dirSave" data-id="'+d.id+'">Salvar</button></div>';
+  }).join("");
+  var teams=state.departments.map(function(dp){
+    var open=!!ui.teamOpen[dp.id];
+    var members=(dp.team||[]).map(function(m,i){
+      return '<div style="display:flex;gap:.6rem;align-items:center;padding:.55rem;border:1px solid #e7e5e4;border-radius:14px">'+avatar(m.photo,m.name,44)+'<div style="min-width:0;flex:1"><div style="font-weight:700;font-size:.84rem">'+esc(m.name)+'</div><div class="help">'+esc(m.role||"Integrante")+'</div></div><div style="display:flex;gap:.3rem;flex-wrap:wrap"><button class="btn-soft btn-sm" data-act="teamMove" data-dep="'+dp.id+'" data-idx="'+i+'" data-dir="-1">↑</button><button class="btn-soft btn-sm" data-act="teamMove" data-dep="'+dp.id+'" data-idx="'+i+'" data-dir="1">↓</button><button class="btn-soft btn-sm" data-act="teamEdit" data-dep="'+dp.id+'" data-idx="'+i+'">Editar</button><button class="btn-danger btn-sm" data-act="teamDel" data-dep="'+dp.id+'" data-idx="'+i+'">Excluir</button></div></div>';
+    }).join("")||'<p class="help">Nenhum integrante ainda.</p>';
+    return '<div class="card" style="padding:.8rem"><button data-act="teamToggle" data-id="'+dp.id+'" style="width:100%;min-height:40px;display:flex;justify-content:space-between;align-items:center;gap:.5rem;background:none;border:0;cursor:pointer;font-weight:800;font-size:.86rem;text-align:left"><span>'+esc(dp.name)+'</span><span style="display:flex;gap:.4rem;align-items:center;flex-shrink:0">'+pill((dp.team||[]).length+" integrantes","b-stone")+'<span>'+(open?"▲":"▼")+'</span></span></button>'+
+      (open?'<div style="margin-top:.65rem;display:flex;flex-direction:column;gap:.45rem">'+members+'<button class="btn-main" style="width:100%" data-act="teamAdd" data-dep="'+dp.id+'">Adicionar integrante</button></div>':"")+"</div>";
+  }).join("");
+  return hd("Diretoria & Equipes","Crie ou edite cargos da diretoria e integrantes de cada departamento.")+status+
+    '<div class="safe-grid-2" style="margin:1rem 0">'+cards+"</div>"+
+    '<div style="font-weight:800;margin-bottom:.55rem">Equipes dos departamentos</div><div style="display:flex;flex-direction:column;gap:.55rem">'+teams+"</div>";
+}
+
+/* tab records */
+function tabRecords(){
+  if(!state.submissions.length){
+    return hd("Registros Recebidos (0)","Pedidos de oração e decisões enviados pelo aplicativo.")+'<div class="card"><p class="help">Nenhum registro recebido ainda.</p><button class="btn-soft" style="margin-top:.6rem" data-act="go" data-page="prayer">Ir para oração</button></div>';
+  }
+  var rows=state.submissions.map(function(s){
+    return '<tr><td class="nm">'+esc(s.type)+'</td><td>'+esc(s.name)+'</td><td style="text-align:left;min-width:180px">'+esc(s.message)+'</td><td style="white-space:nowrap">'+esc(s.date)+'</td><td><button class="btn-danger btn-sm" data-act="subDelete" data-id="'+s.id+'">Excluir</button></td></tr>';
+  }).join("");
+  return hd("Registros Recebidos ("+state.submissions.length+")","Pedidos de oração e decisões enviados pelo aplicativo.")+'<div class="card" style="padding:0;overflow:hidden"><div class="table-wrap"><table class="adx"><thead><tr><th class="nm">Tipo</th><th>Nome</th><th>Mensagem</th><th>Data</th><th></th></tr></thead><tbody>'+rows+"</tbody></table></div></div>";
+}
+
+/* tab backup & PWA */
+function tabBackup(){
+  var installed=isStandalone();
+  return hd("Backup, Publicação no GitHub & PWA","Exporte o aplicativo já com suas personalizações ou salve backup dos dados.")+
+    '<div class="card" style="display:grid;gap:.7rem;margin-bottom:1rem;background:#eff6ff;border-color:#bfdbfe">'+
+      '<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.4rem">'+
+        '<div style="font-weight:800;color:#1e3a8a">Publicação &amp; App Instalável (PWA)</div>'+
+        pill(installed?"Instalado na tela inicial":"Modo navegador",installed?"b-emerald":"b-sky")+
+      '</div>'+
+      '<div class="help" style="margin:0;color:#1e40af"><b>Service Worker:</b> '+esc(pwa.swStatus)+'</div>'+
+      '<div style="display:flex;flex-direction:column;gap:.5rem">'+
+        '<button class="btn-main" data-act="exportCustomHtml">'+ico("download",15)+'<span>Baixar index.html personalizado (pronto p/ GitHub)</span></button>'+
+        '<button class="btn-soft" data-act="downloadSw">'+ico("download",15)+'<span>Baixar arquivo sw.js (offline no GitHub)</span></button>'+
+        (!installed?'<button class="btn-soft" data-act="installPwa">'+ico("smartphone",15)+'<span>Instalar na Tela Inicial do Celular</span></button>':"")+
+      '</div>'+
+      '<div class="help" style="margin:0">O botão <b>Baixar index.html personalizado</b> gera o arquivo completo já contendo suas cores, textos, departamentos, cargos, funções e membros cadastrados.</div>'+
+    '</div>'+
+    '<div class="card" style="display:grid;gap:.7rem"><div style="font-weight:800">Backup dos Dados (.json)</div><p class="help" style="margin:0">Salve ou restaure apenas os registros e configurações em JSON.</p><div style="display:flex;flex-direction:column;gap:.55rem"><button class="btn-main" data-act="backupDown">Baixar backup em arquivo (.json)</button><button class="btn-soft" data-act="backupImport">Importar backup (.json)</button><button class="btn-danger" data-act="restoreDefault">Restaurar padrão de fábrica</button></div></div>';
+}
+
+/* ---------- form helpers ---------- */
+function v(id){var e=document.getElementById(id);return e?e.value:"";}
+function ch(id){var e=document.getElementById(id);return !!(e&&e.checked);}
+function vis(id){var e=document.getElementById(id);return e?e.value:"todos";}
+function findDept(id){return state.departments.find(function(d){return d.id===id;});}
+function visChecked(prefix){var out=[];document.querySelectorAll('input[data-vis="'+prefix+'"]:checked').forEach(function(i){out.push(i.value);});return out;}
+function syncDepFormFromDom(){
+  if(!document.getElementById("dp_name")) return;
+  ui.depForm=Object.assign({},ui.depForm,{
+    name:v("dp_name"),
+    pixType:v("dp_type"),
+    pixKey:v("dp_key"),
+    btnLabel:v("dp_btn"),
+    icon:v("dp_icon"),
+    description:v("dp_desc"),
+    leader:v("dp_leader"),
+    visibility:vis("dp_vis"),
+    visibleTo:visChecked("dp"),
+    active:ch("dp_active")
+  });
+}
+function syncUserFormFromDom(){
+  if(!document.getElementById("us_name")) return;
+  ui.userForm=Object.assign({},ui.userForm,{
+    name:v("us_name"),
+    role:v("us_role"),
+    memberCode:v("us_code"),
+    accessPassword:v("us_pass"),
+    whatsapp:v("us_wa"),
+    email:v("us_email"),
+    department:v("us_dept")
+  });
+}
+
+/* ---------- people picker (dialog) ---------- */
+function allPeople(){
+  return state.users.map(function(u){
+    return {
+      name:u.name,code:u.memberCode||"",role:u.role,
+      functions:u.functions||[],phone:u.whatsapp||"",photo:u.photo||""
+    };
+  });
+}
+function openPicker(onPick){
+  var people=allPeople();
+  if(!people.length){
+    openDialog('<div style="padding:1.25rem;display:grid;gap:.65rem"><div style="font-weight:800;font-size:1rem">Nenhuma pessoa cadastrada ainda</div><p class="help" style="margin:0">Cadastre pessoas antes de escolher da lista.</p><button class="btn-main" data-act="goUsersTab">Ir para Pessoas</button></div>',function(d){
+      d.querySelector('[data-act="goUsersTab"]').addEventListener("click",function(){d.close();ui.adminTab="users";ui.page="admin-panel";render();});
+    });
+    return;
+  }
+  openDialog('<div style="padding:1.25rem;display:grid;gap:.6rem"><div style="font-weight:800;font-size:1rem;padding-right:2.2rem">Escolher da lista de pessoas</div><input id="pk_q" class="fld" placeholder="Buscar por nome, código, cargo ou função" autocomplete="off"><div id="pk_list" style="display:flex;flex-direction:column;gap:.45rem;max-height:52dvh;overflow:auto"></div><div id="pk_empty" style="display:none" class="help"></div></div>',function(d){
+    var q=d.querySelector("#pk_q"),list=d.querySelector("#pk_list"),empty=d.querySelector("#pk_empty");
+    function draw(){
+      var term=plain(q.value);
+      var res=people.filter(function(p){
+        return !term||plain(p.name+" "+p.code+" "+roleObj(p.role).label+" "+p.functions.join(" ")).indexOf(term)>=0;
+      });
+      if(!res.length){
+        list.innerHTML="";empty.style.display="block";
+        empty.innerHTML='Nenhum nome encontrado <button class="btn-soft btn-sm" id="pk_use" style="margin-left:.4rem">Usar o nome digitado</button>';
+        d.querySelector("#pk_use").addEventListener("click",function(){onPick({name:q.value.trim(),code:"",phone:"",photo:"",functions:[]});d.close();});
+        return;
+      }
+      empty.style.display="none";
+      list.innerHTML=res.map(function(p,i){
+        var fnTxt=p.functions.length?" • "+p.functions.join(", "):"";
+        return '<button data-i="'+i+'" style="display:flex;gap:.65rem;align-items:center;text-align:left;min-height:52px;padding:.55rem;border:1px solid #e7e5e4;border-radius:14px;background:#fff;cursor:pointer">'+avatar(p.photo,p.name,42)+'<span style="min-width:0"><span style="display:block;font-weight:700;font-size:.84rem">'+esc(p.name)+'</span><span class="help">'+(p.code?"Cód. "+esc(p.code)+" • ":"")+esc(roleObj(p.role).label+fnTxt)+"</span></span></button>";
+      }).join("");
+      list.querySelectorAll("button").forEach(function(btn){
+        btn.addEventListener("click",function(){onPick(res[+btn.getAttribute("data-i")]);d.close();});
+      });
+    }
+    q.addEventListener("input",draw);draw();
+  });
+}
+
+/* ---------- Pix dialog ---------- */
+function openPixDialog(dep){
+  var c=state.church,t=theme();
+  var logo=dep.photo
+    ?'<img src="'+esc(dep.photo)+'" alt="" style="width:76px;height:76px;border-radius:999px;border:3px solid #fff;object-fit:cover;margin:0 auto">'
+    :'<div style="width:76px;height:76px;border-radius:999px;border:3px solid #fff;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:1.9rem;margin:0 auto">'+(DEP_ICONS[dep.icon]||"🏛️")+"</div>";
+  var profile=roleObj(session.role).label+(session.userId&&findUser(session.userId)?" • "+findUser(session.userId).name:"");
+  var html='<div style="background:linear-gradient(135deg,#0f172a,'+t.hex+');padding:1.35rem 1rem 1.15rem;text-align:center;color:#fff;border-radius:24px 24px 0 0">'+logo+'<div style="font-size:.72rem;font-weight:700;margin-top:.55rem">Pix • '+esc(dep.pixType)+'</div></div>'+
+    '<div style="padding:1.05rem;display:grid;gap:.75rem">'+
+    '<div style="text-align:center"><span class="pill b-emerald">✓ CHAVE COPIADA</span></div>'+
+    '<div style="text-align:center;font-size:1.2rem;font-weight:900">'+esc(c.pixThankYouTitle)+'</div>'+
+    '<div style="text-align:center;font-weight:800;color:'+t.hex+'">'+esc(dep.name)+'</div>'+
+    (dep.description?'<p class="help" style="text-align:center;margin:0">'+esc(dep.description)+"</p>":"")+
+    '<div style="background:#f5f5f4;border-radius:14px;padding:.8rem;text-align:center"><div class="help" style="margin:0">Chave Pix</div><div style="font-family:monospace;font-size:1rem;font-weight:700;word-break:break-all;margin:.35rem 0">'+esc(dep.pixKey)+'</div><button class="btn-soft btn-sm" data-act="pixRecopy" data-id="'+dep.id+'">Copiar novamente</button></div>'+
+    '<div style="background:#ecfdf5;border-radius:14px;padding:.8rem"><div style="font-weight:800;font-size:.82rem;color:#065f46">Agora é só colar no seu banco</div><ol style="font-size:.78rem;padding-left:1.1rem;margin:.4rem 0 0;display:grid;gap:.3rem;list-style:decimal"><li>Abra o aplicativo do seu banco no celular.</li><li>Escolha Pix, depois Pix Copia e Cola ou Transferir com Chave.</li><li>Cole a chave copiada e confirme sua contribuição.</li></ol></div>'+
+    '<div style="background:#fffbeb;border-radius:14px;padding:.8rem;font-size:.78rem">'+esc(c.accountingReceiptMessage)+"</div>"+
+    '<p style="font-style:italic;font-size:.78rem;text-align:center;margin:0">'+esc(c.pixBibleVerse)+"</p>"+
+    (c.showSendReceiptButton!==false?'<button class="btn-main" style="width:100%;background:#16a34a" data-act="pixReceipt" data-id="'+dep.id+'">Enviar Comprovante via WhatsApp</button>':"")+
+    '<button class="btn-soft" style="width:100%" data-close>Fechar e Voltar ao Aplicativo</button></div>';
+  openDialog(html,function(d){
+    var rc=d.querySelector('[data-act="pixReceipt"]');
+    if(rc) rc.addEventListener("click",function(){
+      var msg="Olá! Segue o comprovante do Pix para o "+dep.name+". Enviado por: "+profile+".";
+      window.open("https://wa.me/55"+c.accountingWhatsapp+"?text="+encodeURIComponent(msg),"_blank","noopener,noreferrer");
+    });
+    var rec=d.querySelector('[data-act="pixRecopy"]');
+    if(rec) rec.addEventListener("click",function(){copyText(dep.pixKey,function(){toast("Chave copiada novamente","success");});});
+  });
+}
+
+/* ---------- Christ decision dialog ---------- */
+function openDecision(){
+  var c=state.church;
+  openDialog('<div style="padding:1.25rem;display:grid;gap:.7rem"><div style="font-size:1.1rem;font-weight:900;padding-right:2.2rem">'+esc(c.christInviteTitle)+'</div><p class="help" style="margin:0">Preencha seus dados e receberemos você com carinho.</p>'+
+    '<div><label class="lbl" for="dc_n">Nome</label><input class="fld" id="dc_n" autocomplete="name"></div>'+
+    '<div><label class="lbl" for="dc_w">WhatsApp</label><input class="fld" id="dc_w" type="tel" inputmode="tel" autocomplete="tel" placeholder="(41) 90000-0000"></div>'+
+    '<button class="btn-main" data-act="decisionSend" style="width:100%;background:linear-gradient(90deg,#be123c,#b45309)">Enviar meus dados</button></div>',function(d){
+    d.querySelector('[data-act="decisionSend"]').addEventListener("click",function(){
+      var n=d.querySelector("#dc_n").value.trim(),w=d.querySelector("#dc_w").value.trim();
+      if(!n){toast("Informe seu nome.","error");return;}
+      state.submissions.unshift({id:"s"+Date.now(),type:"Decisão por Cristo",name:n,message:"WhatsApp: "+w,date:new Date().toLocaleString("pt-BR")});
+      save();toast("Dados enviados. Que Deus abençoe você!","success");d.close();
+    });
+  });
+}
+
+/* ---------- login ---------- */
+function openLogin(){
+  openDialog('<div style="padding:1.25rem;display:grid;gap:.7rem"><div style="font-size:1.1rem;font-weight:900">Entrar</div><p class="help" style="margin:0">Digite seu código de acesso para liberar áreas restritas.</p>'+
+    '<div><label class="lbl" for="lg_code">Código de acesso</label><input class="fld" id="lg_code" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" type="password"></div>'+
+    (ui.loginError?'<div style="background:#fff1f2;color:#9f1239;padding:.6rem;border-radius:10px;font-size:.78rem">'+esc(ui.loginError)+"</div>":"")+
+    '<button class="btn-main" style="width:100%" data-act="loginSubmit">Entrar</button><button class="btn-soft" style="width:100%" data-act="loginVisitor">Continuar como visitante</button></div>',function(d){
+    d.querySelector('[data-act="loginSubmit"]').addEventListener("click",function(){doLogin(d.querySelector("#lg_code").value,d);});
+    d.querySelector("#lg_code").addEventListener("keydown",function(e){if(e.key==="Enter") doLogin(this.value,d);});
+    d.querySelector('[data-act="loginVisitor"]').addEventListener("click",function(){session={role:"visitante",userId:null,realRole:"visitante"};ui.loginError="";d.close();render();});
+  });
+}
+function doLogin(raw,d){
+  var code=normalizePass(raw);
+  var pin=normalizePass(state.church.masterAdminPin);
+  if(code&&(code===pin||code==="Vidal1506@"||code==="1506")){
+    session={role:"admin_geral",userId:"u1",realRole:"admin_geral"};
+    ui.page="admin-panel";ui.adminTab="church";ui.loginError="";
+    if(d) d.close();toast("Bem-vindo ao Painel Gestor","success");render();return;
+  }
+  var usr=state.users.find(function(u){
+    return (u.memberCode&&normalizePass(u.memberCode)===code)||(u.accessPassword&&normalizePass(u.accessPassword)===code);
+  });
+  if(usr&&code){
+    session={role:usr.role,userId:usr.id,realRole:usr.role};
+    ui.loginError="";
+    if(d) d.close();
+    toast("Bem-vindo, "+usr.name.split(" ")[0],"success");
+    render();
+    return;
+  }
+  ui.loginError="Código não encontrado. Confira e tente de novo.";
+  if(d){d.close();openLogin();}
+}
+
+/* ---------- import of members ---------- */
+function parseLine(line){
+  var t=line.trim();if(!t) return null;
+  if(/^(nome|membro|c[oó]digo|matr[ií]cula)\b/i.test(t)&&/(c[oó]digo|matr[ií]cula)/i.test(t)&&!/\d/.test(t)) return {skip:true};
+  var parts=t.split(/\s*[|;:\t,]\s*|\s+-\s+/).map(function(x){return x.trim();}).filter(Boolean);
+  var name="",code="";
+  if(parts.length===1){
+    if(/^\d+$/.test(parts[0])) code=parts[0]; else name=parts[0];
+  } else {
+    var numIdx=-1;parts.forEach(function(p,i){if(numIdx<0&&/^\d{2,}$/.test(p)) numIdx=i;});
+    if(numIdx>=0){code=parts[numIdx];name=parts.filter(function(_,i){return i!==numIdx;}).join(" ");}
+    else name=parts.join(" ");
+  }
+  return {name:name.trim(),code:code.trim()};
+}
+function classifyImport(text){
+  var lines=String(text||"").split(/\r?\n/);
+  var out=[],seenCodes={},seenNames={};
+  lines.forEach(function(l){
+    var p=parseLine(l);if(!p||p.skip) return;
+    var item={name:p.name,code:p.code,status:""};
+    if(!item.name){item.status="Sem nome";}
+    else if(item.code){
+      var byCode=state.users.find(function(u){return u.memberCode&&u.memberCode===item.code;});
+      if(seenCodes[item.code]) item.status="Duplicado na lista";
+      else if(byCode) item.status="Já cadastrado com este código";
+      else item.status="Novo";
+      seenCodes[item.code]=true;
+    } else {
+      var byName=state.users.find(function(u){return plain(u.name)===plain(item.name);});
+      if(seenNames[plain(item.name)]) item.status="Duplicado na lista";
+      else if(byName) item.status="Nome já existe sem código";
+      else item.status="Sem código";
+      seenNames[plain(item.name)]=true;
+    }
+    out.push(item);
+  });
+  return out;
+}
+var STATUS_CLS={
+  "Novo":"b-emerald",
+  "Já cadastrado com este código":"b-sky",
+  "Nome já existe sem código":"b-amber",
+  "Sem código":"b-stone",
+  "Duplicado na lista":"b-rose",
+  "Sem nome":"b-rose"
+};
+function openImportPreview(items){
+  var news=items.filter(function(i){return i.status==="Novo";}).length;
+  var already=items.filter(function(i){return i.status.indexOf("Já")===0;}).length;
+  var noCode=items.filter(function(i){return i.status==="Sem código";}).length;
+  var rows=items.map(function(i){
+    return '<div style="display:flex;justify-content:space-between;gap:.5rem;align-items:center;padding:.5rem;border:1px solid #e7e5e4;border-radius:12px"><div style="min-width:0"><div style="font-weight:700;font-size:.82rem">'+esc(i.name||"(sem nome)")+'</div><div class="help">Código: '+esc(i.code||"—")+'</div></div>'+pill(i.status,STATUS_CLS[i.status]||"b-stone")+"</div>";
+  }).join("");
+  openDialog('<div style="padding:1.25rem;display:grid;gap:.65rem"><div style="font-weight:900;font-size:.98rem;padding-right:2.2rem">'+items.length+' nomes: '+news+' novos, '+already+' já cadastrados, '+noCode+' sem código</div>'+
+    '<div style="max-height:42dvh;overflow:auto;display:flex;flex-direction:column;gap:.4rem">'+rows+"</div>"+
+    '<label style="font-size:.8rem;display:flex;align-items:center;gap:.45rem"><input type="checkbox" id="ip_nocode"> Importar também quem está sem código</label>'+
+    '<label style="font-size:.8rem;display:flex;align-items:center;gap:.45rem"><input type="checkbox" id="ip_update"> Atualizar o nome de quem já existe</label>'+
+    '<div style="display:flex;flex-wrap:wrap;gap:.45rem;justify-content:flex-end"><button class="btn-soft" data-act="ipBack">Corrigir</button><button class="btn-main" style="flex:1" data-act="ipAdd">Adicionar membros</button></div></div>',function(d){
+    d.querySelector('[data-act="ipBack"]').addEventListener("click",function(){d.close();});
+    d.querySelector('[data-act="ipAdd"]').addEventListener("click",function(){
+      var incNoCode=d.querySelector("#ip_nocode").checked,upd=d.querySelector("#ip_update").checked;
+      var dept=v("imp_dept").trim(),role=v("imp_role")||"membro";
+      var added=0,updated=0,skipped=0;
+      items.forEach(function(i){
+        if(i.status==="Novo"){state.users.push({id:"u"+Date.now()+Math.random().toString(36).slice(2,6),name:i.name,role:role,functions:[],email:"",whatsapp:"",memberCode:i.code,accessPassword:"",department:dept});added++;}
+        else if(i.status==="Sem código"&&incNoCode){state.users.push({id:"u"+Date.now()+Math.random().toString(36).slice(2,6),name:i.name,role:role,functions:[],email:"",whatsapp:"",memberCode:"",accessPassword:"",department:dept});added++;}
+        else if(i.status==="Já cadastrado com este código"&&upd){var u=state.users.find(function(x){return x.memberCode===i.code;});if(u){u.name=i.name;updated++;}}
+        else if(i.status==="Nome já existe sem código"&&upd){var u2=state.users.find(function(x){return plain(x.name)===plain(i.name);});if(u2){u2.memberCode=i.code||u2.memberCode;updated++;}}
+        else skipped++;
+      });
+      save();d.close();ui.pendingImport=null;
+      toast("Importação: "+added+" adicionados, "+updated+" atualizados, "+skipped+" ignorados.","success");
+      render();
+    });
+  });
+}
+
+/* ---------- confirm dialog ---------- */
+function openConfirm(msg,onYes){
+  openDialog('<div style="padding:1.25rem;display:grid;gap:.75rem"><div style="font-weight:800;font-size:1rem">Confirmar</div><p class="help" style="margin:0;font-size:.82rem">'+esc(msg)+'</p><div style="display:flex;justify-content:flex-end;gap:.5rem"><button class="btn-soft" data-close>Cancelar</button><button class="btn-danger" data-act="cfYes">Sim, continuar</button></div></div>',function(d){
+    d.querySelector('[data-act="cfYes"]').addEventListener("click",function(){d.close();onYes();});
+  });
+}
+
+/* ---------- apply dynamic visual theme ---------- */
+function applyChromeStyles(){
+  var c=state.church,t=theme();
+  document.documentElement.style.setProperty("--accent",t.hex);
+  document.body.style.background=c.customBgHex||"#f5f5f4";
+
+  var banner=document.getElementById("buildBanner");
+  var bTxt=document.getElementById("buildBannerText");
+  if(banner){
+    banner.hidden=(c.showTopBanner===false);
+    banner.style.background=c.topBannerBg||"#f59e0b";
+    banner.style.color=c.topBannerColor||"#1c1917";
+  }
+  if(bTxt) bTxt.textContent=c.topBannerText||"ADALEX DIGITAL • CONECTANDO A IGREJA";
+
+  var fHome=document.getElementById("footNavHome");
+  var fPray=document.getElementById("footNavPrayer");
+  var fNote=document.getElementById("footNote");
+  if(fHome) fHome.textContent="Início & Pix";
+  if(fPray) fPray.textContent="Administração & Oração";
+  if(fNote) fNote.textContent=c.footerNote||"v2.0 • Dados salvos localmente neste navegador";
+}
+
+/* ---------- render & action dispatcher ---------- */
+function render(){
+  var app=document.getElementById("appRoot");
+  try{
+    applyChromeStyles();
+    renderNav();
+    var html="";
+    if(ui.page==="admin-panel") html=adminHtml();
+    else if(ui.page==="prayer") html=headerHtml()+prayerHtml();
+    else html=headerHtml()+homeHtml();
+    app.innerHTML=html;
+    document.getElementById("footName").textContent=state.church.name;
+    document.getElementById("footInfo").textContent=state.church.address+(can("verCnpj")&&state.church.cnpj?" • CNPJ "+state.church.cnpj:"");
+  }catch(e){
+    app.innerHTML='<div style="max-width:56rem;margin:1rem auto;padding:1rem;background:#fff1f2;color:#9f1239;border-radius:16px;font-size:.85rem"><b>Ocorreu um erro ao mostrar esta tela.</b><br>'+esc(e.message)+'<br><button class="btn-soft" style="margin-top:.5rem" onclick="location.reload()">Recarregar</button></div>';
+  }
+}
+
+A.go=function(el){
+  ui.page=el.getAttribute("data-page");
+  if(el.getAttribute("data-tab")) ui.adminTab=el.getAttribute("data-tab");
+  if(ui.page==="admin-panel"&&!canAccessAdminPanel()){ui.page="home";openLogin();}
+  render();window.scrollTo(0,0);
+};
+A.installPwa=function(){
+  if(pwa.deferredPrompt){
+    pwa.deferredPrompt.prompt();
+    pwa.deferredPrompt.userChoice.then(function(choice){
+      if(choice&&choice.outcome==="accepted") toast("Aplicativo instalado!","success");
+      pwa.deferredPrompt=null;
+      renderNav();
+    });
+    return;
+  }
+  if(isIos()){
+    openIosInstallHelp();
+    return;
+  }
+  openDialog(
+    '<div style="padding:1.25rem;display:grid;gap:.75rem">'+
+      '<div style="font-weight:900;font-size:1.05rem;padding-right:2.2rem">Adicionar à Tela Inicial</div>'+
+      '<p class="help" style="margin:0;font-size:.82rem">Abra o menu do seu navegador (<b>⋮</b> no Chrome/Edge) e toque em <b>Instalar aplicativo</b> ou <b>Adicionar à tela inicial</b>.</p>'+
+      '<button class="btn-main" style="width:100%" data-close>Fechar</button>'+
+    '</div>'
+  );
+};
+A.downloadSw=function(){
+  var swNode=document.getElementById("adalex-sw-code");
+  var code=swNode?swNode.textContent.trim():"";
+  var blob=new Blob([code],{type:"application/javascript"});
+  var a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);
+  a.download="sw.js";
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(function(){URL.revokeObjectURL(a.href);a.remove();},500);
+  toast("Arquivo sw.js baixado!","success");
+};
+A.exportCustomHtml=function(){
+  closeAllDialogs();
+  var clone=document.documentElement.cloneNode(true);
+  var appEl=clone.querySelector("#appRoot");
+  if(appEl) appEl.innerHTML="";
+  var simEl=clone.querySelector("#simBar");
+  if(simEl) simEl.innerHTML="";
+  var toastEl=clone.querySelector("#toastContainer");
+  if(toastEl){toastEl.innerHTML="";toastEl.classList.remove("show");}
+  var safeJson=JSON.stringify(state).replace(/<\/script/gi,"<\\/script");
+  var htmlStr="<!DOCTYPE html>\n"+clone.outerHTML;
+  htmlStr=htmlStr.replace(/\/\*__CUSTOM_STATE_START__\*\/[\s\S]*?\/\*__CUSTOM_STATE_END__\*\//,"/*__CUSTOM_STATE_START__*/var EMBEDDED_STATE="+safeJson+";/*__CUSTOM_STATE_END__*/");
+  var blob=new Blob([htmlStr],{type:"text/html;charset=utf-8"});
+  var a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);
+  a.download="index.html";
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(function(){URL.revokeObjectURL(a.href);a.remove();},500);
+  toast("index.html personalizado baixado!","success");
+};
+
+A.profile=function(){openLogin();};
+A.changeAccess=function(){openLogin();};
+A.simRole=function(el){
+  var r=el.getAttribute("data-role");
+  session.role=r;
+  session.userId=(r==="admin_geral")?"u1":(state.users.find(function(u){return u.role===r;})||{}).id||null;
+  render();
+};
+A.christDecision=function(){openDecision();};
+A.copyCnpj=function(){copyText(state.church.cnpj,function(ok){toast(ok?"CNPJ copiado":"Não foi possível copiar",ok?"success":"error");});};
+A.copyCode=function(){copyText(state.church.masterAdminEmail,function(ok){toast(ok?"E-mail copiado":"Não foi possível copiar",ok?"success":"error");});};
+A.showFullDirectorate=function(){
+  var rows=state.directorate.filter(function(d){return d.name&&d.visible;}).map(function(d){
+    return '<div style="display:flex;gap:.65rem;align-items:center">'+avatar(d.photo,d.name,56)+'<div><div style="font-weight:700">'+esc(d.name)+'</div><div class="help">'+esc(d.role)+"</div></div></div>";
+  }).join("");
+  openDialog('<div style="padding:1.25rem;display:grid;gap:.7rem"><div style="font-weight:900;font-size:1.05rem">'+esc(state.church.directorateTitle||"Toda a diretoria")+'</div>'+rows+'<button class="btn-soft" style="width:100%" data-close>Fechar</button></div>');
+};
+A.pixCopy=function(el){
+  var dep=findDept(el.getAttribute("data-id"));if(!dep) return;
+  copyText(dep.pixKey,function(ok){
+    if(!ok){toast("Não foi possível copiar. Copie a chave manualmente.","error");return;}
+    el.innerHTML="✓ COPIADA!";el.style.background="#059669";
+    setTimeout(function(){render();},1500);
+    openPixDialog(dep);
+  });
+};
+A.depPhoto=function(el){
+  var dep=findDept(el.getAttribute("data-id"));if(!dep) return;
+  pickFile(function(data){dep.photo=data;save();render();toast("Logo do departamento atualizada","success");});
+};
+A.depTeam=function(el){
+  var dep=findDept(el.getAttribute("data-id"));if(!dep) return;
+  var list=(dep.team||[]).map(function(m){
+    return '<div style="display:flex;gap:.65rem;align-items:center">'+avatar(m.photo,m.name,48)+'<div><div style="font-weight:700">'+esc(m.name)+'</div><div class="help">'+esc(m.role||"Integrante")+"</div></div></div>";
+  }).join("")||'<p class="help">Nenhum integrante cadastrado.</p>';
+  openDialog('<div style="padding:1.25rem;display:grid;gap:.7rem"><div style="font-weight:900;font-size:1.05rem;padding-right:2.2rem">Equipe: '+esc(dep.name)+'</div>'+list+'<button class="btn-soft" style="width:100%" data-close>Fechar</button></div>');
+};
+A.loginSubmit=function(){};
+A.loginVisitor=function(){session={role:"visitante",userId:null,realRole:"visitante"};render();};
+A.prayerSend=function(el){
+  var kind=el.getAttribute("data-kind");
+  var c=state.church;
+  if(kind==="whatsapp"){
+    window.open("https://wa.me/55"+c.prayerWhatsapp+"?text="+encodeURIComponent(c.prayerDefaultGreeting),"_blank","noopener,noreferrer");
+    return;
+  }
+  openDialog('<div style="padding:1.25rem;display:grid;gap:.7rem"><div style="font-weight:900;font-size:1.05rem">Pedido de oração</div><p class="help" style="margin:0">'+esc(c.prayerDescription)+'</p><div><label class="lbl" for="pr_n">Seu nome</label><input class="fld" id="pr_n" autocomplete="name"></div><div><label class="lbl" for="pr_m">Seu pedido</label><textarea class="fld" id="pr_m" rows="4"></textarea></div><button class="btn-main" style="width:100%" data-act="prSend">Enviar pedido</button></div>',function(d){
+    d.querySelector('[data-act="prSend"]').addEventListener("click",function(){
+      var n=d.querySelector("#pr_n").value.trim(),m=d.querySelector("#pr_m").value.trim();
+      if(!m){toast("Escreva seu pedido.","error");return;}
+      state.submissions.unshift({id:"s"+Date.now(),type:"Pedido de oração",name:n||"Anônimo",message:m,date:new Date().toLocaleString("pt-BR")});
+      save();d.close();toast("Pedido enviado. Estaremos orando por você!","success");
+    });
+  });
+};
+
+/* Tab 1 actions */
+A.setTheme=function(el){
+  state.church.theme=el.getAttribute("data-theme");
+  save();setupPwa();render();toast("Tema atualizado","success");
+};
+A.saveChurch=function(){
+  var c=state.church;
+  c.customPrimaryHex=v("ch_c1")||"#1e40af";
+  c.customSecondaryHex=v("ch_c2")||"#312e81";
+  c.customBgHex=v("ch_cbg")||"#f5f5f4";
+  c.showTopBanner=ch("ch_showBanner");
+  c.topBannerText=v("ch_bannerTxt");
+  c.topBannerBg=v("ch_bannerBg")||"#f59e0b";
+  c.topBannerColor=v("ch_bannerClr")||"#1c1917";
+
+  c.name=v("ch_name");c.subtitle=v("ch_subtitle");c.cnpj=v("ch_cnpj");c.address=v("ch_address");c.aboutText=v("ch_about");c.sundayWorshipTime=v("ch_sunday");
+  c.logoUrl=v("ch_logo");c.christDecisionEmail=v("ch_decision");c.prayerVisitorEmail=v("ch_prayerEmail");
+  c.secretaryWhatsapp=v("ch_wsec");c.accountingWhatsapp=v("ch_wacc");c.prayerWhatsapp=v("ch_wpray");
+
+  c.welcomeGreeting=v("ch_wGreet");c.welcomeSubtext=v("ch_wSub");c.welcomeBtnText=v("ch_wBtn");
+  c.christEyebrow=v("ch_christEye");c.christButtonTitle=v("ch_christBtn");c.christButtonSubtitle=v("ch_christSub");c.christActionLabel=v("ch_christAct");c.christInviteTitle=v("ch_invite");
+  c.prayerTitle=v("ch_prayTitle");c.prayerDescription=v("ch_prayDesc");c.prayerBtnLabel=v("ch_prayBtn");c.prayerDefaultGreeting=v("ch_prayGreet");
+  c.infoSectionTitle=v("ch_infoT");c.infoSectionSubtitle=v("ch_infoS");
+  c.directorateTitle=v("ch_dirT");c.directorateSubtitle=v("ch_dirS");
+  c.deptsTitle=v("ch_depT");c.deptsSubtitle=v("ch_depS");c.pixCopyBtnLabel=v("ch_pixBtn");
+  c.servicesTitle=v("ch_svcT");c.servicesSubtitle=v("ch_svcS");
+  c.noticesTitle=v("ch_notT");c.noticesSubtitle=v("ch_notS");
+  c.linksTitle=v("ch_lnkT");c.linksSubtitle=v("ch_lnkS");
+  c.footerNote=v("ch_footNote");
+
+  c.pixThankYouTitle=v("ch_pixTitle");c.pixThankYouMessage=v("ch_pixMsg");c.pixBibleVerse=v("ch_verse");c.accountingReceiptMessage=v("ch_receipt");
+  c.showWelcomeCard=ch("ch_showWelcome");
+  c.showSendReceiptButton=ch("ch_showReceipt");
+  c.requireLoginGate=ch("ch_loginGate");
+
+  save();setupPwa();render();toast("Todas as personalizações foram salvas!","success");
+};
+A.logoUpload=function(){pickFile(function(data){state.church.logoUrl=data;save();render();toast("Logo atualizada","success");});};
+
+/* Tab 2 actions */
+A.depPhotoForm=function(){
+  syncDepFormFromDom();
+  pickFile(function(data){
+    ui.depForm.photo=data;
+    ui.adminTab="depts";
+    render();
+    toast("Foto carregada. Clique em Salvar departamento.","success");
+  });
+};
+A.depPhotoLink=function(){
+  syncDepFormFromDom();
+  var u=window.prompt("Link da imagem (aceita Google Drive):","");
+  if(u){
+    ui.depForm.photo=driveLink(u.trim());
+    render();
+    toast("Link registrado. Clique em Salvar departamento.","success");
+  }
+};
+A.depPhotoRemove=function(){
+  syncDepFormFromDom();
+  ui.depForm.photo="";
+  render();
+  toast("Foto removida. Clique em Salvar departamento.");
+};
+A.pickLeader=function(){
+  openPicker(function(p){
+    var el=document.getElementById("dp_leader");
+    if(el) el.value=p.name;
+    ui.depForm.leader=p.name;
+  });
+};
+A.saveDept=function(){
+  var name=v("dp_name").trim();
+  if(!name){toast("O nome do departamento é obrigatório.","error");return;}
+  var key=plain(name);
+  var editing=ui.depEditId?findDept(ui.depEditId):null;
+  var dup=state.departments.find(function(d){return plain(d.name)===key&&(!editing||d.id!==editing.id);});
+  if(dup){toast("Já existe um departamento com este nome.","error");return;}
+  var photoVal=ui.depForm.photo!==undefined?ui.depForm.photo:(editing?editing.photo:"");
+  var data={
+    name:name,pixType:v("dp_type"),pixKey:v("dp_key").trim(),btnLabel:v("dp_btn").trim(),icon:v("dp_icon"),
+    description:v("dp_desc"),visibility:vis("dp_vis"),visibleTo:visChecked("dp"),
+    active:ch("dp_active"),leader:v("dp_leader").trim(),photo:photoVal
+  };
+  if(editing){Object.assign(editing,data);}
+  else{state.departments.push(Object.assign({id:"dep"+Date.now(),team:[]},data));}
+  ui.depForm={};ui.depEditId=null;save();render();toast("Departamento salvo","success");
+};
+A.depCancel=function(){ui.depEditId=null;ui.depForm={};render();};
+A.depEdit=function(el){ui.depEditId=el.getAttribute("data-id");ui.depForm={};ui.adminTab="depts";render();window.scrollTo(0,0);};
+A.depMove=function(el){var i=state.departments.findIndex(function(d){return d.id===el.getAttribute("data-id");});var j=i+(+el.getAttribute("data-dir"));if(j<0||j>=state.departments.length) return;var t=state.departments[i];state.departments[i]=state.departments[j];state.departments[j]=t;save();render();};
+A.depToggle=function(el){var d=findDept(el.getAttribute("data-id"));if(d){d.active=!d.active;save();render();toast(d.active?"Departamento ativo":"Departamento oculto");}};
+A.depTeamAdmin=function(el){ui.teamOpen[el.getAttribute("data-id")]=true;ui.adminTab="directorate";render();};
+A.depDelete=function(el){var id=el.getAttribute("data-id");openConfirm("Excluir este departamento e sua equipe?",function(){state.departments=state.departments.filter(function(d){return d.id!==id;});save();render();toast("Departamento excluído");});};
+
+/* Tab 3 actions: Users, Custom Cargos & Custom Funções */
+A.toggleCreateRoleBox=function(){
+  syncUserFormFromDom();
+  ui.showNewRoleBox=!ui.showNewRoleBox;
+  render();
+};
+A.createInlineRole=function(){
+  syncUserFormFromDom();
+  var lbl=v("nr_label").trim();
+  if(!lbl){toast("Digite o nome do novo cargo.","error");return;}
+  var exists=allRoles().find(function(r){return plain(r.label)===plain(lbl);});
+  if(exists){
+    ui.userForm.role=exists.id;
+    ui.showNewRoleBox=false;
+    render();
+    toast("Cargo já existia e foi selecionado.","success");
+    return;
+  }
+  var lvl=parseInt(v("nr_level"),10);
+  if(isNaN(lvl)) lvl=1;
+  var cls=v("nr_cls")||"b-indigo";
+  var newId="cargo_"+Date.now();
+  state.roles.push({id:newId,label:lbl,cls:cls,level:lvl,system:false});
+  var baseRole=DEFAULT_ROLES[Math.min(Math.max(lvl,0),4)].id;
+  Object.keys(state.permissions).forEach(function(k){
+    state.permissions[k][newId]=!!state.permissions[k][baseRole];
+  });
+  ui.userForm.role=newId;
+  ui.showNewRoleBox=false;
+  save();render();
+  toast('Cargo "'+lbl+'" criado e selecionado!',"success");
+};
+A.renameRole=function(el){
+  var id=el.getAttribute("data-id");
+  var r=roleObj(id);
+  var n=window.prompt("Novo nome para o cargo:",r.label);
+  if(n&&n.trim()){
+    r.label=n.trim();
+    save();render();toast("Cargo renomeado","success");
+  }
+};
+A.deleteCustomRole=function(el){
+  var id=el.getAttribute("data-id");
+  var r=roleObj(id);
+  if(r.system) return;
+  openConfirm('Excluir o cargo "'+r.label+'"? Pessoas com este cargo passarão a ser Membro.',function(){
+    state.roles=state.roles.filter(function(x){return x.id!==id;});
+    state.users.forEach(function(u){if(u.role===id) u.role="membro";});
+    Object.keys(state.permissions).forEach(function(k){delete state.permissions[k][id];});
+    if(ui.userFilter===id) ui.userFilter="todos";
+    save();render();toast("Cargo excluído");
+  });
+};
+A.toggleUserFunc=function(el){
+  syncUserFormFromDom();
+  var fn=el.getAttribute("data-fn");
+  var editing=ui.userEditId?findUser(ui.userEditId):null;
+  var cur=Array.isArray(ui.userForm.functions)?ui.userForm.functions.slice():(editing&&Array.isArray(editing.functions)?editing.functions.slice():[]);
+  var idx=cur.indexOf(fn);
+  if(idx>=0) cur.splice(idx,1);
+  else cur.push(fn);
+  ui.userForm.functions=cur;
+  render();
+};
+A.createInlineFunc=function(){
+  syncUserFormFromDom();
+  var fn=v("nf_name").trim();
+  if(!fn){toast("Digite o nome da função.","error");return;}
+  var existing=(state.functions||[]).find(function(x){return plain(x)===plain(fn);});
+  var finalName=existing||fn;
+  if(!existing) state.functions.push(finalName);
+  var editing=ui.userEditId?findUser(ui.userEditId):null;
+  var cur=Array.isArray(ui.userForm.functions)?ui.userForm.functions.slice():(editing&&Array.isArray(editing.functions)?editing.functions.slice():[]);
+  if(cur.indexOf(finalName)<0) cur.push(finalName);
+  ui.userForm.functions=cur;
+  save();render();
+  toast('Função "'+finalName+'" adicionada!',"success");
+};
+A.deleteCustomFunc=function(el){
+  var fn=el.getAttribute("data-fn");
+  openConfirm('Remover a função "'+fn+'" da lista?',function(){
+    state.functions=(state.functions||[]).filter(function(x){return x!==fn;});
+    state.users.forEach(function(u){
+      if(Array.isArray(u.functions)) u.functions=u.functions.filter(function(x){return x!==fn;});
+    });
+    if(Array.isArray(ui.userForm.functions)) ui.userForm.functions=ui.userForm.functions.filter(function(x){return x!==fn;});
+    if(ui.funcFilter===fn) ui.funcFilter="todas";
+    save();render();toast("Função removida");
+  });
+};
+A.userPhotoForm=function(){
+  syncUserFormFromDom();
+  pickFile(function(data){
+    ui.userForm.photo=data;
+    render();
+    toast("Foto carregada. Clique em Salvar pessoa.","success");
+  });
+};
+A.userPhotoRemove=function(){
+  syncUserFormFromDom();
+  ui.userForm.photo="";
+  render();
+};
+A.userFilter=function(el){ui.userFilter=el.getAttribute("data-f");render();};
+A.userFilterAll=function(){ui.userFilter="todos";ui.funcFilter="todas";ui.userSearch="";render();};
+A.userEdit=function(el){
+  var u=findUser(el.getAttribute("data-id"));
+  ui.userEditId=el.getAttribute("data-id");
+  ui.userForm={functions:u&&Array.isArray(u.functions)?u.functions.slice():[]};
+  ui.showNewRoleBox=false;
+  render();window.scrollTo(0,0);
+};
+A.userCancel=function(){ui.userEditId=null;ui.userForm={functions:[]};ui.showNewRoleBox=false;render();};
+A.saveUser=function(){
+  var name=v("us_name").trim();
+  if(!name){toast("Informe o nome completo.","error");return;}
+  var code=v("us_code").trim();
+  if(code){var clash=state.users.find(function(u){return u.memberCode===code&&u.id!==ui.userEditId;});if(clash){toast("Este código já pertence a outra pessoa.","error");return;}}
+  var editing=ui.userEditId?findUser(ui.userEditId):null;
+  var funcs=Array.isArray(ui.userForm.functions)?ui.userForm.functions:(editing&&Array.isArray(editing.functions)?editing.functions:[]);
+  var photoVal=ui.userForm.photo!==undefined?ui.userForm.photo:(editing?editing.photo:"");
+  var data={
+    name:name,role:v("us_role"),functions:funcs,memberCode:code,accessPassword:v("us_pass"),
+    whatsapp:v("us_wa"),email:v("us_email"),department:v("us_dept"),photo:photoVal
+  };
+  if(editing){Object.assign(editing,data);}
+  else state.users.push(Object.assign({id:"u"+Date.now()},data));
+  ui.userEditId=null;ui.userForm={functions:[]};ui.showNewRoleBox=false;
+  save();render();toast("Pessoa salva com sucesso!","success");
+};
+A.userRole=function(el){var u=findUser(el.getAttribute("data-id"));if(u){u.role=el.value;save();render();toast("Cargo atualizado","success");}};
+A.userDelete=function(el){var id=el.getAttribute("data-id");if(id==="u1"){toast("O administrador principal não pode ser excluído.","error");return;}openConfirm("Excluir esta pessoa?",function(){state.users=state.users.filter(function(u){return u.id!==id;});save();render();toast("Pessoa excluída");});};
+A.importCheck=function(){
+  var text=v("imp_text");
+  var items=classifyImport(text);
+  if(!items.length){toast("Cole ao menos um nome antes de conferir.","error");return;}
+  openImportPreview(items);
+};
+
+/* Tab 4 */
+A.savePerms=function(){
+  document.querySelectorAll("input[data-perm]").forEach(function(inp){
+    var k=inp.getAttribute("data-perm"),r=inp.getAttribute("data-role");
+    state.permissions[k]=state.permissions[k]||{};
+    state.permissions[k][r]=inp.checked;
+  });
+  var cur=v("pw_cur"),nw=v("pw_new"),cf=v("pw_conf");
+  if(nw||cf||cur){
+    if(normalizePass(cur)!==normalizePass(state.church.masterAdminPin)){toast("Senha atual incorreta.","error");return;}
+    if(!nw){toast("Digite a nova senha.","error");return;}
+    if(nw!==cf){toast("A confirmação não confere.","error");return;}
+    state.church.masterAdminPin=normalizePass(nw);
+  }
+  save();render();toast("Permissões salvas","success");
+};
+
+/* Tab 5 */
+A.btnMove=function(el){var i=state.adminButtons.findIndex(function(b){return b.id===el.getAttribute("data-id");});var j=i+(+el.getAttribute("data-dir"));if(j<0||j>=state.adminButtons.length) return;var t=state.adminButtons[i];state.adminButtons[i]=state.adminButtons[j];state.adminButtons[j]=t;save();render();};
+A.btnSave=function(el){
+  var id=el.getAttribute("data-id");var b=state.adminButtons.find(function(x){return x.id===id;});if(!b) return;
+  b.title=v("bt_t_"+id);b.link=v("bt_l_"+id);b.visibility=vis("bt_v_"+id);b.badge=v("bt_b_"+id);b.active=ch("bt_a_"+id);b.isGabinetePastoral=ch("bt_g_"+id);
+  save();render();toast("Botão salvo","success");
+};
+A.btnDelete=function(el){var id=el.getAttribute("data-id");openConfirm("Excluir este botão?",function(){state.adminButtons=state.adminButtons.filter(function(b){return b.id!==id;});save();render();toast("Botão excluído");});};
+A.btnAdd=function(){
+  var t=v("bt_new_t").trim();if(!t){toast("Informe o título.","error");return;}
+  state.adminButtons.push({id:"b"+Date.now(),title:t,type:"link",link:v("bt_new_l"),visibility:vis("bt_new_v"),icon:"link",badge:"Secretaria",isGabinetePastoral:false,active:true});
+  save();render();toast("Botão adicionado","success");
+};
+
+/* Tab 6 */
+A.svcMove=function(el){var i=state.services.findIndex(function(s){return s.id===el.getAttribute("data-id");});var j=i+(+el.getAttribute("data-dir"));if(j<0||j>=state.services.length) return;var t=state.services[i];state.services[i]=state.services[j];state.services[j]=t;save();render();};
+A.svcSave=function(el){var id=el.getAttribute("data-id");var s=state.services.find(function(x){return x.id===id;});if(!s) return;s.day=v("sv_d_"+id);s.time=v("sv_h_"+id);s.title=v("sv_t_"+id);s.description=v("sv_x_"+id);s.visibility=vis("sv_v_"+id);s.active=ch("sv_a_"+id);save();render();toast("Culto salvo","success");};
+A.svcDelete=function(el){var id=el.getAttribute("data-id");openConfirm("Excluir este culto?",function(){state.services=state.services.filter(function(s){return s.id!==id;});save();render();toast("Culto excluído");});};
+A.svcAdd=function(){
+  var t=v("sv_new_t").trim();if(!t){toast("Informe o título do culto.","error");return;}
+  state.services.push({id:"s"+Date.now(),day:v("sv_new_d"),time:v("sv_new_h"),title:t,description:v("sv_new_x"),visibility:vis("sv_new_v"),active:true});
+  save();render();toast("Culto adicionado","success");
+};
+
+/* Tab 7 */
+A.ntMove=function(el){var i=state.notices.findIndex(function(n){return n.id===el.getAttribute("data-id");});var j=i+(+el.getAttribute("data-dir"));if(j<0||j>=state.notices.length) return;var t=state.notices[i];state.notices[i]=state.notices[j];state.notices[j]=t;save();render();};
+A.ntSave=function(el){var id=el.getAttribute("data-id");var n=state.notices.find(function(x){return x.id===id;});if(!n) return;n.title=v("nt_t_"+id);n.date=v("nt_d_"+id);n.content=v("nt_c_"+id);n.visibility=vis("nt_v_"+id);n.highlight=ch("nt_h_"+id);save();render();toast("Aviso salvo","success");};
+A.ntDelete=function(el){var id=el.getAttribute("data-id");openConfirm("Excluir este aviso?",function(){state.notices=state.notices.filter(function(n){return n.id!==id;});save();render();toast("Aviso excluído");});};
+A.ntAdd=function(){var t=v("nt_new_t").trim();if(!t){toast("Informe o título do aviso.","error");return;}state.notices.push({id:"n"+Date.now(),title:t,date:v("nt_new_d"),content:v("nt_new_c"),highlight:false,visibility:vis("nt_new_v")});save();render();toast("Aviso publicado","success");};
+A.lkMove=function(el){var i=state.quickLinks.findIndex(function(l){return l.id===el.getAttribute("data-id");});var j=i+(+el.getAttribute("data-dir"));if(j<0||j>=state.quickLinks.length) return;var t=state.quickLinks[i];state.quickLinks[i]=state.quickLinks[j];state.quickLinks[j]=t;save();render();};
+A.lkSave=function(el){var id=el.getAttribute("data-id");var l=state.quickLinks.find(function(x){return x.id===id;});if(!l) return;l.title=v("lk_t_"+id);l.url=v("lk_u_"+id);l.visibility=vis("lk_v_"+id);save();render();toast("Link salvo","success");};
+A.lkDelete=function(el){var id=el.getAttribute("data-id");openConfirm("Excluir este link?",function(){state.quickLinks=state.quickLinks.filter(function(l){return l.id!==id;});save();render();toast("Link excluído");});};
+A.lkAdd=function(){var t=v("lk_new_t").trim();if(!t){toast("Informe o título do link.","error");return;}state.quickLinks.push({id:"q"+Date.now(),title:t,url:v("lk_new_u"),icon:"link",visibility:vis("lk_new_v")});save();render();toast("Link adicionado","success");};
+
+/* Tab 8 */
+A.dirAdd=function(){
+  var roleName=window.prompt("Nome do novo cargo na diretoria (ex.: 2º Tesoureiro, Conselheiro Fiscal):","");
+  if(roleName&&roleName.trim()){
+    state.directorate.push({id:"dir_"+Date.now(),role:roleName.trim(),name:"",phone:"",photo:"",memberCodeRef:"",visible:true});
+    save();render();toast("Cargo adicionado à diretoria","success");
+  }
+};
+A.dirMove=function(el){
+  var i=state.directorate.findIndex(function(d){return d.id===el.getAttribute("data-id");});
+  var j=i+(+el.getAttribute("data-dir"));
+  if(j<0||j>=state.directorate.length) return;
+  var t=state.directorate[i];state.directorate[i]=state.directorate[j];state.directorate[j]=t;
+  save();render();
+};
+A.dirDelete=function(el){
+  var id=el.getAttribute("data-id");
+  openConfirm("Remover este cargo da diretoria?",function(){
+    state.directorate=state.directorate.filter(function(d){return d.id!==id;});
+    save();render();toast("Cargo removido");
+  });
+};
+A.dirSave=function(el){var id=el.getAttribute("data-id");var d=state.directorate.find(function(x){return x.id===id;});if(!d) return;d.name=v("dr_n_"+id).trim();d.phone=v("dr_p_"+id).trim();d.visible=ch("dr_v_"+id);save();render();toast("Cargo salvo","success");};
+A.dirRename=function(el){var id=el.getAttribute("data-id");var d=state.directorate.find(function(x){return x.id===id;});if(!d) return;var n=window.prompt("Novo nome do cargo:",d.role);if(n&&n.trim()){d.role=n.trim();save();render();}};
+A.pickDir=function(el){var id=el.getAttribute("data-id");openPicker(function(p){var d=state.directorate.find(function(x){return x.id===id;});if(!d) return;d.name=p.name;d.phone=p.phone||d.phone;if(p.photo) d.photo=p.photo;d.memberCodeRef=p.code||"";save();render();toast("Pessoa escolhida","success");});};
+A.dirPhoto=function(el){
+  var id=el.getAttribute("data-id"),mode=el.getAttribute("data-mode");
+  var d=state.directorate.find(function(x){return x.id===id;});if(!d) return;
+  if(mode==="file") pickFile(function(data){d.photo=data;save();render();toast("Foto atualizada","success");});
+  else{var u=window.prompt("Link da foto (aceita Google Drive):","");if(u){d.photo=driveLink(u.trim());save();render();toast("Foto atualizada","success");}}
+};
+A.dirPhotoRemove=function(el){var d=state.directorate.find(function(x){return x.id===el.getAttribute("data-id");});if(d){d.photo="";save();render();toast("Foto removida");}};
+A.teamToggle=function(el){var id=el.getAttribute("data-id");ui.teamOpen[id]=!ui.teamOpen[id];render();};
+function teamForm(dep,idx){
+  var m=idx==null?{name:"",role:"",photo:"",phone:""}:dep.team[idx];
+  openDialog('<div style="padding:1.25rem;display:grid;gap:.65rem"><div style="font-weight:900;font-size:1.05rem">'+(idx==null?"Adicionar integrante":"Editar integrante")+'</div>'+
+    '<div><label class="lbl" for="tm_n">Nome</label><input class="fld" id="tm_n" value="'+esc(m.name)+'"><button class="btn-soft btn-sm" id="tm_pick" style="width:100%;margin-top:.4rem">Escolher da lista de pessoas</button></div>'+
+    '<div><label class="lbl" for="tm_r">Função / Cargo na equipe</label><input class="fld" id="tm_r" value="'+esc(m.role||"")+'"></div>'+
+    '<div><label class="lbl" for="tm_p">Telefone</label><input class="fld" id="tm_p" type="tel" inputmode="tel" value="'+esc(m.phone||"")+'"></div>'+
+    '<div style="display:flex;gap:.45rem;flex-wrap:wrap"><button class="btn-soft btn-sm" id="tm_file">Enviar foto</button><button class="btn-soft btn-sm" id="tm_link">Usar link</button></div>'+
+    '<div style="display:flex;justify-content:flex-end;gap:.5rem"><button class="btn-soft" data-close>Cancelar</button><button class="btn-main" id="tm_save">Salvar integrante</button></div></div>',function(d){
+    var photo=m.photo||"";
+    function setName(n,ph,phone,fn){d.querySelector("#tm_n").value=n;if(phone) d.querySelector("#tm_p").value=phone;if(ph) photo=ph;if(fn&&!d.querySelector("#tm_r").value) d.querySelector("#tm_r").value=fn;}
+    d.querySelector("#tm_pick").addEventListener("click",function(){openPicker(function(p){setName(p.name,p.photo,p.phone,(p.functions||[])[0]||"");});});
+    d.querySelector("#tm_file").addEventListener("click",function(){pickFile(function(x){photo=x;toast("Foto carregada","success");});});
+    d.querySelector("#tm_link").addEventListener("click",function(){var u=window.prompt("Link da foto:","");if(u) photo=driveLink(u.trim());});
+    d.querySelector("#tm_save").addEventListener("click",function(){
+      var n=d.querySelector("#tm_n").value.trim();if(!n){toast("Informe o nome.","error");return;}
+      var entry={name:n,role:d.querySelector("#tm_r").value.trim(),phone:d.querySelector("#tm_p").value.trim(),photo:photo,memberCodeRef:""};
+      if(idx==null) dep.team.push(entry); else dep.team[idx]=entry;
+      save();d.close();render();toast("Integrante salvo","success");
+    });
+  });
+}
+A.teamAdd=function(el){var dep=findDept(el.getAttribute("data-dep"));if(dep) teamForm(dep,null);};
+A.teamEdit=function(el){var dep=findDept(el.getAttribute("data-dep"));if(dep) teamForm(dep,+el.getAttribute("data-idx"));};
+A.teamDel=function(el){var dep=findDept(el.getAttribute("data-dep"));var i=+el.getAttribute("data-idx");if(dep) openConfirm("Excluir este integrante?",function(){dep.team.splice(i,1);save();render();toast("Integrante excluído");});};
+A.teamMove=function(el){var dep=findDept(el.getAttribute("data-dep"));var i=+el.getAttribute("data-idx");var j=i+(+el.getAttribute("data-dir"));if(!dep||j<0||j>=dep.team.length) return;var t=dep.team[i];dep.team[i]=dep.team[j];dep.team[j]=t;save();render();};
+
+A.subDelete=function(el){var id=el.getAttribute("data-id");openConfirm("Excluir este registro?",function(){state.submissions=state.submissions.filter(function(s){return s.id!==id;});save();render();toast("Registro excluído");});};
+
+A.backupDown=function(){
+  var blob=new Blob([JSON.stringify(state,null,2)],{type:"application/json"});
+  var a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="adalex_backup_v2.json";
+  document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove();},500);
+  toast("Backup baixado","success");
+};
+A.backupImport=function(){
+  var inp=document.createElement("input");inp.type="file";inp.accept="application/json,.json";
+  inp.onchange=function(){
+    var f=inp.files[0];if(!f) return;
+    var r=new FileReader();
+    r.onload=function(){
+      try{
+        var data=JSON.parse(r.result);
+        state=migrate(merge(baseDefaultState(),data));
+        save();setupPwa();render();toast("Backup importado","success");
+      }catch(e){toast("Arquivo inválido.","error");}
+    };
+    r.readAsText(f);
+  };
+  inp.click();
+};
+A.restoreDefault=function(){
+  openConfirm("Restaurar o padrão apaga todos os dados cadastrados neste navegador. Confirmar?",function(){
+    openConfirm("Tem certeza? Esta ação não pode ser desfeita.",function(){
+      localStorage.removeItem(KEY);
+      state=baseDefaultState();save();setupPwa();session={role:"visitante",userId:null,realRole:"visitante"};ui.page="home";render();toast("Padrão restaurado","success");
+    });
+  });
+};
+A.adminTab=function(el){ui.adminTab=el.getAttribute("data-tab");render();};
+A.goUsersTab=function(){ui.adminTab="users";ui.page="admin-panel";render();};
+
+/* generic click & input listeners */
+document.addEventListener("click",function(e){
+  var nav=e.target.closest("[data-nav]");
+  if(nav){e.preventDefault();ui.page=nav.getAttribute("data-nav");render();window.scrollTo(0,0);return;}
+  var el=e.target.closest("[data-act]");
+  if(!el) return;
+  var act=el.getAttribute("data-act");
+  if(typeof A[act]!=="function") return;
+  if(el.tagName==="A") e.preventDefault();
+  try{A[act](el,e);}catch(err){toast("Ação indisponível: "+err.message,"error");}
+});
+
+document.addEventListener("input",function(e){
+  if(e.target&&e.target.id==="us_search"){
+    ui.userSearch=e.target.value;
+    var pos=e.target.selectionStart;
+    render();
+    var box=document.getElementById("us_search");
+    if(box){box.focus();try{box.setSelectionRange(pos,pos);}catch(err){}}
+  }
+});
+
+document.addEventListener("change",function(e){
+  if(e.target&&e.target.id==="us_func_filter"){
+    ui.funcFilter=e.target.value;
+    render();
+  }
+});
+
+window.addEventListener("keydown",function(e){
+  if(e.key==="Escape") closeAllDialogs();
+  if(e.key==="Enter"&&e.target&&e.target.id==="nf_name"){
+    e.preventDefault();
+    A.createInlineFunc();
+  }
+});
+
+/* ---------- PWA event listeners ---------- */
+window.addEventListener("beforeinstallprompt",function(e){
+  e.preventDefault();
+  pwa.deferredPrompt=e;
+  renderNav();
+});
+window.addEventListener("appinstalled",function(){
+  pwa.deferredPrompt=null;
+  renderNav();
+  toast("Aplicativo instalado na tela inicial!","success");
+});
+function updateOnlineStatus(){
+  var chip=document.getElementById("offlineChip");
+  if(chip) chip.hidden=navigator.onLine;
+}
+window.addEventListener("online",updateOnlineStatus);
+window.addEventListener("offline",updateOnlineStatus);
+
+/* ---------- initial render ---------- */
+setupPwa();
+registerInlineServiceWorker();
+updateOnlineStatus();
+render();
+})();
+</script>
+</body>
+</html>
