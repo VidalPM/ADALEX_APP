@@ -954,7 +954,7 @@ var ui={
   depEditId:null,userEditId:null,userFilter:"todos",funcFilter:"todas",userSearch:"",
   teamOpen:{},pendingImport:null,
   depForm:{},userForm:{functions:[]},showNewRoleBox:false,
-  gateMode:"visitor",showCpfLookup:false,cpfResult:null,permProfile:"visitante",
+  gateMode:"visitor",showCpfLookup:false,cpfResult:null,permProfile:"visitante",welcomePreview:null,
   installPlatform:(/iphone|ipad|ipod/i.test(navigator.userAgent)?"ios":"android"),installStep:0
 };
 var pwa={deferredPrompt:null,swStatus:"Aguardando hospedagem HTTPS"};
@@ -1437,6 +1437,31 @@ function headerHtml(){
 }
 
 /* ---------- identification gate ---------- */
+
+function welcomeScreenHtml(wp){
+  var t=theme();
+  var u=wp.user||{name:"Bem-vindo(a)",photo:"",role:wp.targetRole,memberCode:"",functions:[]};
+  var funcs=(u.functions||[]).slice(0,3).map(function(fn){return pill(fn,"b-stone");}).join("");
+  var photoHtml=u.photo
+    ?'<img src="'+esc(u.photo)+'" alt="Foto de '+esc(u.name)+'" style="width:116px;height:116px;border-radius:999px;object-fit:cover;border:4px solid '+t.hex+';box-shadow:0 8px 24px rgba(0,0,0,.14);margin:0 auto">'
+    :'<div style="width:116px;height:116px;border-radius:999px;display:flex;align-items:center;justify-content:center;font-weight:900;color:#fff;font-size:2.2rem;background:'+t.hex+';border:4px solid #fff;box-shadow:0 8px 24px rgba(0,0,0,.14);margin:0 auto">'+esc(initials(u.name))+'</div>';
+  return '<section style="max-width:30rem;margin:-1.35rem auto 0;padding:0 .85rem;width:100%">'+
+    '<div class="card" style="display:grid;gap:.85rem;text-align:center;padding:1.6rem 1.25rem">'+
+      photoHtml+
+      '<div>'+
+        '<div style="font-size:.74rem;font-weight:800;letter-spacing:.06em;color:'+t.hex+'">PAZ DO SENHOR!</div>'+
+        '<div style="font-weight:900;font-size:1.22rem;margin-top:.15rem">'+esc(u.name)+'</div>'+
+      '</div>'+
+      '<div style="display:flex;flex-wrap:wrap;justify-content:center;gap:.35rem">'+
+        roleBadge(wp.targetRole)+
+        (u.memberCode?pill("Código "+u.memberCode,"b-indigo"):"")+
+        funcs+
+      '</div>'+
+      '<button class="btn-main" style="width:100%;font-size:.96rem;padding:.8rem 1rem;background:linear-gradient(90deg,'+t.hex+','+t.hex2+')" data-act="confirmEnterApp">Entrar no APP →</button>'+
+      '<button class="btn-soft btn-sm" style="width:100%" data-act="cancelWelcomePreview">Não sou eu • Voltar</button>'+
+    '</div>'+
+  '</section>';
+}
 function identificationGateHtml(){
   var c=state.church,t=theme();
   var mode=ui.gateMode||"visitor";
@@ -1485,7 +1510,7 @@ function identificationGateHtml(){
     '</div>';
   }else if(mode==="member"){
     formBody='<div style="display:grid;gap:.65rem">'+
-      '<div><label class="lbl" for="gate_m_code">Número do Código de Membro</label><input class="fld" id="gate_m_code" type="password" inputmode="numeric" autocomplete="off" placeholder="Digite o número do seu código de membro"></div>'+
+      '<div><label class="lbl" for="gate_m_code">Código de Membro ou CPF</label><input class="fld" id="gate_m_code" type="text" inputmode="numeric" autocomplete="off" placeholder="Digite seu código de membro ou CPF (somente números)"></div>'+
       (ui.loginError?'<div style="background:#fff1f2;color:#9f1239;padding:.6rem;border-radius:10px;font-size:.78rem">'+esc(ui.loginError)+'</div>':"")+
       '<button class="btn-main" style="width:100%;background:linear-gradient(90deg,'+t.hex+','+t.hex2+')" data-act="gateMemberEnter">Entrar como Membro</button>'+
       '<button class="btn-soft btn-sm" style="width:100%" data-act="toggleCpfLookup">'+(ui.showCpfLookup?"Fechar consulta por CPF":"Não sei meu código de membro (consultar por CPF)")+'</button>'+
@@ -2359,49 +2384,53 @@ function openLogin(){
 }
 function doLogin(raw,d){
   var code=normalizePass(raw);
+  var digits=code.replace(/\D/g,"");
   var pin=normalizePass(state.church.masterAdminPin);
   var mode=ui.gateMode||"member";
   if(code&&(code===pin||code==="Vidal1506@"||code==="1506")){
-    session={role:"admin_geral",userId:"u1",realRole:"admin_geral",visitorName:"",identified:true};
-    saveSession();
-    ui.page="admin-panel";ui.adminTab="church";ui.loginError="";
-    if(d) d.close();toast("Bem-vindo ao Painel Gestor","success");render();return true;
+    var adm=findUser("u1")||{id:"u1",name:"Administrador",role:"admin_geral",photo:"",memberCode:""};
+    ui.welcomePreview={user:adm,targetRole:"admin_geral",realRole:"admin_geral",openAdmin:true};
+    ui.loginError="";
+    if(d) d.close();
+    render();
+    return true;
   }
   var secPin=normalizePass(state.church.secretariaPin);
   var tesPin=normalizePass(state.church.tesourariaPin);
   var ebdPin=normalizePass(state.church.ebdPin);
   if(code&&secPin&&code===secPin){
-    session={role:"secretaria",userId:null,realRole:"secretaria",visitorName:"Secretaria",identified:true};
-    saveSession();ui.loginError="";
-    if(d) d.close();toast("Bem-vindo(a) à Secretaria","success");render();return true;
+    ui.welcomePreview={user:{id:null,name:"Secretaria",role:"secretaria",photo:"",memberCode:""},targetRole:"secretaria",realRole:"secretaria",openAdmin:false};
+    ui.loginError="";if(d) d.close();render();return true;
   }
   if(code&&tesPin&&code===tesPin){
-    session={role:"tesouraria",userId:null,realRole:"tesouraria",visitorName:"Tesouraria",identified:true};
-    saveSession();ui.loginError="";
-    if(d) d.close();toast("Bem-vindo(a) à Tesouraria","success");render();return true;
+    ui.welcomePreview={user:{id:null,name:"Tesouraria",role:"tesouraria",photo:"",memberCode:""},targetRole:"tesouraria",realRole:"tesouraria",openAdmin:false};
+    ui.loginError="";if(d) d.close();render();return true;
   }
   if(code&&ebdPin&&code===ebdPin){
-    session={role:"ebd",userId:null,realRole:"ebd",visitorName:"EBD",identified:true};
-    saveSession();ui.loginError="";
-    if(d) d.close();toast("Bem-vindo(a) à EBD","success");render();return true;
+    ui.welcomePreview={user:{id:null,name:"EBD",role:"ebd",photo:"",memberCode:""},targetRole:"ebd",realRole:"ebd",openAdmin:false};
+    ui.loginError="";if(d) d.close();render();return true;
   }
   var usr=state.users.find(function(u){
-    return (u.memberCode&&normalizePass(u.memberCode)===code)||(u.accessPassword&&normalizePass(u.accessPassword)===code);
+    if(u.memberCode&&normalizePass(u.memberCode)===code) return true;
+    if(u.accessPassword&&normalizePass(u.accessPassword)===code) return true;
+    if(digits.length>=9&&u.cpf){
+      var uc=String(u.cpf).replace(/\D/g,"");
+      if(uc&&(uc===digits||uc.replace(/^0+/,"")===digits.replace(/^0+/,""))) return true;
+    }
+    return false;
   });
   if(usr&&code){
     var targetRole=usr.role;
     if((mode==="secretaria"||mode==="tesouraria"||mode==="ebd")&&(usr.role===mode||usr.role==="diretoria"||usr.role==="admin_geral")){
       targetRole=mode;
     }
-    session={role:targetRole,userId:usr.id,realRole:usr.role,visitorName:"",identified:true};
-    saveSession();
+    ui.welcomePreview={user:usr,targetRole:targetRole,realRole:usr.role,openAdmin:(targetRole==="admin_geral"&&mode==="admin")};
     ui.loginError="";
     if(d) d.close();
-    toast("Bem-vindo, "+usr.name.split(" ")[0],"success");
     render();
     return true;
   }
-  ui.loginError="Código ou senha não encontrados. Confira e tente de novo.";
+  ui.loginError="Código de membro, CPF ou senha não encontrados. Confira e tente de novo.";
   return false;
 }
 
@@ -2520,7 +2549,8 @@ function render(){
     applyChromeStyles();
     renderNav();
     var html="";
-    if(ui.page==="admin-panel") html=adminHtml();
+    if(ui.welcomePreview) html=headerHtml()+welcomeScreenHtml(ui.welcomePreview);
+    else if(ui.page==="admin-panel") html=adminHtml();
     else if((state.church.requireIdentificationOnOpen!==false||state.church.requireLoginGate)&&!session.identified) html=headerHtml()+identificationGateHtml();
     else if(ui.page==="prayer") html=headerHtml()+prayerHtml();
     else if(ui.page==="secretaria") html=headerHtml()+secretariaHtml();
@@ -2556,6 +2586,23 @@ A.gateVisitorEnter=function(){
   saveSession();
   ui.loginError="";
   toast("Paz do Senhor, "+nm.split(" ")[0]+"!","success");
+  render();
+};
+A.confirmEnterApp=function(){
+  var wp=ui.welcomePreview;
+  if(!wp) return;
+  var u=wp.user||{};
+  session={role:wp.targetRole,userId:u.id||null,realRole:wp.realRole||wp.targetRole,visitorName:(u.id?"":u.name),identified:true};
+  saveSession();
+  ui.welcomePreview=null;
+  ui.page=wp.openAdmin?"admin-panel":"home";
+  if(wp.openAdmin) ui.adminTab="church";
+  toast("Bem-vindo(a), "+String(u.name||"").split(" ")[0]+"!","success");
+  render();
+};
+A.cancelWelcomePreview=function(){
+  ui.welcomePreview=null;
+  ui.loginError="";
   render();
 };
 A.gateMemberEnter=function(){
