@@ -1,4 +1,4 @@
-const CACHE_NAME = "adalex-digital-v2.0";
+const CACHE_NAME = "adalex-digital-v1.0";
 const ASSETS = ["./", "./index.html", "./logo.png"];
 
 self.addEventListener("install", (event) => {
@@ -19,13 +19,29 @@ self.addEventListener("activate", (event) => {
 
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
-  event.respondWith(
-    caches.match(event.request).then((cached) => {
-      const networkFetch = fetch(event.request)
+  const req = event.request;
+  const isNav = req.mode === "navigate" || (req.headers.get("accept") || "").includes("text/html") || req.url.endsWith("index.html");
+  if (isNav) {
+    event.respondWith(
+      fetch(req, { cache: "no-store" })
         .then((response) => {
           if (response && response.status === 200) {
             const copy = response.clone();
-            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
+            caches.open(CACHE_NAME).then((cache) => cache.put(req, copy));
+          }
+          return response;
+        })
+        .catch(() => caches.match(req).then((c) => c || caches.match("./index.html")))
+    );
+    return;
+  }
+  event.respondWith(
+    caches.match(req).then((cached) => {
+      const networkFetch = fetch(req)
+        .then((response) => {
+          if (response && response.status === 200) {
+            const copy = response.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(req, copy));
           }
           return response;
         })
