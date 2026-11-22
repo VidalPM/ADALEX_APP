@@ -1558,25 +1558,25 @@ var A=window.appActions;
 
 /* ---------- nav ---------- */
 function renderNav(){
-  var left='<button class="nav-btn '+(ui.page==="home"?"on":"")+'" data-act="go" data-page="home">'+ico("church",15)+'<span>Início</span></button>'+
-    '<button class="nav-btn '+(ui.page==="prayer"?"on":"")+'" data-act="go" data-page="prayer">'+ico("heart-handshake",15)+'<span>Oração</span></button>';
-  if(can("verPaginaSecretaria")){
-    left+='<button class="nav-btn '+(ui.page==="secretaria"?"on":"")+'" data-act="go" data-page="secretaria">'+ico("file-text",15)+'<span>Secretaria</span></button>';
+  var left=(navCfg("home").show!==false?'<button class="nav-btn '+(ui.page==="home"?"on":"")+'" data-act="go" data-page="home">'+ico("church",15)+'<span>'+esc(navCfg("home").label||"Início")+'</span></button>':"")+
+    (navCfg("prayer").show!==false?'<button class="nav-btn '+(ui.page==="prayer"?"on":"")+'" data-act="go" data-page="prayer">'+ico("heart-handshake",15)+'<span>'+esc(navCfg("prayer").label||"Oração")+'</span></button>':"");
+  if(can("verPaginaSecretaria")&&navCfg("secretaria").show!==false){
+    left+='<button class="nav-btn '+(ui.page==="secretaria"?"on":"")+'" data-act="go" data-page="secretaria">'+ico("file-text",15)+'<span>'+esc(navCfg("secretaria").label||"Secretaria")+'</span></button>';
   }
-  if(can("verPaginaTesouraria")){
-    left+='<button class="nav-btn '+(ui.page==="tesouraria"?"on":"")+'" data-act="go" data-page="tesouraria">'+ico("wallet",15)+'<span>Tesouraria</span></button>';
+  if(can("verPaginaTesouraria")&&navCfg("tesouraria").show!==false){
+    left+='<button class="nav-btn '+(ui.page==="tesouraria"?"on":"")+'" data-act="go" data-page="tesouraria">'+ico("wallet",15)+'<span>'+esc(navCfg("tesouraria").label||"Tesouraria")+'</span></button>';
   }
-  if(can("verPaginaEBD")){
-    left+='<button class="nav-btn '+(ui.page==="ebd"?"on":"")+'" data-act="go" data-page="ebd">'+ico("book-open",15)+'<span>EBD</span></button>';
+  if(can("verPaginaEBD")&&navCfg("ebd").show!==false){
+    left+='<button class="nav-btn '+(ui.page==="ebd"?"on":"")+'" data-act="go" data-page="ebd">'+ico("book-open",15)+'<span>'+esc(navCfg("ebd").label||"EBD")+'</span></button>';
   }
   customPagesFor("nav").forEach(function(p){
     left+='<button class="nav-btn '+(ui.page==="cp:"+p.id?"on":"")+'" data-act="go" data-page="cp:'+esc(p.id)+'"><span aria-hidden="true">'+(p.logo?'<img src="'+esc(driveLink(safeUrl(p.logo)))+'" alt="" style="width:20px;height:20px;border-radius:6px;object-fit:contain;background:#fff">':esc(p.icon||"📄"))+'</span><span>'+esc(p.title)+'</span></button>';
   });
   if(canAccessAdminPanel()){
-    left+='<button class="nav-btn '+(ui.page==="admin-panel"?"gold":"")+'" data-act="go" data-page="admin-panel">'+ico("settings",15)+'<span>'+(ui.page==="admin-panel"?"Fechar Gestor":"Gestor")+"</span></button>";
+    left+='<button class="nav-btn '+(ui.page==="admin-panel"?"gold":"")+'" data-act="go" data-page="admin-panel">'+ico("settings",15)+'<span>'+(ui.page==="admin-panel"?"Fechar "+(L().nav.gestorLabel||"Gestor"):(L().nav.gestorLabel||"Gestor"))+"</span></button>";
   }
-  if(!isStandalone()){
-    left+='<button class="nav-btn install" data-act="installPwa">'+ico("smartphone",15)+'<span>Instalar App</span></button>';
+  if(!isStandalone()&&L().nav.showInstall!==false){
+    left+='<button class="nav-btn install" data-act="installPwa">'+ico("smartphone",15)+'<span>'+esc(L().nav.installLabel||"Instalar App")+'</span></button>';
   }
   document.getElementById("navLeft").innerHTML=left;
   var name=session.userId?(findUser(session.userId)||{}).name:(session.visitorName||"");
@@ -1602,17 +1602,18 @@ function headerHtml(){
   var logo=c.logoUrl
     ?'<img src="'+esc(driveLink(c.logoUrl))+'" alt="Logo da igreja" style="width:84px;height:84px;border-radius:22px;border:3px solid #fff;object-fit:contain;padding:4px;background:#fff;box-shadow:0 6px 18px rgba(0,0,0,.22)">'
     :'<div style="width:84px;height:84px;border-radius:22px;border:3px solid #fff;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.15);color:#fff">'+ico("church",36)+"</div>";
-  var cnpj=can("verCnpj")&&c.cnpj
+  var H=L().header;
+  var cnpj=can("verCnpj")&&c.cnpj&&H.showCnpj!==false
     ?'<button data-act="copyCnpj" style="display:inline-flex;align-items:center;gap:.35rem;background:rgba(255,255,255,.16);color:#fff;border-radius:999px;padding:.35rem .75rem;font-size:.72rem;font-weight:700;border:0;cursor:pointer">'+ico("copy",13)+'<span>CNPJ '+esc(c.cnpj)+"</span></button>"
     :"";
-  var addr=c.address
+  var addr=c.address&&H.showAddress!==false
     ?'<span style="display:inline-flex;align-items:center;gap:.35rem;background:rgba(255,255,255,.16);border-radius:999px;padding:.35rem .75rem;font-size:.72rem;font-weight:600">'+ico("map-pin",13)+'<span>'+esc(c.address)+"</span></span>"
     :"";
   return '<header style="background:linear-gradient(135deg,#0f172a,'+t.hex+')">'+
     '<div class="hero-header">'+
-      '<div style="display:inline-block">'+logo+"</div>"+
-      '<h1 class="hero-title">'+esc(c.name)+"</h1>"+
-      '<p style="font-size:.84rem;opacity:.92;margin:0">'+esc(c.subtitle)+"</p>"+
+      (H.showLogo!==false?'<div style="display:inline-block">'+logo+"</div>":"")+
+      (H.showName!==false?'<h1 class="hero-title">'+esc(c.name)+"</h1>":"")+
+      (H.showSubtitle!==false?'<p style="font-size:.84rem;opacity:.92;margin:0">'+esc(c.subtitle)+"</p>":"")+
       '<div style="display:flex;flex-wrap:wrap;justify-content:center;gap:.45rem;margin-top:.85rem">'+
         cnpj+addr+
       "</div>"+
@@ -1698,65 +1699,188 @@ function identificationGateHtml(){
 }
 
 /* ---------- home ---------- */
+/* ======================================================================
+   LAYOUT DAS PÁGINAS FIXAS — cada seção pode ser exibida/ocultada,
+   reordenada, renomeada, restrita por cargo, removida ou complementada
+   com blocos livres (texto, botões, links, imagens, vídeos...).
+   ====================================================================== */
+var LAYOUT_PAGES=[["home","Início"],["prayer","Oração"],["secretaria","Secretaria"],["tesouraria","Tesouraria"],["ebd","EBD"]];
+var curSec=null;
+var SYS={
+  welcome:{label:"Cartão de boas-vindas",pages:["home"],titles:false,note:"Textos em Personalização & Igreja → Personalizar textos.",opts:[{f:"showBtn",label:"Mostrar botão Trocar acesso",type:"check",def:true}]},
+  christ:{label:"Botão Entregar a vida a Cristo",pages:["home"],titles:true,defTitle:function(c){return c.christButtonTitle;},defSub:function(c){return c.christButtonSubtitle;},opts:[{f:"btnLabel",label:"Texto do botão",type:"text",ph:function(c){return c.christActionLabel||"Quero dar este passo";}}]},
+  prayerCard:{label:"Cartão de pedido de oração",pages:["home"],titles:true,defTitle:function(c){return c.prayerTitle;},defSub:function(c){return c.prayerDescription;},opts:[{f:"btnLabel",label:"Texto do botão",type:"text",ph:function(c){return c.prayerBtnLabel||"Enviar pedido de oração";}}]},
+  info:{label:"Informações sobre a Igreja",pages:["home"],titles:true,defTitle:function(c){return c.infoSectionTitle||"Informações sobre a Igreja";},defSub:function(c){return c.infoSectionSubtitle||"Conheça nossa igreja e nossos horários.";},opts:[{f:"showAbout",label:"Mostrar texto Sobre a igreja",type:"check",def:true},{f:"showTime",label:"Mostrar horário principal de culto",type:"check",def:true}]},
+  customPages:{label:"Cartões das Páginas Personalizadas",pages:["home"],titles:true,defTitle:function(c){return c.customPagesTitle||"Páginas & Serviços";},defSub:function(c){return c.customPagesSubtitle||"Toque para abrir.";}},
+  directorate:{label:"Nossa Diretoria",pages:["home"],titles:true,defTitle:function(c){return c.directorateTitle||"Nossa Diretoria";},defSub:function(c){return c.directorateSubtitle||"Quem cuida da obra no dia a dia.";},opts:[{f:"maxItems",label:"Quantidade exibida antes de 'Ver toda a diretoria'",type:"number",ph:function(){return "6";}}]},
+  departments:{label:"Departamentos & Contribuições Pix",pages:["home"],titles:true,defTitle:function(c){return c.deptsTitle||"Departamentos & Contribuições Pix";},defSub:function(c){return c.deptsSubtitle||"Toque em copiar e cole no aplicativo do seu banco.";}},
+  services:{label:"Dias de Cultos",pages:["home"],titles:true,defTitle:function(c){return c.servicesTitle||"Dias de Cultos";},defSub:function(c){return c.servicesSubtitle||"Horários da semana. O dia de hoje aparece destacado.";}},
+  notices:{label:"Mural de Avisos",pages:["home"],titles:true,defTitle:function(c){return c.noticesTitle||"Mural de Avisos";},defSub:function(c){return c.noticesSubtitle||"Comunicados da igreja.";}},
+  links:{label:"Redes Sociais, Links & Atalhos",pages:["home"],titles:true,defTitle:function(c){return c.linksTitle||"Redes Sociais & Links";},defSub:function(c){return c.linksSubtitle||"Acompanhe a igreja e fale com a secretaria.";},opts:[{f:"showSocial",label:"Mostrar redes sociais e links",type:"check",def:true},{f:"gabMode",label:"Atalhos administrativos neste cartão",type:"select",def:"all",choices:[["all","Todos os atalhos ativos"],["gabinete","Somente os marcados como Gabinete"],["none","Nenhum atalho"]]},{f:"areas",label:"Áreas dos atalhos exibidos",type:"areas"}]},
+  prayerMain:{label:"Central de oração (botões de pedido)",pages:["prayer"],titles:true,defTitle:function(c){return c.prayerTitle;},defSub:function(c){return c.prayerDescription;},opts:[{f:"showAppBtn",label:"Mostrar botão de pedido no app",type:"check",def:true},{f:"appBtnLabel",label:"Texto do botão de pedido no app",type:"text",ph:function(){return "Pedido de oração no app";}},{f:"showWaBtn",label:"Mostrar botão do WhatsApp",type:"check",def:true},{f:"waBtnLabel",label:"Texto do botão do WhatsApp",type:"text",ph:function(){return "Falar pelo WhatsApp";}}]},
+  adminShortcuts:{label:"Atalhos administrativos (Secretaria & Gabinete)",pages:["prayer"],titles:true,defTitle:function(){return "Secretaria & Gabinete";},defSub:function(){return "Atalhos administrativos disponíveis para o seu acesso.";},opts:[{f:"areas",label:"Áreas dos atalhos exibidos",type:"areas"},{f:"onlyGab",label:"Mostrar somente os marcados como Gabinete",type:"check",def:false},{f:"showEmpty",label:"Mostrar aviso quando não houver atalhos",type:"check",def:true}]},
+  staffAccess:{label:"Cartão Acesso da equipe",pages:["prayer"],titles:true,defTitle:function(){return "Acesso da equipe";},defSub:function(){return "Membros entram com o CPF; a equipe entra com a senha pessoal.";},opts:[{f:"btnLabel",label:"Texto do botão",type:"text",ph:function(){return "Entrar";}}]},
+  areaButtons:{label:"Botões / serviços da página",pages:["secretaria","tesouraria","ebd"],titles:true,defTitle:function(c,pg){return AREA_DEF[pg][0];},defSub:function(c,pg){return AREA_DEF[pg][1];},opts:[{f:"showEmpty",label:"Mostrar aviso quando não houver botões",type:"check",def:true}],note:"Os botões são cadastrados nas abas Botões Secretaria / Tesouraria / EBD."},
+  memberCta:{label:"Convite 'É membro da igreja?' (só visitantes)",pages:["secretaria","tesouraria","ebd"],titles:true,defTitle:function(){return "É membro da igreja?";},defSub:function(){return "Entre com seu CPF para acessar todos os serviços.";},opts:[{f:"btnLabel",label:"Texto do botão",type:"text",ph:function(){return "Entrar com CPF";}}]}
+};
+var AREA_DEF={
+  secretaria:["Secretaria da Igreja","Solicitação de cartas, apresentação de crianças e atendimento da secretaria."],
+  tesouraria:["Tesouraria da Igreja","Atalhos contábeis, envio de comprovantes e serviços da tesouraria."],
+  ebd:["Escola Bíblica Dominical","Revistas, materiais, chamada, inscrições e atendimento da EBD."]
+};
+var DEFAULT_LAYOUT_KEYS={
+  home:["welcome","christ","prayerCard","info","customPages","directorate","departments","services","notices","links"],
+  prayer:["prayerMain","adminShortcuts","staffAccess"],
+  secretaria:["areaButtons","memberCta"],tesouraria:["areaButtons","memberCta"],ebd:["areaButtons","memberCta"]
+};
+function sysItem(key){
+  var it={id:"sys_"+key,type:"sys",key:key,show:true,visibility:"todos",title:"",subtitle:""};
+  (SYS[key].opts||[]).forEach(function(o){
+    if(o.type==="check") it[o.f]=o.def!==false;
+    else if(o.type==="areas") it[o.f]=["secretaria","tesouraria","ebd"];
+    else if(o.type==="select") it[o.f]=o.def;
+    else it[o.f]="";
+  });
+  return it;
+}
+function defaultLayout(pg){return (DEFAULT_LAYOUT_KEYS[pg]||[]).map(sysItem);}
+function defaultLayoutState(){
+  var pages={};LAYOUT_PAGES.forEach(function(p){pages[p[0]]=defaultLayout(p[0]);});
+  return {
+    pages:pages,
+    nav:{home:{label:"Início",show:true},prayer:{label:"Oração",show:true},secretaria:{label:"Secretaria",show:true},tesouraria:{label:"Tesouraria",show:true},ebd:{label:"EBD",show:true},gestorLabel:"Gestor",showInstall:true,installLabel:"Instalar App"},
+    header:{showLogo:true,showName:true,showSubtitle:true,showCnpj:true,showAddress:true},
+    footer:{show:true,showName:true,showInfo:true,homeShow:true,homeLabel:"Início & Pix",prayerShow:true,prayerLabel:"Administração & Oração",showNote:true}
+  };
+}
+function L(){
+  var dl=defaultLayoutState();
+  if(!state.layout||typeof state.layout!=="object") state.layout=dl;
+  var l=state.layout;
+  l.pages=l.pages||{};
+  LAYOUT_PAGES.forEach(function(p){if(!Array.isArray(l.pages[p[0]])) l.pages[p[0]]=dl.pages[p[0]];});
+  l.nav=Object.assign({},dl.nav,l.nav||{});
+  l.header=Object.assign({},dl.header,l.header||{});
+  l.footer=Object.assign({},dl.footer,l.footer||{});
+  return l;
+}
+function navCfg(k){var n=L().nav||{};return n[k]||{label:k,show:true};}
+function tmpOverride(obj,map,fn){
+  var saved={};
+  Object.keys(map).forEach(function(k){if(map[k]){saved[k]=obj[k];obj[k]=map[k];}});
+  try{return fn();}finally{Object.keys(saved).forEach(function(k){obj[k]=saved[k];});}
+}
+function secAreas(sec){return Array.isArray(sec.areas)?sec.areas:["secretaria","tesouraria","ebd"];}
+function adminBtnLink(b,t,strong){
+  return '<a href="'+esc(b.link)+'" target="_blank" rel="noopener noreferrer" style="display:flex;justify-content:space-between;align-items:center;gap:.5rem;min-height:44px;padding:.7rem .85rem;border-radius:14px;border:1px solid '+t.hex+';'+(strong?"background:"+t.hexLight+";":"")+'color:'+t.hex+';text-decoration:none;font-weight:'+(strong?800:700)+';font-size:.82rem"><span>'+esc(b.title)+"</span>"+pill(b.badge||"","b-white")+"</a>";
+}
+
+/* ---- renderizadores das seções ---- */
+function renderSys(sec,pg){
+  var c=state.church,t=theme();
+  var T=sec.title||"",S=sec.subtitle||"";
+  switch(sec.key){
+  case "welcome":
+    if(c.showWelcomeCard===false) return "";
+    var uObj=session.userId?findUser(session.userId):null;
+    var greet=(c.welcomeGreeting||"Paz do Senhor, {nome}!").replace("{nome}",currentName());
+    var funcsHtml=(uObj&&uObj.functions&&uObj.functions.length)?'<div style="display:flex;flex-wrap:wrap;gap:.25rem;margin-top:.3rem">'+uObj.functions.map(function(fn){return pill(fn,"b-stone");}).join("")+"</div>":"";
+    return '<div class="card" style="display:flex;flex-wrap:wrap;gap:.75rem;align-items:center;justify-content:space-between">'+
+      '<div style="display:flex;align-items:center;gap:.6rem;min-width:0;flex:1">'+roleBadge(session.role)+
+        '<div style="min-width:0"><div style="font-weight:800;font-size:.92rem">'+esc(greet)+'</div><div class="help" style="margin:0">'+esc(c.welcomeSubtext||"Seu nível define os recursos visíveis.")+"</div>"+funcsHtml+"</div>"+
+      "</div>"+
+      (sec.showBtn!==false?'<button class="btn-soft btn-sm" data-act="changeAccess">'+esc(c.welcomeBtnText||"Trocar acesso")+"</button>":"")+
+    "</div>";
+  case "christ":
+    if(!can("verBotaoEntregarVida")) return "";
+    return '<button data-act="christDecision" class="card" style="text-align:left;background:linear-gradient(120deg,#be123c,#b45309);color:#fff;border:0;cursor:pointer">'+
+      '<div style="font-size:.66rem;font-weight:800;letter-spacing:.08em;opacity:.9">'+esc(c.christEyebrow||"DECISÃO IMPORTANTE")+"</div>"+
+      '<div style="font-size:1.05rem;font-weight:800;margin:.2rem 0">'+esc(T||c.christButtonTitle)+"</div>"+
+      '<div style="font-size:.78rem;opacity:.95;line-height:1.4">'+esc(S||c.christButtonSubtitle)+"</div>"+
+      '<span style="display:inline-block;margin-top:.75rem;background:#fff;color:#9f1239;border-radius:12px;padding:.5rem .9rem;font-weight:800;font-size:.78rem">'+esc(sec.btnLabel||c.christActionLabel||"Quero dar este passo")+"</span>"+
+    "</button>";
+  case "prayerCard":
+    if(!can("fazerPedidoOracaoEmail")) return "";
+    return '<div class="card"><div style="font-size:1rem;font-weight:800">'+esc(T||c.prayerTitle)+'</div><p class="help" style="margin:.25rem 0 .8rem">'+esc(S||c.prayerDescription)+'</p><button class="btn-main" style="width:100%;background:linear-gradient(90deg,'+t.hex+","+t.hex2+')" data-act="go" data-page="prayer">'+esc(sec.btnLabel||c.prayerBtnLabel||"Enviar pedido de oração")+"</button></div>";
+  case "info":
+    if(!can("verInfoIgreja")) return "";
+    return '<div class="card"><div style="font-size:1rem;font-weight:800">'+esc(T||c.infoSectionTitle||"Informações sobre a Igreja")+'</div><p class="help" style="margin:.2rem 0 .6rem">'+esc(S||c.infoSectionSubtitle||"Conheça nossa igreja e nossos horários.")+"</p>"+
+      (sec.showAbout!==false?'<p style="font-size:.84rem;line-height:1.55;margin:0 0 .7rem">'+esc(c.aboutText)+"</p>":"")+
+      (sec.showTime!==false?'<span class="pill" style="background:'+t.hexLight+";color:"+t.hex+";border-color:"+t.hex+'">'+esc(c.sundayWorshipTime)+"</span>":"")+"</div>";
+  case "customPages":
+    return tmpOverride(c,{customPagesTitle:T,customPagesSubtitle:S},customPagesHomeHtml);
+  case "directorate":
+    return tmpOverride(c,{directorateTitle:T,directorateSubtitle:S},directorateSectionHtml);
+  case "departments":
+    return tmpOverride(c,{deptsTitle:T,deptsSubtitle:S},departmentsSectionHtml);
+  case "services":
+    return tmpOverride(c,{servicesTitle:T,servicesSubtitle:S},cultosSectionHtml);
+  case "notices":
+    return can("verAvisos")?tmpOverride(c,{noticesTitle:T,noticesSubtitle:S},avisosHtml):"";
+  case "links":
+    return can("verLinks")?tmpOverride(c,{linksTitle:T,linksSubtitle:S},linksHtml):"";
+  case "prayerMain":
+    var b1=sec.showAppBtn!==false?'<button class="btn-main" style="background:linear-gradient(90deg,'+t.hex+","+t.hex2+')" data-act="prayerSend" data-kind="oracao">'+esc(sec.appBtnLabel||"Pedido de oração no app")+"</button>":"";
+    var b2=sec.showWaBtn!==false?'<button class="btn-soft" data-act="prayerSend" data-kind="whatsapp">'+esc(sec.waBtnLabel||"Falar pelo WhatsApp")+"</button>":"";
+    return '<div class="card">'+pageHeadHtml("prayer",T||c.prayerTitle,S||c.prayerDescription)+((b1||b2)?'<div class="safe-grid-sm">'+b1+b2+"</div>":"")+"</div>";
+  case "adminShortcuts":
+    var ar=secAreas(sec);
+    var btns=state.adminButtons.filter(function(b){return b.active&&visible(b.visibility,session.role)&&ar.indexOf(b.area||"secretaria")>=0&&(!sec.onlyGab||b.isGabinetePastoral);});
+    if(!btns.length&&sec.showEmpty===false) return "";
+    return '<div class="card"><div style="font-weight:800">'+esc(T||"Secretaria & Gabinete")+'</div><p class="help" style="margin:.2rem 0 .75rem">'+esc(S||"Atalhos administrativos disponíveis para o seu acesso.")+'</p><div style="display:flex;flex-direction:column;gap:.55rem">'+
+      (btns.length?btns.map(function(b){return adminBtnLink(b,t,false);}).join(""):'<p class="help">Nenhum atalho disponível para o seu acesso. Entre com seu CPF ou senha pessoal para ver mais.</p>')+"</div></div>";
+  case "staffAccess":
+    return '<div class="card"><div style="font-weight:800">'+esc(T||"Acesso da equipe")+'</div><p class="help" style="margin:.2rem 0 .75rem">'+esc(S||"Membros entram com o CPF; a equipe entra com a senha pessoal.")+'</p><button class="btn-soft" style="width:100%" data-act="changeAccess">'+esc(sec.btnLabel||"Entrar")+"</button></div>";
+  case "areaButtons":
+    var def=AREA_DEF[pg]||["",""];
+    var title=T||def[0];
+    var ab=state.adminButtons.filter(function(b){return b.active&&(b.area||"secretaria")===pg&&visible(b.visibility,session.role);});
+    if(!ab.length&&sec.showEmpty===false) return '<div class="card">'+pageHeadHtml(pg,title,S||def[1])+"</div>";
+    return '<div class="card">'+pageHeadHtml(pg,title,S||def[1])+'<div style="display:flex;flex-direction:column;gap:.6rem">'+
+      (ab.length?ab.map(function(b){return '<a href="'+esc(b.link)+'" target="_blank" rel="noopener noreferrer" style="display:flex;justify-content:space-between;align-items:center;gap:.5rem;min-height:48px;padding:.75rem .9rem;border-radius:14px;border:1px solid '+t.hex+";background:"+t.hexLight+";color:"+t.hex+';text-decoration:none;font-weight:800;font-size:.86rem"><span>'+esc(b.title)+"</span>"+pill(b.badge||title,"b-white")+"</a>";}).join(""):'<p class="help">Nenhum serviço disponível para o seu nível de acesso. Entre com seu CPF de membro ou senha pessoal para liberar.</p>')+
+    "</div></div>";
+  case "memberCta":
+    if(session.role!=="visitante") return "";
+    return '<div class="card"><div style="font-weight:800">'+esc(T||"É membro da igreja?")+'</div><p class="help" style="margin:.2rem 0 .7rem">'+esc(S||"Entre com seu CPF para acessar todos os serviços.")+'</p><button class="btn-main" style="width:100%" data-act="changeAccess">'+esc(sec.btnLabel||"Entrar com CPF")+"</button></div>";
+  }
+  return "";
+}
+function renderLayoutPage(pg){
+  var t=theme();
+  var items=(L().pages||{})[pg]||defaultLayout(pg);
+  var parts=[],group="";
+  function flush(){if(group){parts.push({k:"custom",h:'<div class="card"><div class="cp-blocks">'+group+"</div></div>"});group="";}}
+  items.forEach(function(it){
+    if(it.type==="sys"){
+      flush();
+      if(!SYS[it.key]||it.show===false||!visible(it.visibility||"todos",session.role)) return;
+      curSec=it;
+      var h="";
+      try{h=renderSys(it,pg);}finally{curSec=null;}
+      if(h) parts.push({k:it.key,h:h});
+    }else{
+      var bh=blockHtml(it,t);
+      if(bh) group+=bh;
+    }
+  });
+  flush();
+  var out="";
+  for(var i=0;i<parts.length;i++){
+    var a=parts[i],b=parts[i+1];
+    if(b&&((a.k==="notices"&&b.k==="links")||(a.k==="links"&&b.k==="notices"))){out+='<div class="safe-grid-2">'+a.h+b.h+"</div>";i++;}
+    else out+=a.h;
+  }
+  return '<section style="max-width:56rem;margin:-1.35rem auto 0;padding:0 .85rem;width:100%;display:flex;flex-direction:column;gap:.9rem">'+(out||'<div class="card"><p class="help" style="margin:0">Nenhum conteúdo disponível nesta página para o seu acesso.</p></div>')+"</section>";
+}
+
 function homeHtml(){
-  var c=state.church,t=theme(),h="";
+  var c=state.church;
   if((c.requireIdentificationOnOpen!==false||c.requireLoginGate||ui.forceGate)&&!session.identified){
     return identificationGateHtml();
   }
-  h+='<section style="max-width:56rem;margin:-1.35rem auto 0;padding:0 .85rem;width:100%;display:flex;flex-direction:column;gap:.9rem">';
-
-  /* Welcome card */
-  if(c.showWelcomeCard!==false){
-    var uObj=session.userId?findUser(session.userId):null;
-    var greet=(c.welcomeGreeting||"Paz do Senhor, {nome}!").replace("{nome}",currentName());
-    var funcsHtml=(uObj&&uObj.functions&&uObj.functions.length)
-      ?'<div style="display:flex;flex-wrap:wrap;gap:.25rem;margin-top:.3rem">'+uObj.functions.map(function(fn){return pill(fn,"b-stone");}).join("")+"</div>"
-      :"";
-    h+='<div class="card" style="display:flex;flex-wrap:wrap;gap:.75rem;align-items:center;justify-content:space-between">'+
-      '<div style="display:flex;align-items:center;gap:.6rem;min-width:0;flex:1">'+roleBadge(session.role)+
-        '<div style="min-width:0"><div style="font-weight:800;font-size:.92rem">'+esc(greet)+'</div><div class="help" style="margin:0">'+esc(c.welcomeSubtext||"Seu nível define os recursos visíveis.")+'</div>'+funcsHtml+'</div>'+
-      '</div>'+
-      '<button class="btn-soft btn-sm" data-act="changeAccess">'+esc(c.welcomeBtnText||"Trocar acesso")+'</button>'+
-    '</div>';
-  }
-
-  /* Christ decision CTA */
-  if(can("verBotaoEntregarVida")&&visible("todos")){
-    h+='<button data-act="christDecision" class="card" style="text-align:left;background:linear-gradient(120deg,#be123c,#b45309);color:#fff;border:0;cursor:pointer">'+
-      '<div style="font-size:.66rem;font-weight:800;letter-spacing:.08em;opacity:.9">'+esc(c.christEyebrow||"DECISÃO IMPORTANTE")+'</div>'+
-      '<div style="font-size:1.05rem;font-weight:800;margin:.2rem 0">'+esc(c.christButtonTitle)+'</div>'+
-      '<div style="font-size:.78rem;opacity:.95;line-height:1.4">'+esc(c.christButtonSubtitle)+'</div>'+
-      '<span style="display:inline-block;margin-top:.75rem;background:#fff;color:#9f1239;border-radius:12px;padding:.5rem .9rem;font-weight:800;font-size:.78rem">'+esc(c.christActionLabel||"Quero dar este passo")+'</span>'+
-    '</button>';
-  }
-
-  /* Prayer card */
-  if(can("fazerPedidoOracaoEmail")){
-    h+='<div class="card">'+
-      '<div style="font-size:1rem;font-weight:800">'+esc(c.prayerTitle)+'</div>'+
-      '<p class="help" style="margin:.25rem 0 .8rem">'+esc(c.prayerDescription)+'</p>'+
-      '<button class="btn-main" style="width:100%;background:linear-gradient(90deg,'+t.hex+','+t.hex2+')" data-act="go" data-page="prayer">'+esc(c.prayerBtnLabel||"Enviar pedido de oração")+'</button>'+
-    '</div>';
-  }
-
-  /* Info card */
-  if(can("verInfoIgreja")){
-    h+='<div class="card">'+
-      '<div style="font-size:1rem;font-weight:800">'+esc(c.infoSectionTitle||"Informações sobre a Igreja")+'</div>'+
-      '<p class="help" style="margin:.2rem 0 .6rem">'+esc(c.infoSectionSubtitle||"Conheça nossa igreja e nossos horários.")+'</p>'+
-      '<p style="font-size:.84rem;line-height:1.55;margin:0 0 .7rem">'+esc(c.aboutText)+'</p>'+
-      '<span class="pill" style="background:'+t.hexLight+';color:'+t.hex+';border-color:'+t.hex+'">'+esc(c.sundayWorshipTime)+"</span>"+
-    "</div>";
-  }
-
-  h+=customPagesHomeHtml();
-  h+=directorateSectionHtml();
-  h+=departmentsSectionHtml();
-  h+=cultosSectionHtml();
-  h+='<div class="safe-grid-2">'+(can("verAvisos")?avisosHtml():"")+(can("verLinks")?linksHtml():"")+"</div>";
-  h+="</section>";
-  return h;
+  return renderLayoutPage("home");
 }
+
 function currentName(){
   if(session.userId){var u=findUser(session.userId);if(u) return u.name.split(" ")[0];}
   if(session.visitorName) return session.visitorName.split(" ")[0];
@@ -1773,12 +1897,12 @@ function directorateSectionHtml(){
     }
     return "";
   }
-  var list=filled.slice(0,6).map(function(d){
+  var list=filled.slice(0,dirMax()).map(function(d){
     var wa=d.phone?'<a href="https://wa.me/55'+esc(String(d.phone).replace(/\D/g,""))+'" target="_blank" rel="noopener noreferrer" style="display:inline-block;margin-top:.15rem;font-size:.74rem;color:#15803d;font-weight:700">WhatsApp</a>':"";
     return '<div style="display:flex;gap:.65rem;align-items:center;padding:.35rem;border-radius:14px;background:#fafaf9">'+avatar(d.photo,d.name,56)+'<div style="min-width:0"><div style="font-weight:700;font-size:.85rem">'+esc(d.name)+'</div><div style="font-size:.72rem;font-weight:600;color:'+t.hex+'">'+esc(d.role)+"</div>"+wa+"</div></div>";
   }).join("");
   return '<div class="card"><div style="font-size:1rem;font-weight:800">'+esc(c.directorateTitle||"Nossa Diretoria")+'</div><p class="help" style="margin:.2rem 0 .75rem">'+esc(c.directorateSubtitle||"Quem cuida da obra no dia a dia.")+'</p><div class="safe-grid-sm">'+list+"</div>"+
-    (filled.length>6?'<button class="btn-soft" style="width:100%;margin-top:.75rem" data-act="showFullDirectorate">Ver toda a diretoria</button>':"")+"</div>";
+    (filled.length>dirMax()?'<button class="btn-soft" style="width:100%;margin-top:.75rem" data-act="showFullDirectorate">Ver toda a diretoria</button>':"")+"</div>";
 }
 
 function departmentsSectionHtml(){
@@ -1829,10 +1953,10 @@ function avisosHtml(){
 function linksHtml(){
   var c=state.church,t=theme();
   var items=state.quickLinks.filter(function(l){return visible(l.visibility,session.role);});
-  var body=items.map(function(l){
+  var body=(curSec&&curSec.showSocial===false)?"":items.map(function(l){
     return '<a href="'+esc(l.url)+'" target="_blank" rel="noopener noreferrer" style="display:flex;justify-content:space-between;align-items:center;min-height:44px;padding:.65rem .8rem;border-radius:14px;border:1px solid #e7e5e4;color:#1c1917;text-decoration:none;font-weight:700;font-size:.82rem"><span>'+esc(l.title)+"</span>"+ico("external-link",15)+"</a>";
   }).join("");
-  var gab=state.adminButtons.filter(function(b){return b.active&&visible(b.visibility,session.role)&&(b.isGabinetePastoral?can("verGabinetePastoral"):true);});
+  var gab=state.adminButtons.filter(function(b){return b.active&&visible(b.visibility,session.role)&&(b.isGabinetePastoral?can("verGabinetePastoral"):true)&&linksGabOk(b);});
   var gabHtml=gab.map(function(b){
     return '<a href="'+esc(b.link)+'" target="_blank" rel="noopener noreferrer" style="display:flex;justify-content:space-between;align-items:center;gap:.5rem;min-height:44px;padding:.65rem .8rem;border-radius:14px;background:'+t.hexLight+';color:'+t.hex+';text-decoration:none;font-weight:700;font-size:.82rem"><span>'+esc(b.title)+"</span>"+pill(b.badge,"b-white")+"</a>";
   }).join("");
@@ -1840,41 +1964,9 @@ function linksHtml(){
 }
 
 /* ---------- prayer page ---------- */
-function prayerHtml(){
-  var c=state.church,t=theme();
-  var h='<section style="max-width:56rem;margin:-1.35rem auto 0;padding:0 .85rem;width:100%;display:flex;flex-direction:column;gap:.9rem">';
-  h+='<div class="card">'+pageHeadHtml("prayer",c.prayerTitle,c.prayerDescription)+
-    '<div class="safe-grid-sm">'+
-    '<button class="btn-main" style="background:linear-gradient(90deg,'+t.hex+','+t.hex2+')" data-act="prayerSend" data-kind="oracao">Pedido de oração no app</button>'+
-    '<button class="btn-soft" data-act="prayerSend" data-kind="whatsapp">Falar pelo WhatsApp</button></div></div>';
-  if(state.adminButtons.length){
-    var btns=state.adminButtons.filter(function(b){return b.active&&visible(b.visibility,session.role);});
-    h+='<div class="card"><div style="font-weight:800">Secretaria &amp; Gabinete</div><p class="help" style="margin:.2rem 0 .75rem">Atalhos administrativos disponíveis para o seu acesso.</p><div style="display:flex;flex-direction:column;gap:.55rem">'+
-      (btns.length?btns.map(function(b){return '<a href="'+esc(b.link)+'" target="_blank" rel="noopener noreferrer" style="display:flex;justify-content:space-between;align-items:center;gap:.5rem;min-height:44px;padding:.7rem .85rem;border-radius:14px;border:1px solid '+t.hex+';color:'+t.hex+';text-decoration:none;font-weight:700;font-size:.82rem"><span>'+esc(b.title)+"</span>"+pill(b.badge,"b-white")+"</a>";}).join(""):'<p class="help">Nenhum atalho disponível para o seu acesso. Entre com seu CPF ou senha pessoal para ver mais.</p>')+"</div></div>";
-  }
-  h+='<div class="card"><div style="font-weight:800">Acesso da equipe</div><p class="help" style="margin:.2rem 0 .75rem">Membros entram com o CPF; a equipe entra com a senha pessoal.</p><button class="btn-soft" style="width:100%" data-act="changeAccess">Entrar</button></div>';
-  h+="</section>";
-  return h;
-}
+function prayerHtml(){return renderLayoutPage("prayer");}
 
-function areaButtonsPageHtml(area,title,subtitle){
-  var t=theme();
-  var btns=state.adminButtons.filter(function(b){
-    return b.active&&(b.area||"secretaria")===area&&visible(b.visibility,session.role);
-  });
-  var listHtml=btns.length
-    ?btns.map(function(b){
-      return '<a href="'+esc(b.link)+'" target="_blank" rel="noopener noreferrer" style="display:flex;justify-content:space-between;align-items:center;gap:.5rem;min-height:48px;padding:.75rem .9rem;border-radius:14px;border:1px solid '+t.hex+';background:'+t.hexLight+';color:'+t.hex+';text-decoration:none;font-weight:800;font-size:.86rem"><span>'+esc(b.title)+'</span>'+pill(b.badge||title,"b-white")+'</a>';
-    }).join("")
-    :'<p class="help">Nenhum serviço disponível para o seu nível de acesso. Entre com seu CPF de membro ou senha pessoal para liberar.</p>';
-  return '<section style="max-width:56rem;margin:-1.35rem auto 0;padding:0 .85rem;width:100%;display:flex;flex-direction:column;gap:.9rem">'+
-    '<div class="card">'+
-      pageHeadHtml(area,title,subtitle)+
-      '<div style="display:flex;flex-direction:column;gap:.6rem">'+listHtml+'</div>'+
-    '</div>'+
-    (session.role==="visitante"?'<div class="card"><div style="font-weight:800">É membro da igreja?</div><p class="help" style="margin:.2rem 0 .7rem">Entre com seu CPF para acessar todos os serviços.</p><button class="btn-main" style="width:100%" data-act="changeAccess">Entrar com CPF</button></div>':"")+
-  '</section>';
-}
+function areaButtonsPageHtml(area){return renderLayoutPage(area);}
 function secretariaHtml(){
   return areaButtonsPageHtml("secretaria","Secretaria da Igreja","Solicitação de cartas, apresentação de crianças e atendimento da secretaria.");
 }
@@ -1898,6 +1990,7 @@ var ADMIN_TABS=[
   ["notices","8. Avisos & Links","bell"],
   ["directorate","9. Diretoria & Equipes","users-round"],
   ["pages","10. Páginas Personalizadas","layout"],
+  ["layout","11. Layout & Visibilidade","sliders"],
   ["records","Registros ("+state.submissions.length+")","inbox"],
   ["backup","Backup & Publicar","share-2"]
 ];
@@ -1934,6 +2027,7 @@ function adminTabBody(tab){
   if(tab==="notices") return tabNotices();
   if(tab==="directorate") return tabDirectorate();
   if(tab==="pages") return tabPages();
+  if(tab==="layout") return tabLayout();
   if(tab==="records") return tabRecords();
   if(tab==="backup") return tabBackup();
   return "";
@@ -2714,9 +2808,12 @@ function applyChromeStyles(){
   var fHome=document.getElementById("footNavHome");
   var fPray=document.getElementById("footNavPrayer");
   var fNote=document.getElementById("footNote");
-  if(fHome) fHome.textContent="Início & Pix";
-  if(fPray) fPray.textContent="Administração & Oração";
-  if(fNote) fNote.textContent=c.footerNote||"v2.0 • Dados salvos localmente neste navegador";
+  var F=L().footer;
+  var foot=document.getElementById("adxFoot");
+  if(foot) foot.hidden=(F.show===false);
+  if(fHome){fHome.textContent=F.homeLabel||"Início & Pix";fHome.hidden=(F.homeShow===false);}
+  if(fPray){fPray.textContent=F.prayerLabel||"Administração & Oração";fPray.hidden=(F.prayerShow===false);}
+  if(fNote){fNote.textContent=c.footerNote||"v2.0 • Dados salvos localmente neste navegador";fNote.hidden=(F.showNote===false);}
 }
 
 /* ---------- render & action dispatcher ---------- */
@@ -2738,6 +2835,8 @@ function render(){
     app.innerHTML=html;
     document.getElementById("footName").textContent=state.church.name;
     document.getElementById("footInfo").textContent=state.church.address+(can("verCnpj")&&state.church.cnpj?" • CNPJ "+state.church.cnpj:"");
+    document.getElementById("footName").hidden=(L().footer.showName===false);
+    document.getElementById("footInfo").hidden=(L().footer.showInfo===false);
   }catch(e){
     app.innerHTML='<div style="max-width:56rem;margin:1rem auto;padding:1rem;background:#fff1f2;color:#9f1239;border-radius:16px;font-size:.85rem"><b>Ocorreu um erro ao mostrar esta tela.</b><br>'+esc(e.message)+'<br><button class="btn-soft" style="margin-top:.5rem" onclick="location.reload()">Recarregar</button></div>';
   }
@@ -3799,18 +3898,18 @@ A.pbDel=function(el){
   });
 };
 A.pbImgUpload=function(el){
-  syncPageDraft();
+  syncAnyDraft();
   var id=el.getAttribute("data-id");
   var inp=document.createElement("input");inp.type="file";inp.accept="image/*";
   inp.onchange=function(){
     if(!inp.files[0]) return;
     resizeWide(inp.files[0],function(data,before,after){
-      var b=draftBlock(id);if(b){b.url=data;render();toast("Imagem otimizada ("+fmtKB(before)+" → "+fmtKB(after)+"). Toque em Salvar página.","success");}
+      var b=anyDraftBlock(id);if(b){b.url=data;render();toast("Imagem otimizada ("+fmtKB(before)+" → "+fmtKB(after)+"). Toque em Salvar página.","success");}
     });
   };
   inp.click();
 };
-A.pbImgRemove=function(el){syncPageDraft();var b=draftBlock(el.getAttribute("data-id"));if(b){b.url="";render();}};
+A.pbImgRemove=function(el){syncAnyDraft();var b=anyDraftBlock(el.getAttribute("data-id"));if(b){b.url="";render();}};
 A.pageMove=function(el){
   var arr=state.customPages,id=el.getAttribute("data-id");
   var i=arr.findIndex(function(p){return p.id===id;}),j=i+(+el.getAttribute("data-dir"));
@@ -3854,8 +3953,8 @@ window.addEventListener("hashchange",function(){applyHashRoute();render();window
 document.addEventListener("change",function(e){
   var id=e.target&&e.target.id||"";
   if(id.indexOf("pb_action_")===0){
-    syncPageDraft();
-    var b=draftBlock(id.slice(10));
+    syncAnyDraft();
+    var b=anyDraftBlock(id.slice(10));
     if(b){b.value=(b.action==="page"?"home":(b.action==="url"?"https://":""));b.message="";}
     render();
   }
@@ -3959,6 +4058,208 @@ A.optimizeImages=function(el){
     compressDataUrl(x.o[x.k],x.p,function(out){x.o[x.k]=out;setTimeout(next,0);});
   }
   next();
+};
+
+/* ---------- admin: Layout & Visibilidade ---------- */
+function dirMax(){var n=curSec&&parseInt(curSec.maxItems,10);return n>0?n:6;}
+function linksGabOk(b){
+  if(!curSec) return true;
+  if(curSec.gabMode==="none") return false;
+  if(curSec.gabMode==="gabinete"&&!b.isGabinetePastoral) return false;
+  return secAreas(curSec).indexOf(b.area||"secretaria")>=0;
+}
+function readBlockFields(b){
+  (BLOCK_FIELDS[b.type]||[]).concat(["visibility"]).forEach(function(f){
+    var el=document.getElementById("pb_"+f+"_"+b.id);
+    if(!el) return;
+    if(b.type==="image"&&f==="url"&&!el.value&&String(b.url||"").indexOf("data:")===0) return;
+    b[f]=el.value;
+  });
+}
+function layoutDraft(){
+  ui.layoutDrafts=ui.layoutDrafts||{};
+  var pg=ui.layoutPage||"home";
+  if(!ui.layoutDrafts[pg]) ui.layoutDrafts[pg]=clone((L().pages||{})[pg]||defaultLayout(pg));
+  return ui.layoutDrafts[pg];
+}
+function syncLayoutDraft(){
+  if(!document.getElementById("ly_marker")||!ui.layoutDrafts) return;
+  var list=ui.layoutDrafts[ui.layoutPage||"home"];if(!list) return;
+  list.forEach(function(it){
+    if(it.type!=="sys"){readBlockFields(it);return;}
+    function g(f){return document.getElementById("ly_"+f+"_"+it.id);}
+    var e=g("show");if(e) it.show=e.checked;
+    ["title","subtitle","visibility"].forEach(function(f){var el=g(f);if(el) it[f]=el.value;});
+    (SYS[it.key].opts||[]).forEach(function(o){
+      if(o.type==="areas"){
+        var boxes=document.querySelectorAll('input[data-lyarea="'+it.id+'"]');
+        if(boxes.length){var arr=[];boxes.forEach(function(x){if(x.checked) arr.push(x.value);});it[o.f]=arr;}
+        return;
+      }
+      var el=g(o.f);if(!el) return;
+      it[o.f]=o.type==="check"?el.checked:el.value;
+    });
+  });
+}
+function syncAnyDraft(){syncPageDraft();syncLayoutDraft();}
+function anyDraftBlock(id){
+  var b=draftBlock(id);if(b) return b;
+  var list=ui.layoutDrafts&&ui.layoutDrafts[ui.layoutPage||"home"];
+  return list?list.find(function(x){return x.id===id;}):null;
+}
+function inputPh(label,id,val,ph,help,type){
+  return '<div><label class="lbl" for="'+id+'">'+esc(label)+'</label><input class="fld" id="'+id+'" type="'+(type||"text")+'" value="'+esc(val||"")+'" placeholder="'+esc(ph||"")+'">'+(help?'<div class="help">'+esc(help)+"</div>":"")+"</div>";
+}
+function chk(id,on,label){return '<label style="font-size:.82rem;display:flex;align-items:center;gap:.45rem"><input type="checkbox" id="'+id+'"'+(on?" checked":"")+"> "+esc(label)+"</label>";}
+function sysEditorHtml(it,i,n,pg){
+  var c=state.church,S=SYS[it.key],id=it.id;
+  function P(f){return "ly_"+f+"_"+id;}
+  var h='<div class="blk-card" id="blk_card_'+id+'" style="'+(it.show===false?"opacity:.6;background:#fafaf9":"")+'">'+
+    '<div class="blk-head"><div style="font-weight:800;font-size:.85rem">'+(i+1)+". ⚙️ "+esc(S.label)+"</div>"+
+      '<div style="display:flex;gap:.3rem;flex-wrap:wrap">'+
+        '<button type="button" class="btn-soft btn-sm" data-act="lyMove" data-id="'+id+'" data-dir="-1" aria-label="Subir">↑</button>'+
+        '<button type="button" class="btn-soft btn-sm" data-act="lyMove" data-id="'+id+'" data-dir="1" aria-label="Descer">↓</button>'+
+        '<button type="button" class="btn-danger btn-sm" data-act="lyDel" data-id="'+id+'" aria-label="Remover seção">✕</button>'+
+      "</div></div>"+
+    chk(P("show"),it.show!==false,"Exibir esta seção");
+  if(S.titles){
+    h+='<div class="safe-grid-sm">'+inputPh("Título (deixe vazio p/ padrão)",P("title"),it.title,S.defTitle?S.defTitle(c,pg):"")+inputPh("Subtítulo (deixe vazio p/ padrão)",P("subtitle"),it.subtitle,S.defSub?S.defSub(c,pg):"")+"</div>";
+  }
+  (S.opts||[]).forEach(function(o){
+    if(o.type==="check") h+=chk(P(o.f),it[o.f]!==false&&(it[o.f]!==undefined||o.def!==false),o.label);
+    else if(o.type==="text") h+=inputPh(o.label,P(o.f),it[o.f],o.ph?o.ph(c):"");
+    else if(o.type==="number") h+=inputPh(o.label,P(o.f),it[o.f],o.ph?o.ph(c):"","","number");
+    else if(o.type==="select") h+=selectF(o.label,P(o.f),o.choices,it[o.f]||o.def);
+    else if(o.type==="areas"){
+      var ar=secAreas(it);
+      h+='<div><div class="lbl">'+esc(o.label)+'</div><div style="display:flex;flex-wrap:wrap;gap:.75rem">'+["secretaria","tesouraria","ebd"].map(function(a){
+        return '<label style="font-size:.8rem;display:inline-flex;align-items:center;gap:.3rem"><input type="checkbox" data-lyarea="'+id+'" value="'+a+'"'+(ar.indexOf(a)>=0?" checked":"")+"> "+AREA_NAMES[a]+"</label>";
+      }).join("")+"</div></div>";
+    }
+  });
+  h+=selectF("Quem vê esta seção",P("visibility"),blockVisOpts(),it.visibility||"todos");
+  if(S.note) h+='<p class="help" style="margin:0">ℹ️ '+esc(S.note)+"</p>";
+  return h+"</div>";
+}
+function customItemEditorHtml(b,i){
+  return '<div class="blk-card" id="blk_card_'+b.id+'" style="border-color:#bfdbfe">'+
+    '<div class="blk-head"><div style="font-weight:800;font-size:.85rem">'+(i+1)+". "+esc(BLOCK_LABEL[b.type]||b.type)+' <span class="pill b-sky">bloco livre</span></div>'+
+      '<div style="display:flex;gap:.3rem;flex-wrap:wrap">'+
+        '<button type="button" class="btn-soft btn-sm" data-act="lyMove" data-id="'+b.id+'" data-dir="-1" aria-label="Subir">↑</button>'+
+        '<button type="button" class="btn-soft btn-sm" data-act="lyMove" data-id="'+b.id+'" data-dir="1" aria-label="Descer">↓</button>'+
+        '<button type="button" class="btn-soft btn-sm" data-act="lyDup" data-id="'+b.id+'">Duplicar</button>'+
+        '<button type="button" class="btn-danger btn-sm" data-act="lyDel" data-id="'+b.id+'" aria-label="Excluir bloco">✕</button>'+
+      "</div></div>"+
+    blockEditorFields(b)+
+  "</div>";
+}
+function chromeEditorHtml(){
+  var l=L(),n=l.nav,hd2=l.header,f=l.footer;
+  var navRows=LAYOUT_PAGES.map(function(p){
+    var cfg=n[p[0]]||{label:p[1],show:true};
+    return '<div style="display:grid;grid-template-columns:auto 1fr;gap:.6rem;align-items:center;padding:.5rem;border:1px solid #e7e5e4;border-radius:12px"><input type="checkbox" id="nv_s_'+p[0]+'"'+(cfg.show!==false?" checked":"")+' aria-label="Mostrar '+p[1]+'"><input class="fld" id="nv_l_'+p[0]+'" value="'+esc(cfg.label||p[1])+'" placeholder="'+esc(p[1])+'"></div>';
+  }).join("");
+  return '<div id="ly_chrome" style="display:grid;gap:.85rem">'+
+    '<details class="adx-acc" open><summary>🧭 Menu superior</summary><div class="acc-body">'+
+      '<p class="help" style="margin:0">Marque para mostrar no menu e edite o nome de cada botão. (A página continua respeitando as Permissões por cargo.) As Páginas Personalizadas são configuradas na aba delas.</p>'+
+      navRows+
+      inputPh("Nome do botão do Painel Gestor","nv_gestor",n.gestorLabel,"Gestor")+
+      chk("nv_inst",n.showInstall!==false,"Mostrar botão Instalar App no menu")+
+      inputPh("Nome do botão Instalar","nv_instL",n.installLabel,"Instalar App")+
+    "</div></details>"+
+    '<details class="adx-acc" open><summary>🏛️ Cabeçalho (topo de todas as páginas)</summary><div class="acc-body">'+
+      chk("hd_logo",hd2.showLogo!==false,"Mostrar logo da igreja")+
+      chk("hd_name",hd2.showName!==false,"Mostrar nome da igreja")+
+      chk("hd_sub",hd2.showSubtitle!==false,"Mostrar subtítulo / lema")+
+      chk("hd_cnpj",hd2.showCnpj!==false,"Mostrar CNPJ (também depende da permissão CNPJ)")+
+      chk("hd_addr",hd2.showAddress!==false,"Mostrar endereço")+
+    "</div></details>"+
+    '<details class="adx-acc" open><summary>⬇️ Rodapé</summary><div class="acc-body">'+
+      chk("ft_show",f.show!==false,"Mostrar rodapé")+
+      chk("ft_name",f.showName!==false,"Mostrar nome da igreja")+
+      chk("ft_info",f.showInfo!==false,"Mostrar endereço / CNPJ")+
+      '<div class="safe-grid-sm">'+chk("ft_hs",f.homeShow!==false,"Mostrar link 1 (vai para Início)")+inputPh("Texto do link 1","ft_hl",f.homeLabel,"Início & Pix")+"</div>"+
+      '<div class="safe-grid-sm">'+chk("ft_ps",f.prayerShow!==false,"Mostrar link 2 (vai para Oração)")+inputPh("Texto do link 2","ft_pl",f.prayerLabel,"Administração & Oração")+"</div>"+
+      chk("ft_note",f.showNote!==false,"Mostrar nota final (texto editável em Personalização)")+
+    "</div></details>"+
+    '<button class="btn-main" style="width:100%" data-act="saveChrome">Salvar menu, cabeçalho e rodapé</button>'+
+  "</div>";
+}
+function tabLayout(){
+  if(!canManagePages()&&!can("gerenciarIdentidade")) return errorBox("Seu cargo não tem permissão para alterar o layout.");
+  var pg=ui.layoutPage||"home";
+  var pills=LAYOUT_PAGES.concat([["chrome","Menu, Cabeçalho & Rodapé"]]).map(function(p){
+    return '<button class="tab-btn '+(pg===p[0]?"on":"")+'" data-act="lyPage" data-page="'+p[0]+'">'+esc(p[1])+"</button>";
+  }).join("");
+  var head=hd("Layout & Visibilidade das Páginas","Escolha tudo o que aparece em cada página: mostre, oculte, reordene, renomeie, limite por cargo, remova seções ou complemente com blocos livres (textos, botões, links, imagens, vídeos, Pix...).")+
+    '<div style="display:flex;flex-wrap:wrap;gap:.35rem;margin-bottom:.9rem">'+pills+"</div>";
+  if(pg==="chrome") return head+chromeEditorHtml();
+  var list=layoutDraft();
+  var items=list.map(function(it,i){return it.type==="sys"?sysEditorHtml(it,i,list.length,pg):customItemEditorHtml(it,i);}).join("");
+  var present={};list.forEach(function(it){if(it.type==="sys") present[it.key]=1;});
+  var missing=(DEFAULT_LAYOUT_KEYS[pg]||[]).filter(function(k){return !present[k];});
+  var readd=missing.length?'<div style="display:grid;gap:.4rem"><div class="lbl" style="margin:0">Seções do sistema removidas (toque para adicionar de volta)</div><div style="display:flex;flex-wrap:wrap;gap:.4rem">'+missing.map(function(k){return '<button type="button" class="btn-soft btn-sm" data-act="lyAddSys" data-key="'+k+'">↩️ '+esc(SYS[k].label)+"</button>";}).join("")+"</div></div>":"";
+  var addBtns=BLOCK_TYPES.map(function(bt){return '<button type="button" class="btn-soft btn-sm" style="justify-content:flex-start" data-act="lyAdd" data-type="'+bt[0]+'">'+bt[2]+" "+esc(bt[1])+"</button>";}).join("");
+  var actions='<div style="display:flex;flex-wrap:wrap;gap:.5rem"><button type="button" class="btn-soft" data-act="lyReset">Restaurar padrão desta página</button><button type="button" class="btn-soft" data-act="lyDiscard">Desfazer alterações</button><button type="button" class="btn-main" style="flex:1" data-act="lySave">Salvar layout</button></div>';
+  return head+'<span id="ly_marker" hidden></span>'+
+    '<div class="card" style="background:#f5f5f4;margin-bottom:.8rem"><p class="help" style="margin:0">⚙️ = seção do sistema (pode ocultar, renomear, mover ou remover) • <span class="pill b-sky">bloco livre</span> = conteúdo criado por você. Blocos livres seguidos aparecem juntos em um cartão. As seções também respeitam as Permissões por cargo.</p></div>'+
+    actions+'<div style="height:.8rem"></div>'+
+    '<div style="display:flex;flex-direction:column;gap:.65rem">'+(items||'<p class="help">Página vazia. Adicione seções ou blocos abaixo.</p>')+"</div>"+
+    '<div class="card" style="margin:1rem 0;background:#eff6ff;border-color:#bfdbfe;display:grid;gap:.6rem"><div style="font-weight:800;color:#1e3a8a">➕ Adicionar conteúdo nesta página</div><div class="add-blk-grid">'+addBtns+"</div>"+readd+"</div>"+
+    actions;
+}
+A.lyPage=function(el){syncLayoutDraft();ui.layoutPage=el.getAttribute("data-page");render();};
+A.lyMove=function(el){
+  syncLayoutDraft();
+  var list=layoutDraft(),id=el.getAttribute("data-id");
+  var i=list.findIndex(function(x){return x.id===id;}),j=i+(+el.getAttribute("data-dir"));
+  if(i<0||j<0||j>=list.length) return;
+  var t=list[i];list[i]=list[j];list[j]=t;render();
+};
+A.lyDup=function(el){
+  syncLayoutDraft();
+  var list=layoutDraft(),id=el.getAttribute("data-id");
+  var i=list.findIndex(function(x){return x.id===id;});if(i<0) return;
+  var cp=clone(list[i]);cp.id=newId("blk_");list.splice(i+1,0,cp);render();
+};
+A.lyDel=function(el){
+  syncLayoutDraft();
+  var id=el.getAttribute("data-id"),list=layoutDraft();
+  var it=list.find(function(x){return x.id===id;});if(!it) return;
+  openConfirm(it.type==="sys"?'Remover a seção "'+SYS[it.key].label+'" desta página? Você pode adicioná-la de volta depois.':"Excluir este bloco?",function(){
+    ui.layoutDrafts[ui.layoutPage||"home"]=list.filter(function(x){return x.id!==id;});
+    render();toast("Removido. Toque em Salvar layout para confirmar.");
+  });
+};
+A.lyAdd=function(el){
+  syncLayoutDraft();
+  var b=newBlock(el.getAttribute("data-type"));
+  layoutDraft().push(b);render();
+  setTimeout(function(){var c=document.getElementById("blk_card_"+b.id);if(c&&c.scrollIntoView) c.scrollIntoView({behavior:"smooth",block:"center"});},60);
+};
+A.lyAddSys=function(el){syncLayoutDraft();layoutDraft().push(sysItem(el.getAttribute("data-key")));render();};
+A.lyReset=function(){
+  var pg=ui.layoutPage||"home";
+  openConfirm("Restaurar o layout padrão desta página? Blocos livres desta página serão apagados.",function(){
+    ui.layoutDrafts[pg]=defaultLayout(pg);render();toast("Padrão restaurado. Toque em Salvar layout para confirmar.");
+  });
+};
+A.lyDiscard=function(){var pg=ui.layoutPage||"home";if(ui.layoutDrafts) delete ui.layoutDrafts[pg];render();toast("Alterações desfeitas");};
+A.lySave=function(){
+  syncLayoutDraft();
+  state.layout=state.layout||defaultLayoutState();
+  Object.keys(ui.layoutDrafts||{}).forEach(function(pg){state.layout.pages[pg]=clone(ui.layoutDrafts[pg]);});
+  ui.layoutDrafts={};
+  save();render();toast("Layout salvo!","success");
+};
+A.saveChrome=function(){
+  var l=state.layout=state.layout||defaultLayoutState();
+  LAYOUT_PAGES.forEach(function(p){l.nav[p[0]]={label:v("nv_l_"+p[0]).trim()||p[1],show:ch("nv_s_"+p[0])};});
+  l.nav.gestorLabel=v("nv_gestor").trim()||"Gestor";
+  l.nav.showInstall=ch("nv_inst");l.nav.installLabel=v("nv_instL").trim()||"Instalar App";
+  l.header={showLogo:ch("hd_logo"),showName:ch("hd_name"),showSubtitle:ch("hd_sub"),showCnpj:ch("hd_cnpj"),showAddress:ch("hd_addr")};
+  l.footer={show:ch("ft_show"),showName:ch("ft_name"),showInfo:ch("ft_info"),homeShow:ch("ft_hs"),homeLabel:v("ft_hl").trim()||"Início & Pix",prayerShow:ch("ft_ps"),prayerLabel:v("ft_pl").trim()||"Administração & Oração",showNote:ch("ft_note")};
+  save();render();toast("Menu, cabeçalho e rodapé salvos!","success");
 };
 
 /* generic click & input listeners */
