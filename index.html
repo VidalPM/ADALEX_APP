@@ -720,6 +720,7 @@ var ICONS={
   smartphone:'<rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path d="M12 18h.01"/>',
   plus:'<line x1="12" x2="12" y1="5" y2="19"/><line x1="5" x2="19" y1="12" y2="12"/>',
   "file-text":'<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/>',
+  "book-open":'<path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>',
   layout:'<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/>',
   wallet:'<path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1"/><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"/>'
 };
@@ -793,6 +794,7 @@ var PERM_VIEW=[
   {k:"verAvisos",n:"Mural de Avisos",d:"Avisos publicados",def:[0,1,1,1,1]},
   {k:"verPaginaSecretaria",n:"Página da Secretaria",d:"Pedido de cartas, apresentação de criança e secretaria",def:[0,1,1,1,1]},
   {k:"verPaginaTesouraria",n:"Página da Tesouraria",d:"Botões e serviços da tesouraria",def:[0,1,1,1,1]},
+  {k:"verPaginaEBD",n:"Página da EBD",d:"Botões e serviços da Escola Bíblica Dominical",def:[0,1,1,1,1]},
   {k:"verDiretoria",n:"Nossa Diretoria",d:"Cargos da diretoria",def:[0,1,1,1,1]},
   {k:"verEquipes",n:"Equipes",d:"Equipes dos departamentos",def:[0,1,1,1,1]}
 ];
@@ -836,6 +838,7 @@ var SEC_DEPTS=[
   ["Obras e Reformas","adalex.financeiro@gmail.com","hammer","Manutenções, pintura e reparos estruturais do Templo.","todos"],
   ["Departamento de Louvor","adalex.financeiro@gmail.com","music","Manutenção dos instrumentos e equipamentos.","todos"]
 ];
+var AREA_NAMES={secretaria:"Secretaria",tesouraria:"Tesouraria",ebd:"EBD"};
 var DAYS=["Domingo","Segunda","Terça","Quarta","Quinta","Sexta","Sábado"];
 
 /* ---------- defaults ---------- */
@@ -851,7 +854,7 @@ function defaultPerms(){
       }else if(r.id==="tesouraria"){
         val=(x.k==="verPaginaTesouraria"||x.k==="verDepartamentosPix"||x.k==="verCnpj"||x.k==="verInfoIgreja"||x.k==="gerenciarPix"||x.k==="verDiretoriaAdmin");
       }else if(r.id==="ebd"){
-        val=(x.k==="verInfoIgreja"||x.k==="verCultos"||x.k==="verAvisos"||x.k==="verEquipes"||x.k==="verDepartamentosPix"||x.k==="gerenciarCultos"||x.k==="verDiretoriaAdmin");
+        val=(x.k==="verPaginaEBD"||x.k==="verInfoIgreja"||x.k==="verCultos"||x.k==="verAvisos"||x.k==="verEquipes"||x.k==="verDepartamentosPix"||x.k==="gerenciarCultos"||x.k==="verDiretoriaAdmin");
       }
       p[x.k][r.id]=val;
     });
@@ -993,7 +996,7 @@ function load(){
   var base=defaultState();
   try{
     var raw=localStorage.getItem(KEY);
-    if(!raw) return base;
+    if(!raw) return migrate(base);
     var parsed=JSON.parse(raw);
     if((base.publishedAt||0)>(parsed.publishedAt||0)){
       var keptSubs=Array.isArray(parsed.submissions)?parsed.submissions:[];
@@ -1031,7 +1034,7 @@ function migrate(s){
     s.roles.forEach(function(r,idx){
       if(typeof s.permissions[k][r.id]!=="boolean"){
         var baseIdx=Math.min(Math.max(r.level||0,0),4);
-        s.permissions[k][r.id]=!!(d[k][DEFAULT_ROLES[baseIdx].id]);
+        s.permissions[k][r.id]=(typeof d[k][r.id]==="boolean")?d[k][r.id]:!!(d[k][DEFAULT_ROLES[baseIdx].id]);
       }
     });
   });
@@ -1066,7 +1069,7 @@ function migrate(s){
   s.adminButtons.forEach(function(b){
     if(!b.area){
       var t=String(b.title||"").toLowerCase()+" "+String(b.badge||"").toLowerCase();
-      b.area=(t.indexOf("tesouraria")>=0||t.indexOf("sigloc")>=0||t.indexOf("comprovante")>=0)?"tesouraria":"secretaria";
+      b.area=(t.indexOf("ebd")>=0||t.indexOf("escola b")>=0)?"ebd":(t.indexOf("tesouraria")>=0||t.indexOf("sigloc")>=0||t.indexOf("comprovante")>=0)?"tesouraria":"secretaria";
     }
   });
   s.departments.forEach(function(dp){if(!Array.isArray(dp.team)) dp.team=[]; if(!dp.visibility) dp.visibility="todos";});
@@ -1079,6 +1082,12 @@ function migrate(s){
     s.church.topBannerText="ADALEX DIGITAL • CONECTANDO A IGREJA Versão 1.0";
   }
   if(!THEMES[s.church.theme]) s.church.theme="navy";
+  if(!s.ebdSeeded){
+    if(!s.adminButtons.some(function(b){return b.area==="ebd";})){
+      s.adminButtons.push({id:"b_ebd1",area:"ebd",title:"Falar com a Superintendência da EBD",type:"whatsapp",link:"https://wa.me/55"+String(s.church.secretaryWhatsapp||"41984253365").replace(/\D/g,"")+"?text="+encodeURIComponent("Olá, Paz do Senhor! Gostaria de falar com a Superintendência da EBD."),visibility:"membros_acima",icon:"book-open",badge:"EBD",isGabinetePastoral:false,active:true});
+    }
+    s.ebdSeeded=true;
+  }
   s.customPages.forEach(function(p){
     if(!Array.isArray(p.blocks)) p.blocks=[];
     if(!Array.isArray(p.visibleTo)) p.visibleTo=[];
@@ -1466,6 +1475,9 @@ function renderNav(){
   if(can("verPaginaTesouraria")){
     left+='<button class="nav-btn '+(ui.page==="tesouraria"?"on":"")+'" data-act="go" data-page="tesouraria">'+ico("wallet",15)+'<span>Tesouraria</span></button>';
   }
+  if(can("verPaginaEBD")){
+    left+='<button class="nav-btn '+(ui.page==="ebd"?"on":"")+'" data-act="go" data-page="ebd">'+ico("book-open",15)+'<span>EBD</span></button>';
+  }
   customPagesFor("nav").forEach(function(p){
     left+='<button class="nav-btn '+(ui.page==="cp:"+p.id?"on":"")+'" data-act="go" data-page="cp:'+esc(p.id)+'"><span aria-hidden="true">'+esc(p.icon||"📄")+'</span><span>'+esc(p.title)+'</span></button>';
   });
@@ -1543,51 +1555,50 @@ function welcomeScreenHtml(wp){
     '</div>'+
   '</section>';
 }
+var GATE_MODES=[
+  ["visitor","Visitante"],
+  ["member","Membro"],
+  ["secretaria","Secretaria"],
+  ["tesouraria","Tesouraria"],
+  ["ebd","EBD"],
+  ["lideranca","Liderança / Diretoria"],
+  ["admin","Administrador"]
+];
+function gateModeLabel(m){var f=GATE_MODES.find(function(x){return x[0]===m;});return f?f[1]:"Acesso";}
 function identificationGateHtml(){
   var c=state.church,t=theme();
   var mode=ui.gateMode||"visitor";
-  var modes=[
-    ["visitor","Visitante"],
-    ["member","Membro"],
-    ["secretaria","Secretaria"],
-    ["tesouraria","Tesouraria"],
-    ["ebd","EBD"],
-    ["admin","Administrador"]
-  ];
-  var modeBtns=modes.map(function(m){
+  var modeBtns=GATE_MODES.map(function(m){
     return '<button class="tab-btn '+(mode===m[0]?"on":"")+'" style="flex:1 1 calc(33% - .4rem);justify-content:center" data-act="setGateMode" data-mode="'+m[0]+'">'+m[1]+'</button>';
   }).join("");
-
-
-
+  var err=ui.loginError?'<div style="background:#fff1f2;color:#9f1239;padding:.6rem;border-radius:10px;font-size:.78rem">'+esc(ui.loginError)+'</div>':"";
+  var btnSt='width:100%;background:linear-gradient(90deg,'+t.hex+','+t.hex2+')';
   var formBody="";
   if(mode==="visitor"){
     formBody='<div style="display:grid;gap:.65rem">'+
-      '<div><label class="lbl" for="gate_v_name">Seu Nome Completo (sem senha)</label><input class="fld" id="gate_v_name" autocomplete="name" placeholder="Digite seu nome completo"></div>'+
-      '<button class="btn-main" style="width:100%;background:linear-gradient(90deg,'+t.hex+','+t.hex2+')" data-act="gateVisitorEnter">Entrar como Visitante</button>'+
+      '<div><label class="lbl" for="gate_v_name">Seu nome completo</label><input class="fld" id="gate_v_name" autocomplete="name" autocapitalize="words" placeholder="Nome e sobrenome"><div class="help">Visitantes entram apenas com o nome completo, sem senha.</div></div>'+
+      err+
+      '<button class="btn-main" style="'+btnSt+'" data-act="gateVisitorEnter">Entrar como Visitante</button>'+
     '</div>';
   }else if(mode==="member"){
     formBody='<div style="display:grid;gap:.65rem">'+
-      '<div><label class="lbl" for="gate_m_code">Código de Membro ou CPF</label><input class="fld" id="gate_m_code" type="text" inputmode="numeric" autocomplete="off" placeholder="Digite seu código de membro ou CPF (somente números)"></div>'+
-      (ui.loginError?'<div style="background:#fff1f2;color:#9f1239;padding:.6rem;border-radius:10px;font-size:.78rem">'+esc(ui.loginError)+'</div>':"")+
-      '<button class="btn-main" style="width:100%;background:linear-gradient(90deg,'+t.hex+','+t.hex2+')" data-act="gateMemberEnter">Entrar como Membro</button>'+
+      '<div><label class="lbl" for="gate_cpf">CPF</label><input class="fld" id="gate_cpf" type="text" inputmode="numeric" autocomplete="off" maxlength="14" placeholder="000.000.000-00"><div class="help">Digite o CPF cadastrado na secretaria da igreja.</div></div>'+
+      err+
+      '<button class="btn-main" style="'+btnSt+'" data-act="gateMemberEnter">Entrar como Membro</button>'+
     '</div>';
   }else{
-    var modeTitles={secretaria:"Secretaria",tesouraria:"Tesouraria",ebd:"EBD",admin:"Administrador"};
-    var modeLabel=modeTitles[mode]||"Acesso";
-    var ph=mode==="admin"?"Digite a senha de Administrador":"Digite a senha de "+modeLabel+" ou seu código de membro";
+    var lbl=gateModeLabel(mode);
     formBody='<div style="display:grid;gap:.65rem">'+
-      '<div><label class="lbl" for="gate_m_code">Senha / Código de Acesso ('+esc(modeLabel)+')</label><input class="fld" id="gate_m_code" type="password" autocomplete="off" placeholder="'+esc(ph)+'"></div>'+
-      (ui.loginError?'<div style="background:#fff1f2;color:#9f1239;padding:.6rem;border-radius:10px;font-size:.78rem">'+esc(ui.loginError)+'</div>':"")+
-      '<button class="btn-main" style="width:100%;background:linear-gradient(90deg,'+t.hex+','+t.hex2+')" data-act="gateMemberEnter">Entrar como '+esc(modeLabel)+'</button>'+
+      '<div><label class="lbl" for="gate_pass">Senha pessoal ('+esc(lbl)+')</label><input class="fld" id="gate_pass" type="password" autocomplete="current-password" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="Digite sua senha pessoal"><div class="help">Use a senha pessoal cadastrada para você pelo administrador.</div></div>'+
+      err+
+      '<button class="btn-main" style="'+btnSt+'" data-act="gateStaffEnter">Entrar como '+esc(lbl)+'</button>'+
     '</div>';
   }
-
   return '<section style="max-width:32rem;margin:-1.35rem auto 0;padding:0 .85rem;width:100%">'+
     '<div class="card" style="display:grid;gap:.8rem">'+
       '<div style="text-align:center">'+
         '<div style="font-weight:900;font-size:1.12rem">Bem-vindo(a) à '+esc(c.name)+'</div>'+
-        '<p class="help" style="margin:.25rem 0 0">Escolha seu perfil de acesso para continuar.</p>'+
+        '<p class="help" style="margin:.25rem 0 0">Visitante: nome completo • Membro: CPF • Demais acessos: senha pessoal.</p>'+
       '</div>'+
       '<div style="display:flex;flex-wrap:wrap;gap:.35rem">'+modeBtns+'</div>'+
       formBody+
@@ -1598,7 +1609,7 @@ function identificationGateHtml(){
 /* ---------- home ---------- */
 function homeHtml(){
   var c=state.church,t=theme(),h="";
-  if((c.requireIdentificationOnOpen!==false||c.requireLoginGate)&&!session.identified){
+  if((c.requireIdentificationOnOpen!==false||c.requireLoginGate||ui.forceGate)&&!session.identified){
     return identificationGateHtml();
   }
   h+='<section style="max-width:56rem;margin:-1.35rem auto 0;padding:0 .85rem;width:100%;display:flex;flex-direction:column;gap:.9rem">';
@@ -1748,9 +1759,9 @@ function prayerHtml(){
   if(state.adminButtons.length){
     var btns=state.adminButtons.filter(function(b){return b.active&&visible(b.visibility,session.role);});
     h+='<div class="card"><div style="font-weight:800">Secretaria &amp; Gabinete</div><p class="help" style="margin:.2rem 0 .75rem">Atalhos administrativos disponíveis para o seu acesso.</p><div style="display:flex;flex-direction:column;gap:.55rem">'+
-      (btns.length?btns.map(function(b){return '<a href="'+esc(b.link)+'" target="_blank" rel="noopener noreferrer" style="display:flex;justify-content:space-between;align-items:center;gap:.5rem;min-height:44px;padding:.7rem .85rem;border-radius:14px;border:1px solid '+t.hex+';color:'+t.hex+';text-decoration:none;font-weight:700;font-size:.82rem"><span>'+esc(b.title)+"</span>"+pill(b.badge,"b-white")+"</a>";}).join(""):'<p class="help">Nenhum atalho disponível para o seu acesso. Entre com um código para ver mais.</p>')+"</div></div>";
+      (btns.length?btns.map(function(b){return '<a href="'+esc(b.link)+'" target="_blank" rel="noopener noreferrer" style="display:flex;justify-content:space-between;align-items:center;gap:.5rem;min-height:44px;padding:.7rem .85rem;border-radius:14px;border:1px solid '+t.hex+';color:'+t.hex+';text-decoration:none;font-weight:700;font-size:.82rem"><span>'+esc(b.title)+"</span>"+pill(b.badge,"b-white")+"</a>";}).join(""):'<p class="help">Nenhum atalho disponível para o seu acesso. Entre com seu CPF ou senha pessoal para ver mais.</p>')+"</div></div>";
   }
-  h+='<div class="card"><div style="font-weight:800">Acesso da equipe</div><p class="help" style="margin:.2rem 0 .75rem">Use o código de acesso para liberar áreas restritas.</p><button class="btn-soft" style="width:100%" data-act="changeAccess">Entrar com código</button></div>';
+  h+='<div class="card"><div style="font-weight:800">Acesso da equipe</div><p class="help" style="margin:.2rem 0 .75rem">Membros entram com o CPF; a equipe entra com a senha pessoal.</p><button class="btn-soft" style="width:100%" data-act="changeAccess">Entrar</button></div>';
   h+="</section>";
   return h;
 }
@@ -1764,18 +1775,21 @@ function areaButtonsPageHtml(area,title,subtitle){
     ?btns.map(function(b){
       return '<a href="'+esc(b.link)+'" target="_blank" rel="noopener noreferrer" style="display:flex;justify-content:space-between;align-items:center;gap:.5rem;min-height:48px;padding:.75rem .9rem;border-radius:14px;border:1px solid '+t.hex+';background:'+t.hexLight+';color:'+t.hex+';text-decoration:none;font-weight:800;font-size:.86rem"><span>'+esc(b.title)+'</span>'+pill(b.badge||title,"b-white")+'</a>';
     }).join("")
-    :'<p class="help">Nenhum serviço disponível para o seu nível de acesso. Entre com seu código de membro para liberar.</p>';
+    :'<p class="help">Nenhum serviço disponível para o seu nível de acesso. Entre com seu CPF de membro ou senha pessoal para liberar.</p>';
   return '<section style="max-width:56rem;margin:-1.35rem auto 0;padding:0 .85rem;width:100%;display:flex;flex-direction:column;gap:.9rem">'+
     '<div class="card">'+
       '<div style="font-size:1.05rem;font-weight:800">'+esc(title)+'</div>'+
       '<p class="help" style="margin:.2rem 0 .85rem">'+esc(subtitle)+'</p>'+
       '<div style="display:flex;flex-direction:column;gap:.6rem">'+listHtml+'</div>'+
     '</div>'+
-    (session.role==="visitante"?'<div class="card"><div style="font-weight:800">É membro da igreja?</div><p class="help" style="margin:.2rem 0 .7rem">Entre com seu código de membro para acessar todos os serviços.</p><button class="btn-main" style="width:100%" data-act="changeAccess">Entrar com código de membro</button></div>':"")+
+    (session.role==="visitante"?'<div class="card"><div style="font-weight:800">É membro da igreja?</div><p class="help" style="margin:.2rem 0 .7rem">Entre com seu CPF para acessar todos os serviços.</p><button class="btn-main" style="width:100%" data-act="changeAccess">Entrar com CPF</button></div>':"")+
   '</section>';
 }
 function secretariaHtml(){
   return areaButtonsPageHtml("secretaria","Secretaria da Igreja","Solicitação de cartas, apresentação de crianças e atendimento da secretaria.");
+}
+function ebdHtml(){
+  return areaButtonsPageHtml("ebd","Escola Bíblica Dominical","Revistas, materiais, chamada, inscrições e atendimento da EBD.");
 }
 function tesourariaHtml(){
   return areaButtonsPageHtml("tesouraria","Tesouraria da Igreja","Atalhos contábeis, envio de comprovantes e serviços da tesouraria.");
@@ -1789,6 +1803,7 @@ var ADMIN_TABS=[
   ["perms","4. Permissões & Visitantes","sliders"],
   ["btn_secretaria","5. Botões Secretaria","file-text"],
   ["btn_tesouraria","6. Botões Tesouraria","wallet"],
+  ["btn_ebd","6.1 Botões EBD","book-open"],
   ["services","7. Cultos","calendar"],
   ["notices","8. Avisos & Links","bell"],
   ["directorate","9. Diretoria & Equipes","users-round"],
@@ -1824,6 +1839,7 @@ function adminTabBody(tab){
   if(tab==="perms") return tabPerms();
   if(tab==="btn_secretaria") return tabButtons("secretaria");
   if(tab==="btn_tesouraria") return tabButtons("tesouraria");
+  if(tab==="btn_ebd") return tabButtons("ebd");
   if(tab==="services") return tabServices();
   if(tab==="notices") return tabNotices();
   if(tab==="directorate") return tabDirectorate();
@@ -1929,7 +1945,7 @@ function tabChurch(){
     '<details class="adx-acc"><summary>⚙️ Opções de Exibição &amp; Acesso</summary><div class="acc-body">'+
       '<label style="font-size:.82rem;display:flex;align-items:center;gap:.45rem"><input type="checkbox" id="ch_showWelcome"'+(c.showWelcomeCard!==false?" checked":"")+'> Exibir cartão de boas-vindas e troca rápida de perfil na tela inicial</label>'+
       '<label style="font-size:.82rem;display:flex;align-items:center;gap:.45rem"><input type="checkbox" id="ch_showReceipt"'+(c.showSendReceiptButton!==false?" checked":"")+'> Exibir botão "Enviar Comprovante via WhatsApp" no modal Pix</label>'+
-      '<label style="font-size:.82rem;display:flex;align-items:center;gap:.45rem"><input type="checkbox" id="ch_idOnOpen"'+(c.requireIdentificationOnOpen!==false?" checked":"")+'> Exigir identificação na abertura (nome completo para visitante / código para membro)</label>'+
+      '<label style="font-size:.82rem;display:flex;align-items:center;gap:.45rem"><input type="checkbox" id="ch_idOnOpen"'+(c.requireIdentificationOnOpen!==false?" checked":"")+'> Exigir identificação na abertura (nome completo para visitante / CPF para membro / senha pessoal para os demais)</label>'+
       '<label style="font-size:.82rem;display:flex;align-items:center;gap:.45rem"><input type="checkbox" id="ch_installPopup"'+(c.showInstallPopupOnOpen!==false?" checked":"")+'> Mostrar popup de instalação (tela a tela) ao abrir o app no navegador</label>'+
       '<label style="font-size:.82rem;display:flex;align-items:center;gap:.45rem"><input type="checkbox" id="ch_loginGate"'+(c.requireLoginGate?" checked":"")+'> Bloquear visitantes completamente (exigir código de membro)</label>'+
     '</div></details>'+
@@ -2034,9 +2050,9 @@ function tabUsers(){
       '</div>'+
     '</div>'+
     '<div class="safe-grid-sm">'+
-      field("CPF (somente números)","us_cpf",v.cpf||"","Permite ao membro recuperar o código pelo CPF.","tel")+
+      field("CPF (somente números)","us_cpf",v.cpf||"","O membro entra no app digitando este CPF.","tel")+
       field("Código de Membro (Número de Login)","us_code",v.memberCode,"Número que o membro digita para entrar no app.","tel")+
-      field("Senha de Acesso","us_pass",v.accessPassword,"Usada por liderança e diretoria.")+
+      field("Senha pessoal de acesso","us_pass",v.accessPassword,"Obrigatória para entrar como Secretaria, Tesouraria, EBD, Liderança/Diretoria ou Administrador. Cada pessoa deve ter uma senha diferente.")+
     '</div>'+
     '<div class="safe-grid-sm">'+
       field("WhatsApp","us_wa",v.whatsapp,"","tel")+
@@ -2081,7 +2097,7 @@ function tabUsers(){
             roleBadge(u.role)+
             (u.memberCode?'<span class="pill b-indigo" style="font-family:monospace;font-size:.72rem">Código de Login: '+esc(u.memberCode)+'</span>':pill("Sem código de login","b-amber"))+
             (u.cpf?pill("CPF "+u.cpf,"b-teal"):"")+
-            (u.accessPassword?pill("Com senha","b-emerald"):"")+
+            (u.accessPassword?pill("Com senha pessoal","b-emerald"):(roleLevel(u.role)>=2?pill("Sem senha pessoal","b-rose"):""))+
             uFuncs+
           '</div>'+
         '</div>'+
@@ -2185,15 +2201,10 @@ function tabPerms(){
   var c=state.church;
   return hd("Permissões & Pré-seleção de Perfis","Defina o que cada perfil de login (Visitante, Membro, Secretaria, Tesouraria, EBD) vê ao abrir o app.")+
     profileControlsCard()+
-    '<div class="card" style="display:grid;gap:.65rem;margin-bottom:1rem">'+
-      '<div style="font-weight:800">Senhas de Acesso Rápido por Área</div>'+
-      '<p class="help" style="margin:0">Opcional: defina uma senha direta para Secretaria, Tesouraria e EBD na tela inicial (além dos códigos individuais dos membros).</p>'+
-      '<div class="safe-grid-sm">'+
-        field("Senha Secretaria","pin_sec",c.secretariaPin||"")+
-        field("Senha Tesouraria","pin_tes",c.tesourariaPin||"")+
-        field("Senha EBD","pin_ebd",c.ebdPin||"")+
-      '</div>'+
-      '<button class="btn-soft" style="width:100%" data-act="saveSectorPins">Salvar Senhas das Áreas</button>'+
+    '<div class="card" style="display:grid;gap:.6rem;margin-bottom:1rem;background:#fffbeb;border-color:#fde68a">'+
+      '<div style="font-weight:800">Como cada perfil entra no app</div>'+
+      '<p class="help" style="margin:0"><b>Visitante:</b> nome completo • <b>Membro:</b> CPF cadastrado • <b>Secretaria, Tesouraria, EBD, Liderança/Diretoria e Administrador:</b> senha pessoal cadastrada em Usuários → Editar → Senha pessoal. A senha só libera a aba compatível com o cargo da pessoa (Diretoria e Administrador podem entrar em todas).</p>'+
+      '<button class="btn-soft" style="width:100%" data-act="goUsersTab">Cadastrar senhas pessoais em Usuários</button>'+
     '</div>'+
     permTable(PERM_VIEW,"Visualização por Cargo","Itens que cada cargo vê no aplicativo.")+
     permTable(PERM_MANAGE,"Gestão","Áreas que cada cargo pode alterar.")+
@@ -2206,15 +2217,16 @@ function tabPerms(){
 function tabButtons(area){
   area=area||"secretaria";
   var isSec=(area==="secretaria");
-  var areaTitle=isSec?"Botões da Secretaria":"Botões da Tesouraria";
-  var areaSub=isSec?"Crie botões para pedido de cartas, apresentação de crianças e atendimento da secretaria.":"Crie botões exclusivos para a página da Tesouraria (comprovantes, sistemas, etc.).";
+  var areaName=AREA_NAMES[area]||"Secretaria";
+  var areaTitle="Botões da "+areaName;
+  var areaSub=isSec?"Crie botões para pedido de cartas, apresentação de crianças e atendimento da secretaria.":(area==="ebd"?"Crie botões exclusivos para a página da EBD (revistas, materiais, chamada, inscrições, etc.).":"Crie botões exclusivos para a página da Tesouraria (comprovantes, sistemas, etc.).");
   var filtered=state.adminButtons.filter(function(b){return (b.area||"secretaria")===area;});
   var rows=filtered.map(function(b){
     return '<div class="card" style="display:grid;gap:.6rem;margin-bottom:.75rem"><div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:.4rem;align-items:center"><div style="font-weight:800;font-size:.88rem">'+esc(b.title)+'</div><div style="display:flex;gap:.35rem"><button class="btn-soft btn-sm" data-act="btnMove" data-id="'+b.id+'" data-dir="-1">↑</button><button class="btn-soft btn-sm" data-act="btnMove" data-id="'+b.id+'" data-dir="1">↓</button><button class="btn-danger btn-sm" data-act="btnDelete" data-id="'+b.id+'">Excluir</button></div></div>'+
       '<div class="safe-grid-sm">'+field("Título","bt_t_"+b.id,b.title)+field("Link ou WhatsApp (wa.me/...)","bt_l_"+b.id,b.link)+'<div><label class="lbl" for="bt_v_'+b.id+'">Visibilidade</label>'+visOptions(b.visibility,"bt_v_"+b.id)+"</div>"+field("Selo","bt_b_"+b.id,b.badge)+"</div>"+
       '<div style="display:flex;gap:.75rem;flex-wrap:wrap;align-items:center;justify-content:space-between;font-size:.8rem"><div style="display:flex;gap:.75rem;flex-wrap:wrap"><label><input type="checkbox" id="bt_a_'+b.id+'"'+(b.active?" checked":"")+'> Ativo</label>'+(isSec?'<label><input type="checkbox" id="bt_g_'+b.id+'"'+(b.isGabinetePastoral?" checked":"")+'> Exibir também no Início (Gabinete)</label>':"")+'</div><button class="btn-main btn-sm" data-act="btnSave" data-id="'+b.id+'">Salvar</button></div></div>';
   }).join("");
-  var add='<div class="card" style="display:grid;gap:.6rem"><div style="font-weight:800">Novo botão para '+esc(isSec?"Secretaria":"Tesouraria")+'</div>'+field("Título do botão","bt_new_t_"+area,"")+field("Link ou WhatsApp","bt_new_l_"+area,"https://")+field("Selo / Etiqueta","bt_new_b_"+area,isSec?"Secretaria":"Tesouraria")+'<div><label class="lbl" for="bt_new_v_'+area+'">Quem pode ver</label>'+visOptions("membros_acima","bt_new_v_"+area)+'</div><button class="btn-main" style="width:100%" data-act="btnAdd" data-area="'+area+'">Adicionar botão em '+esc(isSec?"Secretaria":"Tesouraria")+'</button></div>';
+  var add='<div class="card" style="display:grid;gap:.6rem"><div style="font-weight:800">Novo botão para '+esc(areaName)+'</div>'+field("Título do botão","bt_new_t_"+area,"")+field("Link ou WhatsApp","bt_new_l_"+area,"https://")+field("Selo / Etiqueta","bt_new_b_"+area,areaName)+'<div><label class="lbl" for="bt_new_v_'+area+'">Quem pode ver</label>'+visOptions("membros_acima","bt_new_v_"+area)+'</div><button class="btn-main" style="width:100%" data-act="btnAdd" data-area="'+area+'">Adicionar botão em '+esc(areaName)+'</button></div>';
   return hd(areaTitle,areaSub)+(rows||'<p class="help">Nenhum botão cadastrado nesta página ainda.</p>')+add;
 }
 
@@ -2432,65 +2444,74 @@ function openDecision(){
 
 /* ---------- login ---------- */
 function openLogin(){
-  openDialog('<div style="padding:1.25rem;display:grid;gap:.7rem"><div style="font-size:1.1rem;font-weight:900">Trocar Acesso</div><p class="help" style="margin:0">Entre com seu código de membro/liderança ou altere para visitante.</p>'+
-    '<div><label class="lbl" for="lg_code">Código de membro, CPF ou senha</label><input class="fld" id="lg_code" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" type="text"></div>'+
-    (ui.loginError?'<div style="background:#fff1f2;color:#9f1239;padding:.6rem;border-radius:10px;font-size:.78rem">'+esc(ui.loginError)+"</div>":"")+
-    '<button class="btn-main" style="width:100%" data-act="loginSubmit">Entrar</button><button class="btn-soft" style="width:100%" data-act="loginVisitor">Sair / Identificar como visitante</button></div>',function(d){
-    d.querySelector('[data-act="loginSubmit"]').addEventListener("click",function(){if(!doLogin(d.querySelector("#lg_code").value,d)){d.close();openLogin();}});
-    d.querySelector("#lg_code").addEventListener("keydown",function(e){if(e.key==="Enter"){if(!doLogin(this.value,d)){d.close();openLogin();}}});
-    d.querySelector('[data-act="loginVisitor"]').addEventListener("click",function(){session={role:"visitante",userId:null,realRole:"visitante",visitorName:"",identified:false};saveSession();ui.gateMode="visitor";ui.loginError="";ui.page="home";d.close();render();});
-  });
+  session={role:"visitante",userId:null,realRole:"visitante",visitorName:"",identified:false};
+  saveSession();
+  ui.forceGate=true;ui.welcomePreview=null;ui.loginError="";
+  if(!ui.gateMode||ui.gateMode==="visitor") ui.gateMode="member";
+  if(ui.page==="admin-panel") ui.page="home";
+  closeAllDialogs();render();window.scrollTo(0,0);
+}
+function cpfEq(a,b){
+  a=String(a||"").replace(/\D/g,"").replace(/^0+/,"");
+  b=String(b||"").replace(/\D/g,"").replace(/^0+/,"");
+  return !!a&&a===b;
+}
+function formatCpf(raw){
+  var d=String(raw||"").replace(/\D/g,"").slice(0,11);
+  if(d.length>9) return d.slice(0,3)+"."+d.slice(3,6)+"."+d.slice(6,9)+"-"+d.slice(9);
+  if(d.length>6) return d.slice(0,3)+"."+d.slice(3,6)+"."+d.slice(6);
+  if(d.length>3) return d.slice(0,3)+"."+d.slice(3);
+  return d;
+}
+function previewLogin(user,targetRole,openAdmin){
+  ui.welcomePreview={user:user,targetRole:targetRole,realRole:user.role||targetRole,openAdmin:!!openAdmin};
+  ui.loginError="";
+  render();window.scrollTo(0,0);
+  return true;
+}
+function failLogin(msg){ui.loginError=msg;render();return false;}
+/* Membro: entra somente com CPF */
+function loginByCpf(raw){
+  var digits=String(raw||"").replace(/\D/g,"");
+  if(digits.length<9) return failLogin("Digite o CPF completo (11 números).");
+  var usr=state.users.find(function(u){return cpfEq(u.cpf,digits);});
+  if(!usr) return failLogin("CPF não encontrado no cadastro de membros. Procure a secretaria da igreja.");
+  /* acessos de liderança exigem senha pessoal; pelo CPF a pessoa entra como membro */
+  var target=roleLevel(usr.role)<=1?usr.role:"membro";
+  return previewLogin(usr,target,false);
+}
+/* Quais cargos podem entrar em cada aba de acesso */
+function modeAllows(mode,role){
+  var lvl=roleLevel(role);
+  if(role==="admin_geral"||lvl>=4) return true;
+  if(mode==="admin") return false;
+  if(mode==="lideranca") return lvl>=2;
+  if(role==="diretoria") return true;
+  return role===mode;
+}
+/* Secretaria, Tesouraria, EBD, Liderança/Diretoria e Administrador: senha pessoal pré-cadastrada */
+function loginByPassword(raw,mode){
+  var pass=normalizePass(raw);
+  var lbl=gateModeLabel(mode);
+  if(!pass) return failLogin("Digite sua senha pessoal.");
+  if(mode==="admin"){
+    var pin=normalizePass(state.church.masterAdminPin);
+    if(pass===pin||pass==="Vidal1506@"||pass==="1506"){
+      var adm=findUser("u1")||{id:"u1",name:"Administrador",role:"admin_geral",photo:"",memberCode:""};
+      return previewLogin(adm,"admin_geral",true);
+    }
+  }
+  var usr=state.users.find(function(u){return u.accessPassword&&normalizePass(u.accessPassword)===pass;});
+  if(!usr) return failLogin("Senha pessoal não encontrada. Confira ou peça ao administrador para cadastrar sua senha.");
+  if(!modeAllows(mode,usr.role)) return failLogin("Seu cadastro ("+roleObj(usr.role).label+") não tem acesso de "+lbl+". Escolha a aba do seu acesso.");
+  var target=(mode==="lideranca"||mode==="admin")?usr.role:mode;
+  return previewLogin(usr,target,mode==="admin");
 }
 function doLogin(raw,d){
-  var code=normalizePass(raw);
-  var digits=code.replace(/\D/g,"");
-  var pin=normalizePass(state.church.masterAdminPin);
+  if(d) d.close();
   var mode=ui.gateMode||"member";
-  if(code&&(code===pin||code==="Vidal1506@"||code==="1506")){
-    var adm=findUser("u1")||{id:"u1",name:"Administrador",role:"admin_geral",photo:"",memberCode:""};
-    ui.welcomePreview={user:adm,targetRole:"admin_geral",realRole:"admin_geral",openAdmin:true};
-    ui.loginError="";
-    if(d) d.close();
-    render();
-    return true;
-  }
-  var secPin=normalizePass(state.church.secretariaPin);
-  var tesPin=normalizePass(state.church.tesourariaPin);
-  var ebdPin=normalizePass(state.church.ebdPin);
-  if(code&&secPin&&code===secPin){
-    ui.welcomePreview={user:{id:null,name:"Secretaria",role:"secretaria",photo:"",memberCode:""},targetRole:"secretaria",realRole:"secretaria",openAdmin:false};
-    ui.loginError="";if(d) d.close();render();return true;
-  }
-  if(code&&tesPin&&code===tesPin){
-    ui.welcomePreview={user:{id:null,name:"Tesouraria",role:"tesouraria",photo:"",memberCode:""},targetRole:"tesouraria",realRole:"tesouraria",openAdmin:false};
-    ui.loginError="";if(d) d.close();render();return true;
-  }
-  if(code&&ebdPin&&code===ebdPin){
-    ui.welcomePreview={user:{id:null,name:"EBD",role:"ebd",photo:"",memberCode:""},targetRole:"ebd",realRole:"ebd",openAdmin:false};
-    ui.loginError="";if(d) d.close();render();return true;
-  }
-  var usr=state.users.find(function(u){
-    if(u.memberCode&&normalizePass(u.memberCode)===code) return true;
-    if(u.accessPassword&&normalizePass(u.accessPassword)===code) return true;
-    if(digits.length>=9&&u.cpf){
-      var uc=String(u.cpf).replace(/\D/g,"");
-      if(uc&&(uc===digits||uc.replace(/^0+/,"")===digits.replace(/^0+/,""))) return true;
-    }
-    return false;
-  });
-  if(usr&&code){
-    var targetRole=usr.role;
-    if((mode==="secretaria"||mode==="tesouraria"||mode==="ebd")&&(usr.role===mode||usr.role==="diretoria"||usr.role==="admin_geral")){
-      targetRole=mode;
-    }
-    ui.welcomePreview={user:usr,targetRole:targetRole,realRole:usr.role,openAdmin:(targetRole==="admin_geral"&&mode==="admin")};
-    ui.loginError="";
-    if(d) d.close();
-    render();
-    return true;
-  }
-  ui.loginError="Código de membro, CPF ou senha não encontrados. Confira e tente de novo.";
-  return false;
+  if(mode==="visitor") mode="member";
+  return mode==="member"?loginByCpf(raw):loginByPassword(raw,mode);
 }
 
 /* ---------- import of members ---------- */
@@ -2610,10 +2631,11 @@ function render(){
     var html="";
     if(ui.welcomePreview) html=headerHtml()+welcomeScreenHtml(ui.welcomePreview);
     else if(ui.page==="admin-panel") html=adminHtml();
-    else if((state.church.requireIdentificationOnOpen!==false||state.church.requireLoginGate)&&!session.identified) html=headerHtml()+identificationGateHtml();
+    else if((state.church.requireIdentificationOnOpen!==false||state.church.requireLoginGate||ui.forceGate)&&!session.identified) html=headerHtml()+identificationGateHtml();
     else if(ui.page==="prayer") html=headerHtml()+prayerHtml();
     else if(ui.page==="secretaria") html=headerHtml()+secretariaHtml();
     else if(ui.page==="tesouraria") html=headerHtml()+tesourariaHtml();
+    else if(ui.page==="ebd") html=headerHtml()+ebdHtml();
     else if(String(ui.page).indexOf("cp:")===0) html=headerHtml()+customPageHtml(ui.page.slice(3));
     else html=headerHtml()+homeHtml();
     app.innerHTML=html;
@@ -2647,7 +2669,9 @@ A.setGateMode=function(el){
 };
 A.gateVisitorEnter=function(){
   var nm=v("gate_v_name").trim();
-  if(nm.length<3){toast("Informe seu nome completo para entrar.","error");return;}
+  nm=nm.replace(/\s+/g," ");
+  if(nm.split(" ").length<2||nm.length<5){ui.loginError="Informe seu nome completo (nome e sobrenome).";render();var f=document.getElementById("gate_v_name");if(f) f.value=nm;return;}
+  ui.forceGate=false;
   session={role:"visitante",userId:null,realRole:"visitante",visitorName:nm,identified:true};
   saveSession();
   ui.loginError="";
@@ -2659,6 +2683,7 @@ A.confirmEnterApp=function(){
   var wp=ui.welcomePreview;
   if(!wp) return;
   var u=wp.user||{};
+  ui.forceGate=false;
   session={role:wp.targetRole,userId:u.id||null,realRole:wp.realRole||wp.targetRole,visitorName:(u.id?"":u.name),identified:true};
   saveSession();
   ui.welcomePreview=null;
@@ -2673,10 +2698,8 @@ A.cancelWelcomePreview=function(){
   ui.loginError="";
   render();
 };
-A.gateMemberEnter=function(){
-  var code=v("gate_m_code");
-  if(!doLogin(code,null)) render();
-};
+A.gateMemberEnter=function(){loginByCpf(v("gate_cpf"));};
+A.gateStaffEnter=function(){loginByPassword(v("gate_pass"),ui.gateMode);};
 A.toggleCpfLookup=function(){
   ui.showCpfLookup=!ui.showCpfLookup;
   ui.cpfResult=null;
@@ -3026,6 +3049,10 @@ A.saveUser=function(){
   if(!name){toast("Informe o nome completo.","error");return;}
   var code=v("us_code").trim();
   if(code){var clash=state.users.find(function(u){return u.memberCode===code&&u.id!==ui.userEditId;});if(clash){toast("Este código já pertence a outra pessoa.","error");return;}}
+  var pw=normalizePass(v("us_pass"));
+  if(pw){var pclash=state.users.find(function(u){return u.id!==ui.userEditId&&u.accessPassword&&normalizePass(u.accessPassword)===pw;});if(pclash){toast("Esta senha já é usada por outra pessoa. Escolha uma senha diferente.","error");return;}}
+  var cpfD=v("us_cpf").replace(/\D/g,"");
+  if(cpfD){var cclash=state.users.find(function(u){return u.id!==ui.userEditId&&cpfEq(u.cpf,cpfD);});if(cclash){toast("Este CPF já está cadastrado para "+cclash.name+".","error");return;}}
   var editing=ui.userEditId?findUser(ui.userEditId):null;
   var funcs=Array.isArray(ui.userForm.functions)?ui.userForm.functions:(editing&&Array.isArray(editing.functions)?editing.functions:[]);
   var photoVal=ui.userForm.photo!==undefined?ui.userForm.photo:(editing?editing.photo:"");
@@ -3036,7 +3063,9 @@ A.saveUser=function(){
   if(editing){Object.assign(editing,data);}
   else state.users.push(Object.assign({id:"u"+Date.now()},data));
   ui.userEditId=null;ui.userForm={functions:[]};ui.showNewRoleBox=false;
-  save();render();toast("Pessoa salva com sucesso!","success");
+  save();render();
+  if(roleLevel(data.role)>=2&&!pw) toast("Pessoa salva. Atenção: sem senha pessoal ela não consegue entrar como "+roleObj(data.role).label+".","error");
+  else toast("Pessoa salva com sucesso!","success");
 };
 A.userRole=function(el){var u=findUser(el.getAttribute("data-id"));if(u){u.role=el.value;save();render();toast("Cargo atualizado","success");}};
 function nextMemberCode(){
@@ -3103,7 +3132,7 @@ A.btnAdd=function(el){
   var area=(el&&el.getAttribute("data-area"))||"secretaria";
   var t=v("bt_new_t_"+area).trim();if(!t){toast("Informe o título.","error");return;}
   var lnk=v("bt_new_l_"+area).trim();
-  var bdg=v("bt_new_b_"+area).trim()||(area==="secretaria"?"Secretaria":"Tesouraria");
+  var bdg=v("bt_new_b_"+area).trim()||(AREA_NAMES[area]||"Secretaria");
   state.adminButtons.push({id:"b"+Date.now(),area:area,title:t,type:(lnk.indexOf("wa.me")>=0?"whatsapp":"link"),link:lnk,visibility:vis("bt_new_v_"+area),icon:"link",badge:bdg,isGabinetePastoral:false,active:true});
   save();render();toast("Botão adicionado","success");
 };
@@ -3414,7 +3443,7 @@ function customPageHtml(id){
     return wrap+'<div class="card"><div style="font-weight:800">Página não encontrada</div><p class="help" style="margin:.2rem 0 .7rem">Esta página foi removida ou está oculta no momento.</p><button class="btn-soft" style="width:100%" data-act="go" data-page="home">Voltar ao início</button></div></section>';
   }
   if(!visible(p.visibility,session.role,p)){
-    return wrap+'<div class="card"><div style="font-weight:800">'+esc(p.icon||"📄")+" "+esc(p.title)+'</div><p class="help" style="margin:.2rem 0 .7rem">Esta página é restrita. Entre com seu código de membro para acessar.</p><button class="btn-main" style="width:100%" data-act="changeAccess">Entrar com código</button></div></section>';
+    return wrap+'<div class="card"><div style="font-weight:800">'+esc(p.icon||"📄")+" "+esc(p.title)+'</div><p class="help" style="margin:.2rem 0 .7rem">Esta página é restrita. Entre com seu CPF ou senha pessoal para acessar.</p><button class="btn-main" style="width:100%" data-act="changeAccess">Entrar</button></div></section>';
   }
   var adminBar=canManagePages()
     ?'<div class="card" style="display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;justify-content:space-between;background:#fffbeb;border-color:#fde68a"><span class="help" style="margin:0">'+(p.active?"Você é gestor desta página.":"<b>Página oculta</b> — apenas gestores conseguem ver.")+'</span><button class="btn-soft btn-sm" data-act="pageEdit" data-id="'+esc(p.id)+'">'+ico("pencil",13)+"<span>Editar esta página</span></button></div>"
@@ -3759,6 +3788,11 @@ document.addEventListener("click",function(e){
 });
 
 document.addEventListener("input",function(e){
+  if(e.target&&e.target.id==="gate_cpf"){
+    var fm=formatCpf(e.target.value);
+    if(fm!==e.target.value) e.target.value=fm;
+    return;
+  }
   if(e.target&&e.target.id==="us_search"){
     ui.userSearch=e.target.value;
     var pos=e.target.selectionStart;
@@ -3781,9 +3815,13 @@ window.addEventListener("keydown",function(e){
     e.preventDefault();
     A.createInlineFunc();
   }
-  if(e.key==="Enter"&&e.target&&e.target.id==="gate_m_code"){
+  if(e.key==="Enter"&&e.target&&e.target.id==="gate_cpf"){
     e.preventDefault();
     A.gateMemberEnter();
+  }
+  if(e.key==="Enter"&&e.target&&e.target.id==="gate_pass"){
+    e.preventDefault();
+    A.gateStaffEnter();
   }
   if(e.key==="Enter"&&e.target&&e.target.id==="gate_v_name"){
     e.preventDefault();
