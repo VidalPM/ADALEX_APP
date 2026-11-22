@@ -632,6 +632,7 @@ footer.adx-foot {
     <div style="display:flex;flex-wrap:wrap;gap:1rem">
       <a href="#" data-nav="home" id="footNavHome" style="color:#fcd34d;font-weight:700;padding:.2rem 0">Início &amp; Pix</a>
       <a href="#" data-nav="prayer" id="footNavPrayer" style="color:#fcd34d;font-weight:700;padding:.2rem 0">Administração &amp; Oração</a>
+      <button type="button" data-act="shareApp" id="footNavShare" style="background:none;border:0;color:#fcd34d;font:inherit;font-weight:700;padding:.2rem 0;cursor:pointer;text-decoration:underline">📲 Compartilhar o App</button>
     </div>
     <div style="opacity:.75" id="footNote">v2.0 • Dados salvos localmente neste navegador</div>
   </div>
@@ -1751,7 +1752,7 @@ function defaultLayoutState(){
     pages:pages,
     nav:{home:{label:"Início",show:true},prayer:{label:"Oração",show:true},secretaria:{label:"Secretaria",show:true},tesouraria:{label:"Tesouraria",show:true},ebd:{label:"EBD",show:true},gestorLabel:"Gestor",showInstall:true,installLabel:"Instalar App"},
     header:{showLogo:true,showName:true,showSubtitle:true,showCnpj:true,showAddress:true},
-    footer:{show:true,showName:true,showInfo:true,homeShow:true,homeLabel:"Início & Pix",prayerShow:true,prayerLabel:"Administração & Oração",showNote:true}
+    footer:{show:true,showName:true,showInfo:true,homeShow:true,homeLabel:"Início & Pix",prayerShow:true,prayerLabel:"Administração & Oração",showNote:true,shareShow:true,shareLabel:"📲 Compartilhar o App",shareText:""}
   };
 }
 function L(){
@@ -2830,6 +2831,8 @@ function applyChromeStyles(){
   if(foot) foot.hidden=(F.show===false);
   if(fHome){fHome.textContent=F.homeLabel||"Início & Pix";fHome.hidden=(F.homeShow===false);}
   if(fPray){fPray.textContent=F.prayerLabel||"Administração & Oração";fPray.hidden=(F.prayerShow===false);}
+  var fShare=document.getElementById("footNavShare");
+  if(fShare){fShare.textContent=F.shareLabel||"📲 Compartilhar o App";fShare.hidden=(F.shareShow===false);}
   if(fNote){fNote.textContent=c.footerNote||"v2.0 • Dados salvos localmente neste navegador";fNote.hidden=(F.showNote===false);}
 }
 
@@ -4230,6 +4233,8 @@ function chromeEditorHtml(){
       chk("ft_info",f.showInfo!==false,"Mostrar endereço / CNPJ")+
       '<div class="safe-grid-sm">'+chk("ft_hs",f.homeShow!==false,"Mostrar link 1 (vai para Início)")+inputPh("Texto do link 1","ft_hl",f.homeLabel,"Início & Pix")+"</div>"+
       '<div class="safe-grid-sm">'+chk("ft_ps",f.prayerShow!==false,"Mostrar link 2 (vai para Oração)")+inputPh("Texto do link 2","ft_pl",f.prayerLabel,"Administração & Oração")+"</div>"+
+      '<div class="safe-grid-sm">'+chk("ft_ss",f.shareShow!==false,"Mostrar link Compartilhar o App")+inputPh("Texto do link de compartilhar","ft_sl",f.shareLabel,"📲 Compartilhar o App")+"</div>"+
+      inputPh("Mensagem enviada junto com o link (opcional)","ft_st",f.shareText,"Baixe o app da "+state.church.name+":","O endereço do app é adicionado automaticamente no final.")+
       chk("ft_note",f.showNote!==false,"Mostrar nota final (texto editável em Personalização)")+
     "</div></details>"+
     '<button class="btn-main" style="width:100%" data-act="saveChrome">Salvar menu, cabeçalho e rodapé</button>'+
@@ -4308,7 +4313,7 @@ A.saveChrome=function(){
   l.nav.gestorLabel=v("nv_gestor").trim()||"Gestor";
   l.nav.showInstall=ch("nv_inst");l.nav.installLabel=v("nv_instL").trim()||"Instalar App";
   l.header={showLogo:ch("hd_logo"),showName:ch("hd_name"),showSubtitle:ch("hd_sub"),showCnpj:ch("hd_cnpj"),showAddress:ch("hd_addr")};
-  l.footer={show:ch("ft_show"),showName:ch("ft_name"),showInfo:ch("ft_info"),homeShow:ch("ft_hs"),homeLabel:v("ft_hl").trim()||"Início & Pix",prayerShow:ch("ft_ps"),prayerLabel:v("ft_pl").trim()||"Administração & Oração",showNote:ch("ft_note")};
+  l.footer={show:ch("ft_show"),showName:ch("ft_name"),showInfo:ch("ft_info"),homeShow:ch("ft_hs"),homeLabel:v("ft_hl").trim()||"Início & Pix",prayerShow:ch("ft_ps"),prayerLabel:v("ft_pl").trim()||"Administração & Oração",showNote:ch("ft_note"),shareShow:ch("ft_ss"),shareLabel:v("ft_sl").trim()||"📲 Compartilhar o App",shareText:v("ft_st").trim()};
   save();render();toast("Menu, cabeçalho e rodapé salvos!","success");
 };
 
@@ -4460,6 +4465,36 @@ document.addEventListener("change",function(e){
     render();
   }
 });
+
+/* ---------- compartilhar o app ---------- */
+function appShareUrl(){return location.href.split("#")[0].split("?")[0];}
+function appShareText(){var F=L().footer;return F.shareText||("Baixe o app da "+state.church.name+":");}
+A.shareApp=function(){
+  var url=appShareUrl(),text=appShareText();
+  if(navigator.share){
+    navigator.share({title:state.church.name,text:text,url:url}).catch(function(err){
+      if(!err||err.name!=="AbortError") openShareDialog(url,text);
+    });
+    return;
+  }
+  openShareDialog(url,text);
+};
+function openShareDialog(url,text){
+  var t=theme();
+  var wa="https://wa.me/?text="+encodeURIComponent(text+" "+url);
+  openDialog('<div style="padding:1.25rem;display:grid;gap:.75rem"><div style="font-weight:900;font-size:1.05rem;padding-right:2.2rem">📲 Compartilhar o App</div>'+
+    '<p class="help" style="margin:0">Envie o link para familiares, amigos e visitantes. Ao abrir, a pessoa pode instalar o app no celular.</p>'+
+    '<div style="background:#f5f5f4;border-radius:12px;padding:.7rem;font-family:monospace;font-size:.8rem;word-break:break-all">'+esc(url)+'</div>'+
+    '<a href="'+esc(wa)+'" target="_blank" rel="noopener noreferrer" class="btn-main" style="width:100%;text-align:center;text-decoration:none;background:linear-gradient(90deg,#16a34a,#15803d)">Enviar pelo WhatsApp</a>'+
+    '<button class="btn-soft" style="width:100%" id="shCopy">Copiar link</button>'+
+    '<button class="btn-soft" style="width:100%" data-close>Fechar</button>'+
+  '</div>',function(d){
+    d.querySelector("#shCopy").addEventListener("click",function(e){
+      e.stopPropagation();
+      copyText(text+" "+url,function(ok){toast(ok?"Link copiado! Agora é só colar.":"Não foi possível copiar",ok?"success":"error");});
+    });
+  });
+}
 
 /* generic click & input listeners */
 document.addEventListener("click",function(e){
