@@ -1082,6 +1082,7 @@ function migrate(s){
     s.church.topBannerText="ADALEX DIGITAL • CONECTANDO A IGREJA Versão 1.0";
   }
   if(!THEMES[s.church.theme]) s.church.theme="navy";
+  if(!s.church.pageLogos||typeof s.church.pageLogos!=="object"||Array.isArray(s.church.pageLogos)) s.church.pageLogos={};
   if(!s.ebdSeeded){
     if(!s.adminButtons.some(function(b){return b.area==="ebd";})){
       s.adminButtons.push({id:"b_ebd1",area:"ebd",title:"Falar com a Superintendência da EBD",type:"whatsapp",link:"https://wa.me/55"+String(s.church.secretaryWhatsapp||"41984253365").replace(/\D/g,"")+"?text="+encodeURIComponent("Olá, Paz do Senhor! Gostaria de falar com a Superintendência da EBD."),visibility:"membros_acima",icon:"book-open",badge:"EBD",isGabinetePastoral:false,active:true});
@@ -1374,24 +1375,114 @@ function driveLink(url){
   if(m) return "https://drive.google.com/thumbnail?id="+m[1]+"&sz=w800";
   return url;
 }
-function resizePhoto(file,cb){
+/* ---------- compressão inteligente de imagens ----------
+   Reduz o tamanho mantendo boa qualidade: redimensiona em etapas (mais nítido),
+   escolhe automaticamente o formato mais leve (WebP/JPEG; PNG/WebP quando há
+   transparência) e baixa a qualidade só até atingir o tamanho-alvo. */
+var IMG_PROFILES={
+  avatar:{max:480,square:true,target:45000},   /* fotos de pessoas e departamentos */
+  logo:{max:512,square:false,target:60000},    /* logos (mantém fundo transparente) */
+  banner:{max:1280,square:false,target:160000} /* imagens/banners das páginas */
+};
+var _webpOk=null;
+function webpSupported(){
+  if(_webpOk===null){
+    try{var c=document.createElement("canvas");c.width=c.height=2;_webpOk=c.toDataURL("image/webp").indexOf("data:image/webp")===0;}catch(e){_webpOk=false;}
+  }
+  return _webpOk;
+}
+function dataBytes(d){d=String(d||"");var i=d.indexOf(",");return i<0?d.length:Math.round((d.length-i-1)*3/4);}
+function fmtKB(n){return n>=1048576?(n/1048576).toFixed(1).replace(".",",")+" MB":Math.max(1,Math.round(n/1024))+" KB";}
+function drawScaled(img,sx,sy,sw,sh,w,h){
+  var src=img,ox=sx,oy=sy,cw=sw,ch=sh,c,ctx;
+  while(cw/2>=w&&ch/2>=h){
+    c=document.createElement("canvas");c.width=Math.round(cw/2);c.height=Math.round(ch/2);
+    ctx=c.getContext("2d");ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality="high";
+    ctx.drawImage(src,ox,oy,cw,ch,0,0,c.width,c.height);
+    src=c;ox=0;oy=0;cw=c.width;ch=c.height;
+  }
+  c=document.createElement("canvas");c.width=w;c.height=h;
+  ctx=c.getContext("2d");ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality="high";
+  ctx.drawImage(src,ox,oy,cw,ch,0,0,w,h);
+  return c;
+}
+function canvasHasAlpha(cv){
+  try{
+    var d=cv.getContext("2d").getImageData(0,0,cv.width,cv.height).data;
+    for(var i=3;i<d.length;i+=4){if(d[i]<250) return true;}
+  }catch(e){}
+  return false;
+}
+function flattenWhite(cv){
+  var c=document.createElement("canvas");c.width=cv.width;c.height=cv.height;
+  var ctx=c.getContext("2d");ctx.fillStyle="#ffffff";ctx.fillRect(0,0,c.width,c.height);ctx.drawImage(cv,0,0);
+  return c;
+}
+function encodeBest(cv,alpha,q){
+  var outs=[];
+  if(webpSupported()) outs.push(cv.toDataURL("image/webp",q));
+  if(alpha){if(!outs.length) outs.push(cv.toDataURL("image/png"));}
+  else outs.push(flattenWhite(cv).toDataURL("image/jpeg",q));
+  return outs.sort(function(a,b){return a.length-b.length;})[0];
+}
+function compressImageEl(img,profile){
+  var P=IMG_PROFILES[profile]||IMG_PROFILES.avatar;
+  var iw=img.naturalWidth||img.width,ih=img.naturalHeight||img.height;
+  if(!iw||!ih) return null;
+  var sx=0,sy=0,sw=iw,sh=ih;
+  if(P.square){var side=Math.min(iw,ih);sx=(iw-side)/2;sy=(ih-side)/2;sw=sh=side;}
+  var max=P.max,best=null,qs=[0.86,0.8,0.74,0.68,0.62];
+  for(var attempt=0;attempt<5;attempt++){
+    var scale=Math.min(1,max/Math.max(sw,sh));
+    var w=Math.max(1,Math.round(sw*scale)),h=Math.max(1,Math.round(sh*scale));
+    var cv=drawScaled(img,sx,sy,sw,sh,w,h);
+    var alpha=canvasHasAlpha(cv);
+    for(var i=0;i<qs.length;i++){
+      var out=encodeBest(cv,alpha,qs[i]);
+      if(!best||out.length<best.length) best=out;
+      if(dataBytes(out)<=P.target) return out;
+      if(alpha&&!webpSupported()) break;
+    }
+    max=Math.round(max*0.82);
+    if(max<200) break;
+  }
+  return best;
+}
+function compressFile(file,profile,cb){
   var r=new FileReader();
   r.onload=function(){
     var img=new Image();
     img.onload=function(){
-      var side=Math.min(img.width,img.height);
-      var sx=(img.width-side)/2,sy=(img.height-side)/2;
-      var c=document.createElement("canvas");c.width=320;c.height=320;
-      c.getContext("2d").drawImage(img,sx,sy,side,side,0,0,320,320);
-      cb(c.toDataURL("image/jpeg",0.72));
+      var out=null;
+      try{out=compressImageEl(img,profile);}catch(e){}
+      if(!out){toast("Não foi possível processar esta imagem.","error");return;}
+      cb(out,dataBytes(r.result),dataBytes(out));
     };
+    img.onerror=function(){toast("Formato de imagem não suportado. Use JPG, PNG ou WebP.","error");};
     img.src=r.result;
   };
   r.readAsDataURL(file);
 }
-function pickFile(cb){
+function compressDataUrl(src,profile,cb){
+  var img=new Image();
+  img.onload=function(){
+    var out=null;
+    try{out=compressImageEl(img,profile);}catch(e){}
+    cb(out&&out.length<src.length?out:src);
+  };
+  img.onerror=function(){cb(src);};
+  img.src=src;
+}
+function resizePhoto(file,cb){compressFile(file,"avatar",cb);}
+function pickFile(cb,profile){
   var inp=document.createElement("input");inp.type="file";inp.accept="image/*";
-  inp.onchange=function(){if(inp.files[0]) resizePhoto(inp.files[0],cb);};
+  inp.onchange=function(){
+    if(!inp.files[0]) return;
+    compressFile(inp.files[0],profile||"avatar",function(data,before,after){
+      cb(data);
+      setTimeout(function(){toast("Imagem otimizada: "+fmtKB(before)+" → "+fmtKB(after),"success");},900);
+    });
+  };
   inp.click();
 }
 
@@ -1479,7 +1570,7 @@ function renderNav(){
     left+='<button class="nav-btn '+(ui.page==="ebd"?"on":"")+'" data-act="go" data-page="ebd">'+ico("book-open",15)+'<span>EBD</span></button>';
   }
   customPagesFor("nav").forEach(function(p){
-    left+='<button class="nav-btn '+(ui.page==="cp:"+p.id?"on":"")+'" data-act="go" data-page="cp:'+esc(p.id)+'"><span aria-hidden="true">'+esc(p.icon||"📄")+'</span><span>'+esc(p.title)+'</span></button>';
+    left+='<button class="nav-btn '+(ui.page==="cp:"+p.id?"on":"")+'" data-act="go" data-page="cp:'+esc(p.id)+'"><span aria-hidden="true">'+(p.logo?'<img src="'+esc(driveLink(safeUrl(p.logo)))+'" alt="" style="width:20px;height:20px;border-radius:6px;object-fit:contain;background:#fff">':esc(p.icon||"📄"))+'</span><span>'+esc(p.title)+'</span></button>';
   });
   if(canAccessAdminPanel()){
     left+='<button class="nav-btn '+(ui.page==="admin-panel"?"gold":"")+'" data-act="go" data-page="admin-panel">'+ico("settings",15)+'<span>'+(ui.page==="admin-panel"?"Fechar Gestor":"Gestor")+"</span></button>";
@@ -1752,7 +1843,7 @@ function linksHtml(){
 function prayerHtml(){
   var c=state.church,t=theme();
   var h='<section style="max-width:56rem;margin:-1.35rem auto 0;padding:0 .85rem;width:100%;display:flex;flex-direction:column;gap:.9rem">';
-  h+='<div class="card"><div style="font-size:1rem;font-weight:800">'+esc(c.prayerTitle)+'</div><p class="help" style="margin:.2rem 0 .8rem">'+esc(c.prayerDescription)+'</p>'+
+  h+='<div class="card">'+pageHeadHtml("prayer",c.prayerTitle,c.prayerDescription)+
     '<div class="safe-grid-sm">'+
     '<button class="btn-main" style="background:linear-gradient(90deg,'+t.hex+','+t.hex2+')" data-act="prayerSend" data-kind="oracao">Pedido de oração no app</button>'+
     '<button class="btn-soft" data-act="prayerSend" data-kind="whatsapp">Falar pelo WhatsApp</button></div></div>';
@@ -1778,8 +1869,7 @@ function areaButtonsPageHtml(area,title,subtitle){
     :'<p class="help">Nenhum serviço disponível para o seu nível de acesso. Entre com seu CPF de membro ou senha pessoal para liberar.</p>';
   return '<section style="max-width:56rem;margin:-1.35rem auto 0;padding:0 .85rem;width:100%;display:flex;flex-direction:column;gap:.9rem">'+
     '<div class="card">'+
-      '<div style="font-size:1.05rem;font-weight:800">'+esc(title)+'</div>'+
-      '<p class="help" style="margin:.2rem 0 .85rem">'+esc(subtitle)+'</p>'+
+      pageHeadHtml(area,title,subtitle)+
       '<div style="display:flex;flex-direction:column;gap:.6rem">'+listHtml+'</div>'+
     '</div>'+
     (session.role==="visitante"?'<div class="card"><div style="font-weight:800">É membro da igreja?</div><p class="help" style="margin:.2rem 0 .7rem">Entre com seu CPF para acessar todos os serviços.</p><button class="btn-main" style="width:100%" data-act="changeAccess">Entrar com CPF</button></div>':"")+
@@ -2227,7 +2317,8 @@ function tabButtons(area){
       '<div style="display:flex;gap:.75rem;flex-wrap:wrap;align-items:center;justify-content:space-between;font-size:.8rem"><div style="display:flex;gap:.75rem;flex-wrap:wrap"><label><input type="checkbox" id="bt_a_'+b.id+'"'+(b.active?" checked":"")+'> Ativo</label>'+(isSec?'<label><input type="checkbox" id="bt_g_'+b.id+'"'+(b.isGabinetePastoral?" checked":"")+'> Exibir também no Início (Gabinete)</label>':"")+'</div><button class="btn-main btn-sm" data-act="btnSave" data-id="'+b.id+'">Salvar</button></div></div>';
   }).join("");
   var add='<div class="card" style="display:grid;gap:.6rem"><div style="font-weight:800">Novo botão para '+esc(areaName)+'</div>'+field("Título do botão","bt_new_t_"+area,"")+field("Link ou WhatsApp","bt_new_l_"+area,"https://")+field("Selo / Etiqueta","bt_new_b_"+area,areaName)+'<div><label class="lbl" for="bt_new_v_'+area+'">Quem pode ver</label>'+visOptions("membros_acima","bt_new_v_"+area)+'</div><button class="btn-main" style="width:100%" data-act="btnAdd" data-area="'+area+'">Adicionar botão em '+esc(areaName)+'</button></div>';
-  return hd(areaTitle,areaSub)+(rows||'<p class="help">Nenhum botão cadastrado nesta página ainda.</p>')+add;
+  var logoRow='<div class="card" style="display:flex;align-items:center;gap:.75rem;margin-bottom:.75rem">'+pageLogoHtml(getPageLogo(area),area,"",52)+'<div style="min-width:0;flex:1"><div style="font-weight:800;font-size:.86rem">Logo da página '+esc(areaName)+'</div><div class="help" style="margin:0">Aparece no topo da página. Compactada automaticamente.</div></div><button type="button" class="btn-soft btn-sm" data-act="pageLogoEdit" data-key="'+area+'">'+(getPageLogo(area)?"Alterar":"Adicionar")+'</button></div>';
+  return hd(areaTitle,areaSub)+logoRow+(rows||'<p class="help">Nenhum botão cadastrado nesta página ainda.</p>')+add;
 }
 
 /* tab 6 */
@@ -2315,6 +2406,12 @@ function tabBackup(){
       '</div>'+
       '<div class="help" style="margin:0">O botão <b>Baixar index.html personalizado</b> gera o arquivo completo já contendo suas cores, textos, departamentos, cargos, funções e membros cadastrados.</div>'+
     '</div>'+
+    (function(){var used=(localStorage.getItem(KEY)||"").length;var pct=Math.min(100,Math.round(used/5000000*100));var imgs=collectStoredImages();var ib=0;imgs.forEach(function(x){ib+=dataBytes(x.o[x.k]);});
+      return '<div class="card" style="display:grid;gap:.65rem;margin-bottom:1rem"><div style="font-weight:800">🖼️ Espaço das Fotos</div>'+
+        '<div class="help" style="margin:0">Dados salvos neste aparelho: <b>'+fmtKB(used)+'</b> de aproximadamente 5 MB ('+pct+'%) • Fotos e logos enviadas do aparelho: <b>'+imgs.length+'</b> ('+fmtKB(ib)+')</div>'+
+        '<div style="height:8px;background:#e7e5e4;border-radius:999px;overflow:hidden"><div style="height:100%;width:'+pct+'%;background:'+(pct>80?"#be123c":(pct>60?"#f59e0b":"#16a34a"))+'"></div></div>'+
+        '<p class="help" style="margin:0">Novas fotos já são compactadas automaticamente. Use o botão abaixo para compactar também as fotos que foram enviadas antes desta atualização (a qualidade visual é mantida).</p>'+
+        '<button class="btn-main" data-act="optimizeImages">Otimizar fotos já salvas</button></div>';})()+
     '<div class="card" style="display:grid;gap:.7rem"><div style="font-weight:800">Backup dos Dados (.json)</div><p class="help" style="margin:0">Salve ou restaure apenas os registros e configurações em JSON.</p><div style="display:flex;flex-direction:column;gap:.55rem"><button class="btn-main" data-act="backupDown">Baixar backup em arquivo (.json)</button><button class="btn-soft" data-act="backupImport">Importar backup (.json)</button><button class="btn-danger" data-act="restoreDefault">Restaurar padrão de fábrica</button></div></div>';
 }
 
@@ -2873,7 +2970,7 @@ A.saveChurch=function(){
 
   save();setupPwa();render();toast("Todas as personalizações foram salvas!","success");
 };
-A.logoUpload=function(){pickFile(function(data){state.church.logoUrl=data;save();render();toast("Logo atualizada","success");});};
+A.logoUpload=function(){pickFile(function(data){state.church.logoUrl=data;save();render();toast("Logo atualizada","success");},"logo");};
 
 /* Tab 2 actions */
 A.depPhotoForm=function(){
@@ -3339,7 +3436,7 @@ function pageTemplate(tpl){
   }
   return p;
 }
-function safeUrl(u){u=String(u||"").trim();if(/^\s*(javascript|data|vbscript):/i.test(u)) return "#";return u;}
+function safeUrl(u){u=String(u||"").trim();if(/^\s*(javascript|vbscript):/i.test(u)) return "#";if(/^\s*data:/i.test(u)&&!/^data:image\//i.test(u)) return "#";return u;}
 function blockHref(b){
   var val=String(b.value||"").trim();
   if(b.action==="whatsapp"){
@@ -3425,12 +3522,12 @@ function blockHtml(b,t){
   if(b.type==="spacer") return '<div style="height:'+({sm:".5rem",md:"1.2rem",lg:"2.4rem"}[b.size]||"1.2rem")+'"></div>';
   return "";
 }
-function customPageBodyHtml(p){
+function customPageBodyHtml(p,editKey){
   var t=theme();
   var blocks=(p.blocks||[]).map(function(b){return blockHtml(b,t);}).join("");
   return '<div class="card">'+
     '<div style="display:flex;align-items:center;gap:.7rem;margin-bottom:.9rem">'+
-      '<div style="width:52px;height:52px;border-radius:16px;background:'+t.hexLight+';display:flex;align-items:center;justify-content:center;font-size:1.6rem;flex-shrink:0">'+esc(p.icon||"📄")+"</div>"+
+      pageLogoHtml(p.logo,editKey,p.icon||"📄",52)+
       '<div style="min-width:0"><h2 style="font-size:1.15rem;font-weight:900;line-height:1.2;margin:0">'+esc(p.title)+"</h2>"+(p.subtitle?'<p class="help" style="margin:.15rem 0 0">'+esc(p.subtitle)+"</p>":"")+"</div>"+
     "</div>"+
     '<div class="cp-blocks">'+(blocks||'<p class="help">Esta página ainda não tem conteúdo.</p>')+"</div>"+
@@ -3448,7 +3545,7 @@ function customPageHtml(id){
   var adminBar=canManagePages()
     ?'<div class="card" style="display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;justify-content:space-between;background:#fffbeb;border-color:#fde68a"><span class="help" style="margin:0">'+(p.active?"Você é gestor desta página.":"<b>Página oculta</b> — apenas gestores conseguem ver.")+'</span><button class="btn-soft btn-sm" data-act="pageEdit" data-id="'+esc(p.id)+'">'+ico("pencil",13)+"<span>Editar esta página</span></button></div>"
     :"";
-  return wrap+customPageBodyHtml(p)+adminBar+'<button class="btn-soft" data-act="go" data-page="home">← Voltar ao início</button></section>';
+  return wrap+customPageBodyHtml(p,"cp:"+p.id)+adminBar+'<button class="btn-soft" data-act="go" data-page="home">← Voltar ao início</button></section>';
 }
 function customPagesFor(where){
   return (state.customPages||[]).filter(function(p){
@@ -3462,7 +3559,7 @@ function customPagesHomeHtml(){
   var c=state.church,t=theme();
   var cards=pages.map(function(p){
     return '<div class="dept-card">'+
-      '<div style="width:56px;height:56px;border-radius:16px;background:'+t.hexLight+';display:flex;align-items:center;justify-content:center;font-size:1.65rem">'+esc(p.icon||"📄")+"</div>"+
+      (p.logo?pageLogoImg(p.logo,56):'<div style="width:56px;height:56px;border-radius:16px;background:'+t.hexLight+';display:flex;align-items:center;justify-content:center;font-size:1.65rem">'+esc(p.icon||"📄")+"</div>")+
       '<div><div class="dept-title">'+esc(p.title)+"</div>"+(p.homeDesc?'<div class="help" style="margin:.15rem 0 0">'+esc(p.homeDesc)+"</div>":"")+"</div>"+
       '<button class="btn-main btn-sm" style="width:100%;background:linear-gradient(90deg,'+t.hex+","+t.hex2+')" data-act="go" data-page="cp:'+esc(p.id)+'">Abrir</button>'+
     "</div>";
@@ -3558,6 +3655,7 @@ function pageEditorHtml(){
   var settings='<details class="adx-acc" open><summary>⚙️ Dados da página</summary><div class="acc-body">'+
     field("Nome da página (aparece no menu)","pg_title",p.title)+
     field("Subtítulo (opcional)","pg_sub",p.subtitle)+
+    '<div><label class="lbl">Logo da página (opcional)</label><div style="display:flex;gap:.65rem;align-items:center;flex-wrap:wrap">'+(p.logo?pageLogoImg(p.logo,56):'<div style="width:56px;height:56px;border-radius:16px;border:2px dashed #d6d3d1;display:flex;align-items:center;justify-content:center;font-size:1.4rem">'+esc(p.icon||"📄")+'</div>')+'<button type="button" class="btn-soft btn-sm" data-act="pageLogoEdit" data-key="draft">'+(p.logo?"Alterar logo":"Adicionar logo")+'</button></div><div class="help">Se tiver logo, ela aparece no lugar do ícone (no topo da página, no menu e no cartão da tela inicial). A imagem é compactada automaticamente.</div></div>'+
     '<div><label class="lbl" for="pg_icon">Ícone</label><div style="display:flex;gap:.5rem;align-items:center"><input class="fld" id="pg_icon" value="'+esc(p.icon)+'" style="width:84px;text-align:center;font-size:1.3rem"><span class="help" style="margin:0">Escolha abaixo ou digite qualquer emoji.</span></div><div style="display:flex;flex-wrap:wrap;gap:.3rem;margin-top:.45rem">'+emojiChips+"</div></div>"+
     '<div><label class="lbl" for="pg_vis">Quem pode ver esta página</label>'+visOptions(p.visibility,"pg_vis")+visCheckboxes(p,"pg")+'<div class="help">"Escolher cargos manualmente" usa as caixinhas acima.</div></div>'+
     '<label style="font-size:.82rem;display:flex;align-items:center;gap:.45rem"><input type="checkbox" id="pg_active"'+(p.active!==false?" checked":"")+"> Página ativa (publicada)</label>"+
@@ -3630,6 +3728,9 @@ function tabPages(){
   return hd("Páginas Personalizadas","Crie novas páginas sempre que precisar — com botões, links, WhatsApp, imagens, vídeos, Pix e textos — sem precisar mexer no código.")+
     '<div class="card" style="display:grid;gap:.6rem;margin-bottom:1rem;background:#eff6ff;border-color:#bfdbfe"><div style="font-weight:800;color:#1e3a8a">Criar nova página</div><div class="safe-grid-sm">'+tpl+"</div></div>"+
     '<div style="display:flex;flex-direction:column;gap:.65rem">'+(list||'<div class="card"><p class="help" style="margin:0">Nenhuma página criada ainda. Escolha uma opção acima para começar.</p></div>')+"</div>"+
+    '<div class="card" style="display:grid;gap:.6rem;margin-top:1rem"><div style="font-weight:800">🖼️ Logos das páginas fixas do app</div><p class="help" style="margin:0">Cada página pode ter a sua logo, exibida no topo dela. Toque na logo para trocar.</p><div class="safe-grid-sm">'+
+      FIXED_PAGE_LOGOS.map(function(f){return '<div style="display:flex;align-items:center;gap:.65rem;padding:.55rem;border:1px solid #e7e5e4;border-radius:14px">'+pageLogoHtml(getPageLogo(f[0]),f[0],"",48)+'<div style="min-width:0;flex:1"><div style="font-weight:700;font-size:.84rem">'+esc(f[1])+'</div><button type="button" class="btn-soft btn-sm" style="margin-top:.3rem" data-act="pageLogoEdit" data-key="'+f[0]+'">'+(getPageLogo(f[0])?"Alterar":"Adicionar")+' logo</button></div></div>';}).join("")+
+    '</div></div>'+
     '<details class="adx-acc" style="margin-top:1rem"><summary>🏠 Seção de páginas na tela inicial</summary><div class="acc-body">'+
       field("Título da seção","pgs_title",c.customPagesTitle||"Páginas & Serviços")+
       field("Subtítulo da seção","pgs_sub",c.customPagesSubtitle||"Toque para abrir.")+
@@ -3637,21 +3738,7 @@ function tabPages(){
     "</div></details>"+
     '<p class="help" style="margin-top:.8rem">Lembrete: depois de criar ou editar páginas, use <b>Backup &amp; Publicar → Baixar index.html personalizado</b> e substitua o arquivo no GitHub para que todos vejam.</p>';
 }
-function resizeWide(file,cb){
-  var r=new FileReader();
-  r.onload=function(){
-    var img=new Image();
-    img.onload=function(){
-      var max=900,w=img.width,h=img.height;
-      if(w>max){h=Math.round(h*max/w);w=max;}
-      var c=document.createElement("canvas");c.width=w;c.height=h;
-      c.getContext("2d").drawImage(img,0,0,w,h);
-      cb(c.toDataURL("image/jpeg",0.72));
-    };
-    img.src=r.result;
-  };
-  r.readAsDataURL(file);
-}
+function resizeWide(file,cb){compressFile(file,"banner",cb);}
 function draftBlock(id){return ui.pageEdit&&ui.pageEdit.draft?(ui.pageEdit.draft.blocks||[]).find(function(b){return b.id===id;}):null;}
 
 /* ---------- ações das páginas ---------- */
@@ -3717,8 +3804,8 @@ A.pbImgUpload=function(el){
   var inp=document.createElement("input");inp.type="file";inp.accept="image/*";
   inp.onchange=function(){
     if(!inp.files[0]) return;
-    resizeWide(inp.files[0],function(data){
-      var b=draftBlock(id);if(b){b.url=data;render();toast("Imagem carregada. Toque em Salvar página.","success");}
+    resizeWide(inp.files[0],function(data,before,after){
+      var b=draftBlock(id);if(b){b.url=data;render();toast("Imagem otimizada ("+fmtKB(before)+" → "+fmtKB(after)+"). Toque em Salvar página.","success");}
     });
   };
   inp.click();
@@ -3774,6 +3861,105 @@ document.addEventListener("change",function(e){
   }
 });
 
+
+/* ---------- logos das páginas ---------- */
+var FIXED_PAGE_LOGOS=[["prayer","Oração","🙏"],["secretaria","Secretaria","📄"],["tesouraria","Tesouraria","💰"],["ebd","EBD","📖"]];
+function canEditPageLogos(){return isManager()&&(canManagePages()||can("gerenciarIdentidade"));}
+function getPageLogo(key){
+  if(key==="draft") return ui.pageEdit&&ui.pageEdit.draft?ui.pageEdit.draft.logo||"":"";
+  if(String(key).indexOf("cp:")===0){var p=findPage(key.slice(3));return p?p.logo||"":"";}
+  return (state.church.pageLogos||{})[key]||"";
+}
+function setPageLogo(key,val){
+  if(key==="draft"){syncPageDraft();if(ui.pageEdit&&ui.pageEdit.draft) ui.pageEdit.draft.logo=val;render();return;}
+  if(String(key).indexOf("cp:")===0){
+    var p=findPage(key.slice(3));if(!p) return;
+    p.logo=val;
+    if(ui.pageEdit&&ui.pageEdit.draft&&ui.pageEdit.draft.id===p.id) ui.pageEdit.draft.logo=val;
+  }else{
+    state.church.pageLogos=state.church.pageLogos||{};
+    state.church.pageLogos[key]=val;
+  }
+  save();render();
+}
+function pageLogoImg(src,size){
+  return '<img src="'+esc(driveLink(safeUrl(src)))+'" alt="Logo da página" style="width:'+size+'px;height:'+size+'px;border-radius:16px;object-fit:contain;background:#fff;border:1px solid #e7e5e4;padding:3px;display:block">';
+}
+/* logo da página com lápis de edição para gestores */
+function pageLogoHtml(src,key,fallback,size){
+  size=size||56;
+  var t=theme();
+  var canEdit=!!key&&canEditPageLogos();
+  var inner;
+  if(src) inner=pageLogoImg(src,size);
+  else if(fallback) inner='<div style="width:'+size+'px;height:'+size+'px;border-radius:16px;background:'+t.hexLight+';display:flex;align-items:center;justify-content:center;font-size:'+Math.round(size*.5)+'px">'+esc(fallback)+"</div>";
+  else if(canEdit) return '<button type="button" data-act="pageLogoEdit" data-key="'+esc(key)+'" title="Adicionar logo" style="width:'+size+'px;height:'+size+'px;border-radius:16px;border:2px dashed #d6d3d1;background:#fafaf9;color:#78716c;font-size:.66rem;font-weight:800;cursor:pointer;flex-shrink:0;line-height:1.1">+<br>Logo</button>';
+  else return "";
+  var edit=canEdit?'<button type="button" data-act="pageLogoEdit" data-key="'+esc(key)+'" title="Alterar logo" aria-label="Alterar logo da página" style="position:absolute;top:-6px;right:-6px;background:#fff;border:1px solid #d6d3d1;border-radius:999px;width:26px;height:26px;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,.12)">'+ico("pencil",12)+"</button>":"";
+  return '<div style="position:relative;flex-shrink:0">'+inner+edit+"</div>";
+}
+function pageHeadHtml(key,title,sub){
+  var logo=pageLogoHtml(getPageLogo(key),key,"",56);
+  return '<div style="display:flex;align-items:center;gap:.75rem;margin-bottom:.85rem">'+logo+
+    '<div style="min-width:0"><div style="font-size:1.05rem;font-weight:800;line-height:1.25">'+esc(title)+"</div>"+(sub?'<p class="help" style="margin:.15rem 0 0">'+esc(sub)+"</p>":"")+"</div></div>";
+}
+A.pageLogoEdit=function(el){
+  var key=el.getAttribute("data-key");
+  if(key==="draft") syncPageDraft();
+  var cur=getPageLogo(key);
+  openDialog('<div style="padding:1.25rem;display:grid;gap:.75rem"><div style="font-weight:900;font-size:1.05rem;padding-right:2.2rem">Logo da página</div>'+
+    '<div style="display:flex;justify-content:center">'+(cur?pageLogoImg(cur,96):'<div style="width:96px;height:96px;border-radius:16px;border:2px dashed #d6d3d1;display:flex;align-items:center;justify-content:center" class="help">Sem logo</div>')+"</div>"+
+    '<p class="help" style="margin:0;text-align:center">A imagem é compactada automaticamente (boa qualidade, pouco espaço). Logos PNG com fundo transparente continuam transparentes.</p>'+
+    '<button class="btn-main" style="width:100%" data-act="plUpload">Enviar do aparelho</button>'+
+    '<button class="btn-soft" style="width:100%" data-act="plLink">Usar link (Google Drive ou site)</button>'+
+    (cur?'<button class="btn-danger" style="width:100%" data-act="plRemove">Remover logo</button>':"")+
+  "</div>",function(d){
+    d.querySelector('[data-act="plUpload"]').addEventListener("click",function(e){
+      e.stopPropagation();
+      pickFile(function(data){d.close();setPageLogo(key,data);},"logo");
+    });
+    d.querySelector('[data-act="plLink"]').addEventListener("click",function(e){
+      e.stopPropagation();
+      var u=window.prompt("Link da logo (aceita Google Drive):","");
+      if(u&&u.trim()){d.close();setPageLogo(key,driveLink(u.trim()));toast("Logo atualizada","success");}
+    });
+    var rm=d.querySelector('[data-act="plRemove"]');
+    if(rm) rm.addEventListener("click",function(e){e.stopPropagation();d.close();setPageLogo(key,"");toast("Logo removida");});
+  });
+};
+A.plUpload=function(){};A.plLink=function(){};A.plRemove=function(){};
+
+/* ---------- otimizar fotos já salvas ---------- */
+function collectStoredImages(){
+  var list=[];
+  function add(obj,prop,profile){if(obj&&typeof obj[prop]==="string"&&obj[prop].indexOf("data:image/")===0) list.push({o:obj,k:prop,p:profile});}
+  add(state.church,"logoUrl","logo");
+  var pl=state.church.pageLogos||{};Object.keys(pl).forEach(function(k){add(pl,k,"logo");});
+  state.users.forEach(function(u){add(u,"photo","avatar");});
+  state.departments.forEach(function(dp){add(dp,"photo","avatar");(dp.team||[]).forEach(function(m){add(m,"photo","avatar");});});
+  state.directorate.forEach(function(d){add(d,"photo","avatar");});
+  (state.customPages||[]).forEach(function(p){add(p,"logo","logo");(p.blocks||[]).forEach(function(b){if(b.type==="image") add(b,"url","banner");});});
+  return list;
+}
+A.optimizeImages=function(el){
+  var list=collectStoredImages();
+  if(!list.length){toast("Não há fotos salvas no aparelho para otimizar.");return;}
+  var before=0,after=0,i=0;
+  list.forEach(function(x){before+=dataBytes(x.o[x.k]);});
+  if(el){el.disabled=true;el.style.opacity=".6";}
+  function next(){
+    if(i>=list.length){
+      list.forEach(function(x){after+=dataBytes(x.o[x.k]);});
+      save();render();
+      toast("Fotos otimizadas: "+fmtKB(before)+" → "+fmtKB(after)+" ("+list.length+" imagens)","success");
+      return;
+    }
+    var x=list[i++];
+    if(el) el.textContent="Otimizando "+i+" de "+list.length+"...";
+    compressDataUrl(x.o[x.k],x.p,function(out){x.o[x.k]=out;setTimeout(next,0);});
+  }
+  next();
+};
 
 /* generic click & input listeners */
 document.addEventListener("click",function(e){
