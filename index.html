@@ -2172,6 +2172,7 @@ function tabDepts(){
         '<button class="btn-soft btn-sm" data-act="depToggle" data-id="'+d.id+'">'+(d.active?"Ocultar":"Ativar")+'</button>'+
         '<button class="btn-soft btn-sm" data-act="depEdit" data-id="'+d.id+'">Editar</button>'+
         '<button class="btn-soft btn-sm" data-act="depTeamAdmin" data-id="'+d.id+'">Equipe</button>'+
+        '<button class="btn-soft btn-sm" data-act="depCreatePage" data-id="'+d.id+'">'+((state.customPages||[]).some(function(p){return p.departmentId===d.id;})?"📄 Editar página":"📄 Criar página")+'</button>'+
         '<button class="btn-danger btn-sm" data-act="depDelete" data-id="'+d.id+'">Excluir</button>'+
       '</div>'+
     '</div>';
@@ -3459,6 +3460,7 @@ var BLOCK_TYPES=[
   ["video","Vídeo do YouTube","▶️"],
   ["highlight","Caixa de destaque","📌"],
   ["copy","Botão copiar (Pix/texto)","📋"],
+  ["team","Equipe do departamento","👥"],
   ["divider","Linha separadora","➖"],
   ["spacer","Espaço em branco","⬜"]
 ];
@@ -3473,7 +3475,8 @@ var BLOCK_FIELDS={
   highlight:["title","text","color"],
   copy:["label","value","hint"],
   divider:[],
-  spacer:["size"]
+  spacer:["size"],
+  team:["title","depId","source","showPhone"]
 };
 var BTN_ACTIONS=[["url","Link / Site / Formulário"],["whatsapp","WhatsApp"],["page","Outra página do app"],["email","E-mail"],["phone","Ligar (telefone)"]];
 var BTN_STYLES=[["main","Cor do tema (destaque)"],["outline","Contorno na cor do tema"],["soft","Neutro (cinza)"],["green","Verde (WhatsApp)"],["red","Vermelho"],["gold","Dourado"]];
@@ -3498,6 +3501,7 @@ function newBlock(type){
   else if(type==="highlight"){b.title="Atenção";b.text="";b.color="blue";}
   else if(type==="copy"){b.label="Copiar chave Pix";b.value="";b.hint="";}
   else if(type==="spacer"){b.size="md";}
+  else if(type==="team"){b.title="Nossa Equipe";b.depId="auto";b.source="both";b.showPhone="yes";}
   return b;
 }
 function blk(type,props){return Object.assign(newBlock(type),props||{});}
@@ -3528,7 +3532,8 @@ function pageTemplate(tpl){
       blk("text",{text:"Fale sobre o departamento, seus objetivos e reuniões."}),
       blk("highlight",{title:"🗓️ Reuniões",text:"Todo sábado às 19h30",color:"blue"}),
       blk("copy",{label:"Copiar chave Pix do departamento",value:"",hint:"Cole no aplicativo do seu banco"}),
-      blk("button",{label:"Falar com o líder",action:"whatsapp",value:"",message:"Olá, Paz do Senhor!",style:"green"})
+      blk("button",{label:"Falar com o líder",action:"whatsapp",value:"",message:"Olá, Paz do Senhor!",style:"green"}),
+      blk("team",{})
     ];
   }else{
     p.blocks=[blk("heading",{text:"Título da página"}),blk("text",{text:"Escreva aqui o conteúdo da página."})];
@@ -3617,13 +3622,22 @@ function blockHtml(b,t){
       (b.hint?'<div class="help" style="margin:0">'+esc(b.hint)+"</div>":"")+
     "</div>";
   }
+  if(b.type==="team") return teamBlockHtml(b);
   if(b.type==="divider") return '<hr style="border:0;border-top:1px solid #e7e5e4;margin:.2rem 0">';
   if(b.type==="spacer") return '<div style="height:'+({sm:".5rem",md:"1.2rem",lg:"2.4rem"}[b.size]||"1.2rem")+'"></div>';
   return "";
 }
 function customPageBodyHtml(p,editKey){
   var t=theme();
-  var blocks=(p.blocks||[]).map(function(b){return blockHtml(b,t);}).join("");
+  curPage=p;
+  var blocks="";
+  try{
+    blocks=(p.blocks||[]).map(function(b){return blockHtml(b,t);}).join("");
+    if(p.autoTeam!==false&&!(p.blocks||[]).some(function(b){return b.type==="team";})){
+      var adep=resolvePageDept(p);
+      if(adep) blocks+=teamSectionHtml(adep,{});
+    }
+  }finally{curPage=null;}
   return '<div class="card">'+
     '<div style="display:flex;align-items:center;gap:.7rem;margin-bottom:.9rem">'+
       pageLogoHtml(p.logo,editKey,p.icon||"📄",52)+
@@ -3722,6 +3736,12 @@ function blockEditorFields(b){
     h+=field("Texto do botão",P("label"),b.label);
     h+=field("Conteúdo que será copiado (chave Pix, endereço, código...)",P("value"),b.value);
     h+=field("Dica abaixo do botão (opcional)",P("hint"),b.hint);
+  }else if(b.type==="team"){
+    h+=field("Título da seção",P("title"),b.title);
+    h+=selectF("Departamento",P("depId"),deptOpts(true),b.depId||"auto");
+    h+=selectF("Buscar integrantes em",P("source"),[["both","Equipe cadastrada + pessoas com este Departamento principal"],["team","Somente a equipe cadastrada (Diretoria & Equipes)"],["users","Somente pessoas com este Departamento principal"]],b.source||"both");
+    h+=selectF("Mostrar botão de WhatsApp",P("showPhone"),[["yes","Sim"],["no","Não"]],b.showPhone||"yes");
+    h+='<p class="help" style="margin:0">A equipe é buscada automaticamente e se atualiza sozinha quando você muda os integrantes. O dirigente do departamento aparece em destaque.</p>';
   }else if(b.type==="spacer"){
     h+=selectF("Altura",P("size"),[["sm","Pequeno"],["md","Médio"],["lg","Grande"]],b.size);
   }else if(b.type==="divider"){
@@ -3736,6 +3756,7 @@ function syncPageDraft(){
   p.title=v("pg_title");p.subtitle=v("pg_sub");p.icon=v("pg_icon").trim()||"📄";
   p.visibility=vis("pg_vis");p.visibleTo=visChecked("pg");
   p.active=ch("pg_active");p.showInNav=ch("pg_nav");p.showOnHome=ch("pg_home");p.homeDesc=v("pg_homeDesc");
+  if(document.getElementById("pg_dep")){p.departmentId=v("pg_dep");p.autoTeam=ch("pg_autoTeam");}
   (p.blocks||[]).forEach(function(b){
     (BLOCK_FIELDS[b.type]||[]).concat(["visibility"]).forEach(function(f){
       var el=document.getElementById("pb_"+f+"_"+b.id);
@@ -3761,6 +3782,11 @@ function pageEditorHtml(){
     '<label style="font-size:.82rem;display:flex;align-items:center;gap:.45rem"><input type="checkbox" id="pg_nav"'+(p.showInNav?" checked":"")+"> Mostrar botão no menu superior</label>"+
     '<label style="font-size:.82rem;display:flex;align-items:center;gap:.45rem"><input type="checkbox" id="pg_home"'+(p.showOnHome?" checked":"")+"> Mostrar cartão na tela inicial</label>"+
     field("Descrição curta do cartão na tela inicial (opcional)","pg_homeDesc",p.homeDesc)+
+    '<div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:14px;padding:.75rem;display:grid;gap:.5rem">'+
+      selectF("👥 Departamento desta página",'pg_dep',deptOpts(false),p.departmentId||"")+
+      '<div class="help" style="margin:0">'+(function(){var d=resolvePageDept(p);if(!d) return "Vincule um departamento para a equipe aparecer automaticamente.";var n=deptTeamMembers(d).length;return (p.departmentId?"Vinculado a ":"Detectado pelo nome: ")+"<b>"+esc(d.name)+"</b> • "+n+" integrante"+(n===1?"":"s")+" encontrado"+(n===1?"":"s")+".";})()+'</div>'+
+      '<label style="font-size:.82rem;display:flex;align-items:center;gap:.45rem"><input type="checkbox" id="pg_autoTeam"'+(p.autoTeam!==false?" checked":"")+'> Mostrar a equipe automaticamente no final da página (quando não houver um bloco Equipe)</label>'+
+    '</div>'+
   "</div></details>";
 
   var blocks=(p.blocks||[]).map(function(b,i){
@@ -4261,6 +4287,116 @@ A.saveChrome=function(){
   l.footer={show:ch("ft_show"),showName:ch("ft_name"),showInfo:ch("ft_info"),homeShow:ch("ft_hs"),homeLabel:v("ft_hl").trim()||"Início & Pix",prayerShow:ch("ft_ps"),prayerLabel:v("ft_pl").trim()||"Administração & Oração",showNote:ch("ft_note")};
   save();render();toast("Menu, cabeçalho e rodapé salvos!","success");
 };
+
+/* ---------- equipe automática dos departamentos ---------- */
+var curPage=null;
+var TEAM_GENERIC={"membro":1,"membros":1,"departamento":1,"igreja":1,"visitante":1,"geral":1};
+function resolvePageDept(p){
+  if(!p) return null;
+  if(p.departmentId){var d=findDept(p.departmentId);if(d) return d;}
+  var pt=plain(p.title);
+  if(pt.length<4) return null;
+  return state.departments.find(function(d){
+    var dn=plain(d.name);
+    return dn===pt||(pt.length>=5&&dn.indexOf(pt)>=0)||(dn.length>=5&&pt.indexOf(dn)>=0);
+  })||null;
+}
+function userMatchesDept(u,dep){
+  var pd=plain(u.department);
+  if(!pd||TEAM_GENERIC[pd]) return false;
+  var dn=plain(dep.name);
+  return pd===dn||(pd.length>=4&&dn.indexOf(pd)>=0);
+}
+function userByName(n){var k=plain(n);return k?state.users.find(function(u){return plain(u.name)===k;}):null;}
+/* junta dirigente + equipe cadastrada + pessoas cujo cadastro indica o departamento */
+function deptTeamMembers(dep,source){
+  source=source||"both";
+  var out=[],seen={};
+  function add(m){
+    var k=plain(m.name);if(!k||seen[k]) return;
+    seen[k]=1;out.push(m);
+  }
+  if(dep.leader){
+    var lu=userByName(dep.leader);
+    add({name:dep.leader,role:"Dirigente",photo:(lu&&lu.photo)||"",phone:(lu&&lu.whatsapp)||"",leader:true});
+  }
+  if(source!=="users"){
+    (dep.team||[]).forEach(function(m){
+      var mu=userByName(m.name);
+      add({name:m.name,role:m.role||"Integrante",photo:m.photo||(mu&&mu.photo)||"",phone:m.phone||(mu&&mu.whatsapp)||""});
+    });
+  }
+  if(source!=="team"){
+    state.users.forEach(function(u){
+      if(userMatchesDept(u,dep)) add({name:u.name,role:(u.functions&&u.functions.length?u.functions.join(", "):"Integrante"),photo:u.photo||"",phone:u.whatsapp||""});
+    });
+  }
+  return out;
+}
+function teamSectionHtml(dep,opts){
+  opts=opts||{};
+  var t=theme();
+  var list=deptTeamMembers(dep,opts.source);
+  var title=opts.title||"Nossa Equipe";
+  if(!list.length){
+    return canManagePages()?'<div style="border:2px dashed #d6d3d1;border-radius:16px;padding:.9rem" class="help">👥 <b>'+esc(title)+'</b>: nenhum integrante encontrado para "'+esc(dep.name)+'". Cadastre a equipe em Diretoria &amp; Equipes ou informe o Departamento principal no cadastro das pessoas — a página atualiza sozinha.</div>':"";
+  }
+  var showPhone=opts.showPhone!=="no";
+  var cards=list.map(function(m){
+    var num=String(m.phone||"").replace(/\D/g,"");
+    var wa=showPhone&&num?'<a href="https://wa.me/'+(num.length<=11?"55":"")+num+'" target="_blank" rel="noopener noreferrer" style="display:inline-block;margin-top:.15rem;font-size:.74rem;color:#15803d;font-weight:700">WhatsApp</a>':"";
+    return '<div style="display:flex;gap:.65rem;align-items:center;padding:.45rem;border-radius:14px;background:'+(m.leader?t.hexLight:"#fafaf9")+';border:1px solid '+(m.leader?t.hex:"#e7e5e4")+'">'+avatar(m.photo,m.name,52)+
+      '<div style="min-width:0"><div style="font-weight:700;font-size:.85rem">'+esc(m.name)+'</div><div style="font-size:.72rem;font-weight:600;color:'+t.hex+'">'+esc(m.role)+"</div>"+wa+"</div></div>";
+  }).join("");
+  return '<div><div style="font-weight:800;font-size:1rem;margin-bottom:.15rem">'+esc(title)+'</div><div class="help" style="margin:0 0 .6rem">'+list.length+" integrante"+(list.length>1?"s":"")+" • "+esc(dep.name)+'</div><div class="safe-grid-sm">'+cards+"</div></div>";
+}
+function teamBlockHtml(b){
+  var dep=(b.depId&&b.depId!=="auto")?findDept(b.depId):resolvePageDept(curPage);
+  if(!dep){
+    return canManagePages()?'<div style="border:2px dashed #d6d3d1;border-radius:16px;padding:.9rem" class="help">👥 Bloco de equipe: escolha o departamento no editor (ou vincule um departamento à página).</div>':"";
+  }
+  return teamSectionHtml(dep,{title:b.title,source:b.source,showPhone:b.showPhone});
+}
+function deptOpts(withAuto){
+  var o=withAuto?[["auto","Automático (departamento vinculado à página)"]]:[["","— Nenhum —"]];
+  state.departments.forEach(function(d){o.push([d.id,d.name]);});
+  return o;
+}
+/* preenche automaticamente a página com os dados do departamento */
+function applyDeptToDraft(p,dep,force){
+  if(!dep) return;
+  var generic={"":1,"nova pagina":1,"nome do departamento":1};
+  if(force||generic[plain(p.title)]) p.title=dep.name;
+  if((force||!p.logo)&&dep.photo) p.logo=dep.photo;
+  if(force&&DEP_ICONS[dep.icon]) p.icon=DEP_ICONS[dep.icon];
+  (p.blocks||[]).forEach(function(b){
+    if(b.type==="copy"&&!b.value&&dep.pixKey) b.value=dep.pixKey;
+    if(b.type==="text"&&dep.description&&/^Fale sobre o departamento/.test(b.text||"")) b.text=dep.description;
+    if(b.type==="button"&&b.action==="whatsapp"&&!b.value&&dep.leader){var lu=userByName(dep.leader);if(lu&&lu.whatsapp) b.value=lu.whatsapp;}
+  });
+  if(!(p.blocks||[]).some(function(b){return b.type==="team";})) p.blocks.push(newBlock("team"));
+}
+A.depCreatePage=function(el){
+  var dep=findDept(el.getAttribute("data-id"));if(!dep) return;
+  var existing=(state.customPages||[]).find(function(p){return p.departmentId===dep.id;});
+  if(existing){ui.pageEdit={draft:clone(existing)};ui.adminTab="pages";render();window.scrollTo(0,0);toast("Este departamento já tem página. Abrindo para editar.");return;}
+  var p=pageTemplate("departamento");
+  p.departmentId=dep.id;p.autoTeam=true;
+  if(!dep.pixKey) p.blocks=p.blocks.filter(function(b){return b.type!=="copy";});
+  applyDeptToDraft(p,dep,true);
+  if(dep.description) p.homeDesc=dep.description.slice(0,60);
+  ui.pageEdit={draft:p};ui.adminTab="pages";
+  render();window.scrollTo(0,0);
+  toast("Página criada com os dados e a equipe do departamento. Revise e toque em Salvar.","success");
+};
+document.addEventListener("change",function(e){
+  if(e.target&&e.target.id==="pg_dep"&&ui.pageEdit&&ui.pageEdit.draft){
+    syncPageDraft();
+    var dep=findDept(ui.pageEdit.draft.departmentId);
+    if(dep){applyDeptToDraft(ui.pageEdit.draft,dep,false);toast("Equipe e dados de "+dep.name+" vinculados à página.","success");}
+    render();
+  }
+});
 
 /* generic click & input listeners */
 document.addEventListener("click",function(e){
