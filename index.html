@@ -1721,6 +1721,7 @@ var SYS={
   adminShortcuts:{label:"Atalhos administrativos (Secretaria & Gabinete)",pages:["prayer"],titles:true,defTitle:function(){return "Secretaria & Gabinete";},defSub:function(){return "Atalhos administrativos disponíveis para o seu acesso.";},opts:[{f:"areas",label:"Áreas dos atalhos exibidos",type:"areas"},{f:"onlyGab",label:"Mostrar somente os marcados como Gabinete",type:"check",def:false},{f:"showEmpty",label:"Mostrar aviso quando não houver atalhos",type:"check",def:true}]},
   staffAccess:{label:"Cartão Acesso da equipe",pages:["prayer"],titles:true,defTitle:function(){return "Acesso da equipe";},defSub:function(){return "Membros entram com o CPF; a equipe entra com a senha pessoal.";},opts:[{f:"btnLabel",label:"Texto do botão",type:"text",ph:function(){return "Entrar";}}]},
   areaButtons:{label:"Botões / serviços da página",pages:["secretaria","tesouraria","ebd"],titles:true,defTitle:function(c,pg){return AREA_DEF[pg][0];},defSub:function(c,pg){return AREA_DEF[pg][1];},opts:[{f:"showEmpty",label:"Mostrar aviso quando não houver botões",type:"check",def:true}],note:"Os botões são cadastrados nas abas Botões Secretaria / Tesouraria / EBD."},
+  areaTeam:{label:"Equipe da área (automática)",pages:["secretaria","tesouraria","ebd"],titles:true,defTitle:function(){return "Nossa Equipe";},defSub:function(){return "Automático: quantidade de integrantes";},note:"A equipe é buscada sozinha nos cargos da Diretoria, no cargo/função/departamento das pessoas em Usuários e na equipe do departamento ligado. Atualiza automaticamente.",opts:[{f:"srcDir",label:"Incluir cargos da Diretoria ligados à área (Secretários, Gestores Contábeis, Superintendentes de Ensino)",type:"check",def:true},{f:"srcRoles",label:"Incluir pessoas com o cargo de acesso, função ou departamento principal da área",type:"check",def:true},{f:"srcDept",label:"Incluir a equipe do departamento ligado",type:"check",def:true},{f:"deptId",label:"Departamento ligado",type:"select",def:"auto",choices:function(){return deptOpts(true).map(function(o){return o[0]==="auto"?["auto","Automático (pelo nome da área)"]:o;});}},{f:"showPhone",label:"Mostrar botão de WhatsApp",type:"check",def:true}]},
   memberCta:{label:"Convite 'É membro da igreja?' (só visitantes)",pages:["secretaria","tesouraria","ebd"],titles:true,defTitle:function(){return "É membro da igreja?";},defSub:function(){return "Entre com seu CPF para acessar todos os serviços.";},opts:[{f:"btnLabel",label:"Texto do botão",type:"text",ph:function(){return "Entrar com CPF";}}]}
 };
 var AREA_DEF={
@@ -1731,7 +1732,7 @@ var AREA_DEF={
 var DEFAULT_LAYOUT_KEYS={
   home:["welcome","christ","prayerCard","info","customPages","directorate","departments","services","notices","links"],
   prayer:["prayerMain","adminShortcuts","staffAccess"],
-  secretaria:["areaButtons","memberCta"],tesouraria:["areaButtons","memberCta"],ebd:["areaButtons","memberCta"]
+  secretaria:["areaButtons","areaTeam","memberCta"],tesouraria:["areaButtons","areaTeam","memberCta"],ebd:["areaButtons","areaTeam","memberCta"]
 };
 function sysItem(key){
   var it={id:"sys_"+key,type:"sys",key:key,show:true,visibility:"todos",title:"",subtitle:""};
@@ -1762,6 +1763,15 @@ function L(){
   l.nav=Object.assign({},dl.nav,l.nav||{});
   l.header=Object.assign({},dl.header,l.header||{});
   l.footer=Object.assign({},dl.footer,l.footer||{});
+  if(!l.areaTeamAdded){
+    ["secretaria","tesouraria","ebd"].forEach(function(pg){
+      var arr=l.pages[pg];
+      if(arr.some(function(x){return x.key==="areaTeam";})) return;
+      var i=arr.findIndex(function(x){return x.key==="areaButtons";});
+      arr.splice(i>=0?i+1:arr.length,0,sysItem("areaTeam"));
+    });
+    l.areaTeamAdded=true;
+  }
   return l;
 }
 function navCfg(k){var n=L().nav||{};return n[k]||{label:k,show:true};}
@@ -1839,6 +1849,8 @@ function renderSys(sec,pg){
     return '<div class="card">'+pageHeadHtml(pg,title,S||def[1])+'<div style="display:flex;flex-direction:column;gap:.6rem">'+
       (ab.length?ab.map(function(b){return '<a href="'+esc(b.link)+'" target="_blank" rel="noopener noreferrer" style="display:flex;justify-content:space-between;align-items:center;gap:.5rem;min-height:48px;padding:.75rem .9rem;border-radius:14px;border:1px solid '+t.hex+";background:"+t.hexLight+";color:"+t.hex+';text-decoration:none;font-weight:800;font-size:.86rem"><span>'+esc(b.title)+"</span>"+pill(b.badge||title,"b-white")+"</a>";}).join(""):'<p class="help">Nenhum serviço disponível para o seu nível de acesso. Entre com seu CPF de membro ou senha pessoal para liberar.</p>')+
     "</div></div>";
+  case "areaTeam":
+    return areaTeamSectionHtml(pg,sec);
   case "memberCta":
     if(session.role!=="visitante") return "";
     return '<div class="card"><div style="font-weight:800">'+esc(T||"É membro da igreja?")+'</div><p class="help" style="margin:.2rem 0 .7rem">'+esc(S||"Entre com seu CPF para acessar todos os serviços.")+'</p><button class="btn-main" style="width:100%" data-act="changeAccess">'+esc(sec.btnLabel||"Entrar com CPF")+"</button></div>";
@@ -4155,7 +4167,7 @@ function sysEditorHtml(it,i,n,pg){
     if(o.type==="check") h+=chk(P(o.f),it[o.f]!==false&&(it[o.f]!==undefined||o.def!==false),o.label);
     else if(o.type==="text") h+=inputPh(o.label,P(o.f),it[o.f],o.ph?o.ph(c):"");
     else if(o.type==="number") h+=inputPh(o.label,P(o.f),it[o.f],o.ph?o.ph(c):"","","number");
-    else if(o.type==="select") h+=selectF(o.label,P(o.f),o.choices,it[o.f]||o.def);
+    else if(o.type==="select") h+=selectF(o.label,P(o.f),typeof o.choices==="function"?o.choices():o.choices,it[o.f]||o.def);
     else if(o.type==="areas"){
       var ar=secAreas(it);
       h+='<div><div class="lbl">'+esc(o.label)+'</div><div style="display:flex;flex-wrap:wrap;gap:.75rem">'+["secretaria","tesouraria","ebd"].map(function(a){
@@ -4333,6 +4345,73 @@ function deptTeamMembers(dep,source){
   }
   return out;
 }
+/* ---------- equipe automática das páginas Secretaria / Tesouraria / EBD ---------- */
+var AREA_TEAM_RULES={
+  secretaria:{dir:["sec_1","sec_2","sec_adj"],words:["secret"],deptWords:["secretaria"]},
+  tesouraria:{dir:["cont_1","cont_2"],words:["tesour","contab","financ"],deptWords:["tesouraria","financeiro","contab"]},
+  ebd:{dir:["ensino_1","ensino_2"],words:["ebd","escola biblica","ensino","professor"],deptWords:["escola biblica","ebd"]}
+};
+function hasWord(txt,words){var p=plain(txt);return words.some(function(w){return p.indexOf(w)>=0;});}
+function areaDept(pg,sec){
+  if(sec&&sec.deptId&&sec.deptId!=="auto"){var d=findDept(sec.deptId);if(d) return d;}
+  var R=AREA_TEAM_RULES[pg];if(!R) return null;
+  return state.departments.find(function(d){return hasWord(d.name,R.deptWords);})||null;
+}
+function areaTeamMembers(pg,sec){
+  sec=sec||{};
+  var R=AREA_TEAM_RULES[pg];if(!R) return [];
+  var out=[],seen={};
+  function add(m){var k=plain(m.name);if(!k||seen[k]) return;seen[k]=1;out.push(m);}
+  /* 1. cargos da Diretoria ligados à área (ex.: 1º/2º Secretário, Gestor Contábil, Superintendente de Ensino) */
+  if(sec.srcDir!==false){
+    state.directorate.forEach(function(d){
+      if(!d.name||d.visible===false) return;
+      if(R.dir.indexOf(d.id)>=0||hasWord(d.role,R.words)){
+        var u=userByName(d.name);
+        add({name:d.name,role:d.role,photo:d.photo||(u&&u.photo)||"",phone:d.phone||(u&&u.whatsapp)||"",leader:true});
+      }
+    });
+  }
+  /* 2. pessoas com o cargo de acesso da área ou função / departamento principal relacionado */
+  if(sec.srcRoles!==false){
+    state.users.forEach(function(u){
+      var ro=roleObj(u.role);
+      var byRole=u.role===pg||hasWord(ro.label,R.words);
+      var byFunc=(u.functions||[]).some(function(fn){return hasWord(fn,R.words);});
+      var byDept=u.department&&!TEAM_GENERIC[plain(u.department)]&&hasWord(u.department,R.words);
+      if(byRole||byFunc||byDept){
+        var lbl=(u.functions||[]).filter(function(fn){return hasWord(fn,R.words);}).join(", ")||ro.label;
+        add({name:u.name,role:lbl,photo:u.photo||"",phone:u.whatsapp||""});
+      }
+    });
+  }
+  /* 3. equipe do departamento correspondente (ex.: Escola Bíblica Dominical) */
+  if(sec.srcDept!==false){
+    var dep=areaDept(pg,sec);
+    if(dep) deptTeamMembers(dep,"both").forEach(add);
+  }
+  return out;
+}
+function teamListHtml(list,title,sub,showPhone){
+  var t=theme();
+  var cards=list.map(function(m){
+    var num=String(m.phone||"").replace(/\D/g,"");
+    var wa=showPhone&&num?'<a href="https://wa.me/'+(num.length<=11?"55":"")+num+'" target="_blank" rel="noopener noreferrer" style="display:inline-block;margin-top:.15rem;font-size:.74rem;color:#15803d;font-weight:700">WhatsApp</a>':"";
+    return '<div style="display:flex;gap:.65rem;align-items:center;padding:.45rem;border-radius:14px;background:'+(m.leader?t.hexLight:"#fafaf9")+';border:1px solid '+(m.leader?t.hex:"#e7e5e4")+'">'+avatar(m.photo,m.name,52)+
+      '<div style="min-width:0"><div style="font-weight:700;font-size:.85rem">'+esc(m.name)+'</div><div style="font-size:.72rem;font-weight:600;color:'+t.hex+'">'+esc(m.role)+"</div>"+wa+"</div></div>";
+  }).join("");
+  return '<div><div style="font-weight:800;font-size:1rem;margin-bottom:.15rem">'+esc(title)+'</div><div class="help" style="margin:0 0 .6rem">'+esc(sub)+'</div><div class="safe-grid-sm">'+cards+"</div></div>";
+}
+function areaTeamSectionHtml(pg,sec){
+  var list=areaTeamMembers(pg,sec);
+  var title=sec.title||"Nossa Equipe";
+  if(!list.length){
+    return canManagePages()?'<div class="card"><div style="border:2px dashed #d6d3d1;border-radius:16px;padding:.9rem" class="help">👥 <b>'+esc(title)+"</b>: nenhuma pessoa encontrada para "+esc(AREA_NAMES[pg]||pg)+". Preencha os cargos da Diretoria, dê o cargo "+esc(AREA_NAMES[pg]||pg)+" ou uma função relacionada às pessoas em Usuários — a página atualiza sozinha.</div></div>":"";
+  }
+  var sub=sec.subtitle||(list.length+" integrante"+(list.length>1?"s":"")+" • "+(AREA_DEF[pg]?AREA_DEF[pg][0]:""));
+  return '<div class="card">'+teamListHtml(list,title,sub,sec.showPhone!==false)+"</div>";
+}
+
 function teamSectionHtml(dep,opts){
   opts=opts||{};
   var t=theme();
