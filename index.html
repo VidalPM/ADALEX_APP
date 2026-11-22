@@ -1721,7 +1721,7 @@ var SYS={
   adminShortcuts:{label:"Atalhos administrativos (Secretaria & Gabinete)",pages:["prayer"],titles:true,defTitle:function(){return "Secretaria & Gabinete";},defSub:function(){return "Atalhos administrativos disponíveis para o seu acesso.";},opts:[{f:"areas",label:"Áreas dos atalhos exibidos",type:"areas"},{f:"onlyGab",label:"Mostrar somente os marcados como Gabinete",type:"check",def:false},{f:"showEmpty",label:"Mostrar aviso quando não houver atalhos",type:"check",def:true}]},
   staffAccess:{label:"Cartão Acesso da equipe",pages:["prayer"],titles:true,defTitle:function(){return "Acesso da equipe";},defSub:function(){return "Membros entram com o CPF; a equipe entra com a senha pessoal.";},opts:[{f:"btnLabel",label:"Texto do botão",type:"text",ph:function(){return "Entrar";}}]},
   areaButtons:{label:"Botões / serviços da página",pages:["secretaria","tesouraria","ebd"],titles:true,defTitle:function(c,pg){return AREA_DEF[pg][0];},defSub:function(c,pg){return AREA_DEF[pg][1];},opts:[{f:"showEmpty",label:"Mostrar aviso quando não houver botões",type:"check",def:true}],note:"Os botões são cadastrados nas abas Botões Secretaria / Tesouraria / EBD."},
-  areaTeam:{label:"Equipe da área (automática)",pages:["secretaria","tesouraria","ebd"],titles:true,defTitle:function(){return "Nossa Equipe";},defSub:function(){return "Automático: quantidade de integrantes";},note:"A equipe é buscada sozinha nos cargos da Diretoria, no cargo/função/departamento das pessoas em Usuários e na equipe do departamento ligado. Atualiza automaticamente.",opts:[{f:"srcDir",label:"Incluir cargos da Diretoria ligados à área (Secretários, Gestores Contábeis, Superintendentes de Ensino)",type:"check",def:true},{f:"srcRoles",label:"Incluir pessoas com o cargo de acesso, função ou departamento principal da área",type:"check",def:true},{f:"srcDept",label:"Incluir a equipe do departamento ligado",type:"check",def:true},{f:"deptId",label:"Departamento ligado",type:"select",def:"auto",choices:function(){return deptOpts(true).map(function(o){return o[0]==="auto"?["auto","Automático (pelo nome da área)"]:o;});}},{f:"showPhone",label:"Mostrar botão de WhatsApp",type:"check",def:true}]},
+  areaTeam:{label:"Equipe da área (automática)",pages:["secretaria","tesouraria","ebd"],titles:true,defTitle:function(){return "Nossa Equipe";},defSub:function(){return "Automático: quantidade de integrantes";},note:"A equipe vem somente da aba Diretoria & Equipes: cargos da Diretoria da igreja ligados à área + a equipe do departamento ligado (Equipes dos departamentos). Atualiza automaticamente.",opts:[{f:"srcDir",label:"Incluir cargos da Diretoria ligados à área (Secretários, Gestores Contábeis, Superintendentes de Ensino)",type:"check",def:true},{f:"srcDept",label:"Incluir a equipe do departamento ligado (Equipes dos departamentos)",type:"check",def:true},{f:"deptId",label:"Departamento ligado",type:"select",def:"auto",choices:function(){return deptOpts(true).map(function(o){return o[0]==="auto"?["auto","Automático (pelo nome da área)"]:o;});}},{f:"showPhone",label:"Mostrar botão de WhatsApp",type:"check",def:true}]},
   memberCta:{label:"Convite 'É membro da igreja?' (só visitantes)",pages:["secretaria","tesouraria","ebd"],titles:true,defTitle:function(){return "É membro da igreja?";},defSub:function(){return "Entre com seu CPF para acessar todos os serviços.";},opts:[{f:"btnLabel",label:"Texto do botão",type:"text",ph:function(){return "Entrar com CPF";}}]}
 };
 var AREA_DEF={
@@ -2482,7 +2482,11 @@ function tabDirectorate(){
   }).join("");
   return hd("Diretoria & Equipes","Crie ou edite cargos da diretoria e integrantes de cada departamento.")+status+
     '<div class="safe-grid-2" style="margin:1rem 0">'+cards+"</div>"+
-    '<div style="font-weight:800;margin-bottom:.55rem">Equipes dos departamentos</div><div style="display:flex;flex-direction:column;gap:.55rem">'+teams+"</div>";
+    '<div style="font-weight:800;margin-bottom:.35rem">Equipes dos departamentos</div>'+
+    '<p class="help" style="margin:0 0 .55rem">Estas equipes são exibidas automaticamente nas páginas dos departamentos e nas páginas Secretaria, Tesouraria e EBD. Use a função <b>Dirigente</b>, <b>Líder</b> ou <b>Coordenador</b> para destacar o responsável.</p>'+
+    (function(){var miss=["secretaria","tesouraria","ebd"].filter(function(a){return !areaDept(a,null);});
+      return miss.length?'<div class="card" style="display:grid;gap:.5rem;margin-bottom:.55rem;background:#eff6ff;border-color:#bfdbfe"><div style="font-weight:800;font-size:.84rem;color:#1e3a8a">Equipes das páginas do app</div><p class="help" style="margin:0">Crie a equipe para a página cadastrar seus integrantes aqui (não aparece nos cartões de Pix).</p><div style="display:flex;flex-wrap:wrap;gap:.4rem">'+miss.map(function(a){return '<button class="btn-soft btn-sm" data-act="createAreaTeam" data-area="'+a+'">+ Criar equipe da '+esc(AREA_NAMES[a])+"</button>";}).join("")+"</div></div>":"";})()+
+    '<div style="display:flex;flex-direction:column;gap:.55rem">'+teams+"</div>";
 }
 
 /* tab records */
@@ -3398,12 +3402,21 @@ A.dirPhoto=function(el){
   else{var u=window.prompt("Link da foto (aceita Google Drive):","");if(u){d.photo=driveLink(u.trim());save();render();toast("Foto atualizada","success");}}
 };
 A.dirPhotoRemove=function(el){var d=state.directorate.find(function(x){return x.id===el.getAttribute("data-id");});if(d){d.photo="";save();render();toast("Foto removida");}};
+A.createAreaTeam=function(el){
+  var a=el.getAttribute("data-area");
+  if(areaDept(a,null)){toast("Esta equipe já existe.");return;}
+  var names={secretaria:"Secretaria",tesouraria:"Tesouraria",ebd:"Escola Bíblica Dominical"};
+  var icons={secretaria:"landmark",tesouraria:"landmark",ebd:"book-open"};
+  var d={id:"dep_"+a+"_"+Date.now(),name:names[a],pixType:"E-mail",pixKey:"",icon:icons[a],description:"Equipe da página "+AREA_NAMES[a]+".",visibility:"todos",visibleTo:[],active:false,photo:"",team:[],leader:"",btnLabel:""};
+  state.departments.push(d);ui.teamOpen[d.id]=true;
+  save();render();toast("Equipe da "+AREA_NAMES[a]+" criada. Adicione os integrantes.","success");
+};
 A.teamToggle=function(el){var id=el.getAttribute("data-id");ui.teamOpen[id]=!ui.teamOpen[id];render();};
 function teamForm(dep,idx){
   var m=idx==null?{name:"",role:"",photo:"",phone:""}:dep.team[idx];
   openDialog('<div style="padding:1.25rem;display:grid;gap:.65rem"><div style="font-weight:900;font-size:1.05rem">'+(idx==null?"Adicionar integrante":"Editar integrante")+'</div>'+
     '<div><label class="lbl" for="tm_n">Nome</label><input class="fld" id="tm_n" value="'+esc(m.name)+'"><button class="btn-soft btn-sm" id="tm_pick" style="width:100%;margin-top:.4rem">Escolher da lista de pessoas</button></div>'+
-    '<div><label class="lbl" for="tm_r">Função / Cargo na equipe</label><input class="fld" id="tm_r" value="'+esc(m.role||"")+'"></div>'+
+    '<div><label class="lbl" for="tm_r">Função / Cargo na equipe</label><input class="fld" id="tm_r" value="'+esc(m.role||"")+'" placeholder="Ex.: Dirigente, Vice-líder, Secretário, Professor..."><div class="help">Dirigente, Líder, Coordenador ou Superintendente aparece em destaque na página.</div></div>'+
     '<div><label class="lbl" for="tm_p">Telefone</label><input class="fld" id="tm_p" type="tel" inputmode="tel" value="'+esc(m.phone||"")+'"></div>'+
     '<div style="display:flex;gap:.45rem;flex-wrap:wrap"><button class="btn-soft btn-sm" id="tm_file">Enviar foto</button><button class="btn-soft btn-sm" id="tm_link">Usar link</button></div>'+
     '<div style="display:flex;justify-content:flex-end;gap:.5rem"><button class="btn-soft" data-close>Cancelar</button><button class="btn-main" id="tm_save">Salvar integrante</button></div></div>',function(d){
@@ -3751,9 +3764,8 @@ function blockEditorFields(b){
   }else if(b.type==="team"){
     h+=field("Título da seção",P("title"),b.title);
     h+=selectF("Departamento",P("depId"),deptOpts(true),b.depId||"auto");
-    h+=selectF("Buscar integrantes em",P("source"),[["both","Equipe cadastrada + pessoas com este Departamento principal"],["team","Somente a equipe cadastrada (Diretoria & Equipes)"],["users","Somente pessoas com este Departamento principal"]],b.source||"both");
     h+=selectF("Mostrar botão de WhatsApp",P("showPhone"),[["yes","Sim"],["no","Não"]],b.showPhone||"yes");
-    h+='<p class="help" style="margin:0">A equipe é buscada automaticamente e se atualiza sozinha quando você muda os integrantes. O dirigente do departamento aparece em destaque.</p>';
+    h+='<p class="help" style="margin:0">A equipe é buscada em Diretoria &amp; Equipes → Equipes dos departamentos e se atualiza sozinha. Quem tiver a função Dirigente, Líder, Coordenador ou Superintendente aparece primeiro, em destaque.</p>';
   }else if(b.type==="spacer"){
     h+=selectF("Altura",P("size"),[["sm","Pequeno"],["md","Médio"],["lg","Grande"]],b.size);
   }else if(b.type==="divider"){
@@ -4321,29 +4333,16 @@ function userMatchesDept(u,dep){
 }
 function userByName(n){var k=plain(n);return k?state.users.find(function(u){return plain(u.name)===k;}):null;}
 /* junta dirigente + equipe cadastrada + pessoas cujo cadastro indica o departamento */
-function deptTeamMembers(dep,source){
-  source=source||"both";
+function isLeaderRole(r){return /dirigente|l[ií]der|coordenador|presidente|superintendente|diretor|respons[aá]vel/i.test(String(r||""));}
+/* A equipe vem exclusivamente de Diretoria & Equipes → Equipes dos departamentos.
+   Quem tiver função de Dirigente/Líder/Coordenador... aparece primeiro e em destaque. */
+function deptTeamMembers(dep){
   var out=[],seen={};
-  function add(m){
-    var k=plain(m.name);if(!k||seen[k]) return;
-    seen[k]=1;out.push(m);
-  }
-  if(dep.leader){
-    var lu=userByName(dep.leader);
-    add({name:dep.leader,role:"Dirigente",photo:(lu&&lu.photo)||"",phone:(lu&&lu.whatsapp)||"",leader:true});
-  }
-  if(source!=="users"){
-    (dep.team||[]).forEach(function(m){
-      var mu=userByName(m.name);
-      add({name:m.name,role:m.role||"Integrante",photo:m.photo||(mu&&mu.photo)||"",phone:m.phone||(mu&&mu.whatsapp)||""});
-    });
-  }
-  if(source!=="team"){
-    state.users.forEach(function(u){
-      if(userMatchesDept(u,dep)) add({name:u.name,role:(u.functions&&u.functions.length?u.functions.join(", "):"Integrante"),photo:u.photo||"",phone:u.whatsapp||""});
-    });
-  }
-  return out;
+  (dep&&dep.team||[]).forEach(function(m){
+    var k=plain(m.name);if(!k||seen[k]) return;seen[k]=1;
+    out.push({name:m.name,role:m.role||"Integrante",photo:m.photo||"",phone:m.phone||"",leader:isLeaderRole(m.role)});
+  });
+  return out.filter(function(m){return m.leader;}).concat(out.filter(function(m){return !m.leader;}));
 }
 /* ---------- equipe automática das páginas Secretaria / Tesouraria / EBD ---------- */
 var AREA_TEAM_RULES={
@@ -4362,36 +4361,21 @@ function areaTeamMembers(pg,sec){
   var R=AREA_TEAM_RULES[pg];if(!R) return [];
   var out=[],seen={};
   function add(m){var k=plain(m.name);if(!k||seen[k]) return;seen[k]=1;out.push(m);}
-  /* 1. cargos da Diretoria ligados à área (ex.: 1º/2º Secretário, Gestor Contábil, Superintendente de Ensino) */
+  /* 1. Diretoria da igreja (Diretoria & Equipes → cargos da diretoria ligados à área) */
   if(sec.srcDir!==false){
     state.directorate.forEach(function(d){
       if(!d.name||d.visible===false) return;
-      if(R.dir.indexOf(d.id)>=0||hasWord(d.role,R.words)){
-        var u=userByName(d.name);
-        add({name:d.name,role:d.role,photo:d.photo||(u&&u.photo)||"",phone:d.phone||(u&&u.whatsapp)||"",leader:true});
-      }
+      if(R.dir.indexOf(d.id)>=0||hasWord(d.role,R.words)) add({name:d.name,role:d.role,photo:d.photo||"",phone:d.phone||"",leader:true});
     });
   }
-  /* 2. pessoas com o cargo de acesso da área ou função / departamento principal relacionado */
-  if(sec.srcRoles!==false){
-    state.users.forEach(function(u){
-      var ro=roleObj(u.role);
-      var byRole=u.role===pg||hasWord(ro.label,R.words);
-      var byFunc=(u.functions||[]).some(function(fn){return hasWord(fn,R.words);});
-      var byDept=u.department&&!TEAM_GENERIC[plain(u.department)]&&hasWord(u.department,R.words);
-      if(byRole||byFunc||byDept){
-        var lbl=(u.functions||[]).filter(function(fn){return hasWord(fn,R.words);}).join(", ")||ro.label;
-        add({name:u.name,role:lbl,photo:u.photo||"",phone:u.whatsapp||""});
-      }
-    });
-  }
-  /* 3. equipe do departamento correspondente (ex.: Escola Bíblica Dominical) */
+  /* 2. Equipe do departamento ligado (Diretoria & Equipes → Equipes dos departamentos) */
   if(sec.srcDept!==false){
     var dep=areaDept(pg,sec);
-    if(dep) deptTeamMembers(dep,"both").forEach(add);
+    if(dep) deptTeamMembers(dep).forEach(add);
   }
   return out;
 }
+
 function teamListHtml(list,title,sub,showPhone){
   var t=theme();
   var cards=list.map(function(m){
@@ -4406,7 +4390,7 @@ function areaTeamSectionHtml(pg,sec){
   var list=areaTeamMembers(pg,sec);
   var title=sec.title||"Nossa Equipe";
   if(!list.length){
-    return canManagePages()?'<div class="card"><div style="border:2px dashed #d6d3d1;border-radius:16px;padding:.9rem" class="help">👥 <b>'+esc(title)+"</b>: nenhuma pessoa encontrada para "+esc(AREA_NAMES[pg]||pg)+". Preencha os cargos da Diretoria, dê o cargo "+esc(AREA_NAMES[pg]||pg)+" ou uma função relacionada às pessoas em Usuários — a página atualiza sozinha.</div></div>":"";
+    return canManagePages()?'<div class="card"><div style="border:2px dashed #d6d3d1;border-radius:16px;padding:.9rem" class="help">👥 <b>'+esc(title)+"</b>: nenhuma pessoa encontrada para "+esc(AREA_NAMES[pg]||pg)+". Cadastre em Diretoria &amp; Equipes: os cargos da Diretoria da igreja e a equipe do departamento ligado — a página atualiza sozinha.</div></div>":"";
   }
   var sub=sec.subtitle||(list.length+" integrante"+(list.length>1?"s":"")+" • "+(AREA_DEF[pg]?AREA_DEF[pg][0]:""));
   return '<div class="card">'+teamListHtml(list,title,sub,sec.showPhone!==false)+"</div>";
@@ -4418,7 +4402,7 @@ function teamSectionHtml(dep,opts){
   var list=deptTeamMembers(dep,opts.source);
   var title=opts.title||"Nossa Equipe";
   if(!list.length){
-    return canManagePages()?'<div style="border:2px dashed #d6d3d1;border-radius:16px;padding:.9rem" class="help">👥 <b>'+esc(title)+'</b>: nenhum integrante encontrado para "'+esc(dep.name)+'". Cadastre a equipe em Diretoria &amp; Equipes ou informe o Departamento principal no cadastro das pessoas — a página atualiza sozinha.</div>':"";
+    return canManagePages()?'<div style="border:2px dashed #d6d3d1;border-radius:16px;padding:.9rem" class="help">👥 <b>'+esc(title)+'</b>: nenhum integrante encontrado para "'+esc(dep.name)+'". Cadastre a equipe em Diretoria &amp; Equipes → Equipes dos departamentos — a página atualiza sozinha.</div>':"";
   }
   var showPhone=opts.showPhone!=="no";
   var cards=list.map(function(m){
@@ -4451,7 +4435,7 @@ function applyDeptToDraft(p,dep,force){
   (p.blocks||[]).forEach(function(b){
     if(b.type==="copy"&&!b.value&&dep.pixKey) b.value=dep.pixKey;
     if(b.type==="text"&&dep.description&&/^Fale sobre o departamento/.test(b.text||"")) b.text=dep.description;
-    if(b.type==="button"&&b.action==="whatsapp"&&!b.value&&dep.leader){var lu=userByName(dep.leader);if(lu&&lu.whatsapp) b.value=lu.whatsapp;}
+    if(b.type==="button"&&b.action==="whatsapp"&&!b.value){var ld=deptTeamMembers(dep).find(function(m){return m.leader&&m.phone;});if(ld) b.value=ld.phone;}
   });
   if(!(p.blocks||[]).some(function(b){return b.type==="team";})) p.blocks.push(newBlock("team"));
 }
