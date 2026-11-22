@@ -1083,6 +1083,7 @@ function migrate(s){
     s.church.topBannerText="ADALEX DIGITAL • CONECTANDO A IGREJA Versão 1.0";
   }
   if(!THEMES[s.church.theme]) s.church.theme="navy";
+  try{fixDriveUrls(s.church);fixDriveUrls(s.departments);fixDriveUrls(s.directorate);fixDriveUrls(s.customPages);fixDriveUrls(s.layout);}catch(e){}
   if(!s.church.pageLogos||typeof s.church.pageLogos!=="object"||Array.isArray(s.church.pageLogos)) s.church.pageLogos={};
   if(!s.ebdSeeded){
     if(!s.adminButtons.some(function(b){return b.area==="ebd";})){
@@ -1098,6 +1099,7 @@ function migrate(s){
   return s;
 }
 function save(){
+  state.lastEditAt=Date.now();
   try{localStorage.setItem(KEY,JSON.stringify(state));}
   catch(e){toast("Armazenamento cheio ou bloqueado neste navegador.","error");}
 }
@@ -1342,7 +1344,7 @@ function initials(n){var p=String(n||"?").trim().split(/\s+/);return ((p[0]||"?"
 function avatar(photo,name,size,bg){
   size=size||56;
   var st="width:"+size+"px;height:"+size+"px;border-radius:16px;object-fit:cover;flex-shrink:0";
-  if(photo) return '<img src="'+esc(photo)+'" alt="Foto de '+esc(name)+'" style="'+st+'">';
+  if(photo) return '<img src="'+esc(imgSrc(photo))+'" alt="Foto de '+esc(name)+'" style="'+st+'" loading="lazy" referrerpolicy="no-referrer">';
   return '<div style="'+st+';display:flex;align-items:center;justify-content:center;font-weight:800;color:#fff;font-size:'+Math.round(size*.32)+'px;background:'+(bg||theme().hex)+'">'+esc(initials(name))+'</div>';
 }
 function toast(msg,type){
@@ -1371,10 +1373,35 @@ function fallbackCopy(txt,cb){
   ta.remove();
   cb&&cb(ok);
 }
+function driveId(url){
+  var u=String(url||"");
+  if(!/drive\.google\.com|docs\.google\.com|googleusercontent\.com\/d\//.test(u)) return "";
+  var m=u.match(/(?:\/file\/d\/|\/d\/|[?&]id=)([\w-]{20,})/);
+  return m?m[1]:"";
+}
+/* Links do Google Drive viram um endereço de imagem que abre em qualquer celular,
+   sem precisar estar logado no Google (o arquivo precisa estar compartilhado como
+   "Qualquer pessoa com o link"). */
 function driveLink(url){
-  var m=String(url||"").match(/drive\.google\.com\/(?:file\/d\/|open\?id=|uc\?id=)?([\w-]{20,})/);
-  if(m) return "https://drive.google.com/thumbnail?id="+m[1]+"&sz=w800";
+  var id=driveId(url);
+  if(id) return "https://lh3.googleusercontent.com/d/"+id+"=w800";
   return url;
+}
+function imgSrc(u){return driveLink(u);}
+/* se o endereço principal do Drive falhar, tenta o endereço alternativo */
+window.addEventListener("error",function(e){
+  var el=e.target;
+  if(!el||el.tagName!=="IMG"||el.getAttribute("data-fb")) return;
+  var id=driveId(el.src);
+  if(id){el.setAttribute("data-fb","1");el.src="https://drive.google.com/thumbnail?id="+id+"&sz=w800";}
+},true);
+function fixDriveUrls(o){
+  if(!o||typeof o!=="object") return;
+  Object.keys(o).forEach(function(k){
+    var val=o[k];
+    if(typeof val==="string"){if(val.indexOf("data:")!==0&&driveId(val)&&/photo|logo|url|img|image/i.test(k)) o[k]=driveLink(val);}
+    else if(val&&typeof val==="object") fixDriveUrls(val);
+  });
 }
 /* ---------- compressão inteligente de imagens ----------
    Reduz o tamanho mantendo boa qualidade: redimensiona em etapas (mais nítido),
@@ -1928,7 +1955,7 @@ function departmentsSectionHtml(){
   var cards=deps.map(function(d){
     var icon=DEP_ICONS[d.icon]||"🏛️";
     var logo=d.photo
-      ?'<img src="'+esc(d.photo)+'" alt="Logo de '+esc(d.name)+'" style="width:56px;height:56px;border-radius:16px;object-fit:cover">'
+      ?'<img src="'+esc(imgSrc(d.photo))+'" alt="Logo de '+esc(d.name)+'" style="width:56px;height:56px;border-radius:16px;object-fit:cover" referrerpolicy="no-referrer">'
       :'<div style="width:56px;height:56px;border-radius:16px;background:'+t.hexLight+';display:flex;align-items:center;justify-content:center;font-size:1.65rem">'+icon+"</div>";
     var btnTxt=d.btnLabel||c.pixCopyBtnLabel||"COPIAR PIX";
     var pixBtn=d.pixKey
@@ -2023,6 +2050,7 @@ function adminHtml(){
         '<div style="display:flex;gap:.45rem"><button class="btn-sm" data-act="copyCode" style="background:#16a34a;color:#fff;border:0;border-radius:10px;font-weight:700;cursor:pointer">Copiar E-mail Admin</button><button class="btn-sm" data-act="go" data-page="home" style="background:#f59e0b;color:#1c1917;border:0;border-radius:10px;font-weight:700;cursor:pointer">Ver App</button></div>'+
       '</div>'+
       '<div class="tabs-row">'+tabs+"</div>"+
+      ((state.lastEditAt||0)>(state.publishedAt||0)+2000?'<div style="margin:.75rem .95rem 0;background:#fffbeb;border:1px solid #fde68a;color:#78350f;border-radius:14px;padding:.75rem;display:grid;gap:.5rem"><div style="font-weight:800;font-size:.86rem">⚠️ Há alterações ainda não publicadas</div><div style="font-size:.78rem;line-height:1.45">Logos, fotos, textos e páginas que você muda aqui ficam salvos <b>só neste aparelho</b>. Para aparecerem nos celulares de todos, baixe o index.html personalizado e substitua o arquivo no GitHub.</div><button class="btn-main btn-sm" data-act="exportCustomHtml">Baixar index.html personalizado (pronto p/ GitHub)</button></div>':"")+
       '<div style="padding:.95rem">'+body+"</div>"+
     "</div>"+
   "</section>";
@@ -2609,7 +2637,7 @@ function openPicker(onPick){
 function openPixDialog(dep){
   var c=state.church,t=theme();
   var logo=dep.photo
-    ?'<img src="'+esc(dep.photo)+'" alt="" style="width:76px;height:76px;border-radius:999px;border:3px solid #fff;object-fit:cover;margin:0 auto">'
+    ?'<img src="'+esc(imgSrc(dep.photo))+'" alt="" style="width:76px;height:76px;border-radius:999px;border:3px solid #fff;object-fit:cover;margin:0 auto" referrerpolicy="no-referrer">'
     :'<div style="width:76px;height:76px;border-radius:999px;border:3px solid #fff;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:1.9rem;margin:0 auto">'+(DEP_ICONS[dep.icon]||"🏛️")+"</div>";
   var profile=roleObj(session.role).label+(session.userId&&findUser(session.userId)?" • "+findUser(session.userId).name:"");
   var html='<div style="background:linear-gradient(135deg,#0f172a,'+t.hex+');padding:1.35rem 1rem 1.15rem;text-align:center;color:#fff;border-radius:24px 24px 0 0">'+logo+'<div style="font-size:.72rem;font-weight:700;margin-top:.55rem">Pix • '+esc(dep.pixType)+'</div></div>'+
@@ -2981,6 +3009,9 @@ A.exportCustomHtml=function(){
   var toastEl=clone.querySelector("#toastContainer");
   if(toastEl){toastEl.innerHTML="";toastEl.classList.remove("show");}
   state.publishedAt=Date.now();
+  state.lastEditAt=state.publishedAt;
+  try{localStorage.setItem(KEY,JSON.stringify(state));}catch(e){}
+  setTimeout(render,600);
   var safeJson=JSON.stringify(state).replace(/<\/script/gi,"<\\/script");
   var htmlStr="<!DOCTYPE html>\n"+clone.outerHTML;
   htmlStr=htmlStr.replace(/\/\*__CUSTOM_STATE_START__\*\/[\s\S]*?\/\*__CUSTOM_STATE_END__\*\//,"/*__CUSTOM_STATE_START__*/var EMBEDDED_STATE="+safeJson+";/*__CUSTOM_STATE_END__*/");
