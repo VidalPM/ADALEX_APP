@@ -3122,7 +3122,7 @@ A.exportCustomHtml=function(){
   state.publishedAt=Date.now();
   state.lastEditAt=state.publishedAt;
   try{localStorage.setItem(KEY,JSON.stringify(state));}catch(e){}
-  var safeJson=JSON.stringify(publishableState()).replace(/<\/script/gi,"<\\/script").replace(/<!--/g,"\\u003c!--");
+  var safeJson=JSON.stringify(publishableState()).replace(/<\/script/gi,"<\\/script").replace(/\x3C!--/g,"\\u003c!--");
   var finished=false;
   function finish(src){
     if(finished) return;finished=true;
@@ -4653,7 +4653,17 @@ function openShareDialog(url,text){
    - Se existir: popup com as novidades + botão "Atualizar agora".
    - Se o app já abriu na versão nova: popup "App atualizado" (uma vez).
    ====================================================================== */
-var LOADED_VERSION=String((EMBEDDED_STATE&&EMBEDDED_STATE.publishedAt)||baseDefaultState().publishedAt||"");
+/* A versão = "impressão digital" do código do app + data de publicação dos dados.
+   Assim qualquer mudança (no código ou nos dados publicados) é reconhecida. */
+var MAIN_SCRIPT_TEXT=(document.currentScript&&document.currentScript.textContent)||"";
+function codeFingerprint(scriptText){
+  var t=String(scriptText||"").replace(/\r/g,"").replace(/\/\*__CUSTOM_STATE_START__\*\/[\s\S]*?\/\*__CUSTOM_STATE_END__\*\//,"");
+  var h=0x811c9dc5;
+  for(var i=0;i<t.length;i++){h^=t.charCodeAt(i);h=Math.imul(h,0x01000193);}
+  return (h>>>0).toString(16)+"-"+t.length.toString(36);
+}
+var LOADED_PUBLISHED=String((EMBEDDED_STATE&&EMBEDDED_STATE.publishedAt)||baseDefaultState().publishedAt||"");
+var LOADED_VERSION=(MAIN_SCRIPT_TEXT?codeFingerprint(MAIN_SCRIPT_TEXT):"x")+"|"+LOADED_PUBLISHED;
 var SEEN_KEY="adalex_seen_version";
 var upd={checking:false,lastCheck:0,shownFor:""};
 function updInfo(src){
@@ -4666,16 +4676,20 @@ function updInfo(src){
   };
 }
 function fmtVersion(v){
-  var n=+v;if(!n) return "";
+  var n=+String(v||"").split("|").pop();if(!n) return "";
   try{return new Date(n).toLocaleString("pt-BR",{day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit"});}catch(e){return "";}
 }
 function parseRemoteVersion(html){
   var m=html.match(/var EMBEDDED_STATE=([\s\S]*?);\/\*__CUSTOM_STATE_END__\*\//);
   var st=null;
   if(m&&m[1]&&m[1].trim()!=="null"){try{st=JSON.parse(m[1]);}catch(e){st=null;}}
-  var ver=st&&st.publishedAt?String(st.publishedAt):"";
-  if(!ver){var b=html.match(/publishedAt:(\d{10,})/);ver=b?b[1]:"";}
-  return {version:ver,info:updInfo(st)};
+  var pub=st&&st.publishedAt?String(st.publishedAt):"";
+  if(!pub){var b=html.match(/publishedAt:(\d{10,})/);pub=b?b[1]:"";}
+  var code="x",blocks=html.match(/\x3Cscript>[\s\S]*?\x3C\/script>/g)||[];
+  for(var i=0;i<blocks.length;i++){
+    if(blocks[i].indexOf("__CUSTOM_STATE_START__")>=0){code=codeFingerprint(blocks[i].slice(8,-9));break;}
+  }
+  return {version:(pub?code+"|"+pub:""),info:updInfo(st)};
 }
 function checkForUpdate(force){
   if(upd.checking) return;
