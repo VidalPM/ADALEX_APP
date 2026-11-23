@@ -1006,7 +1006,10 @@ function load(){
       fresh.submissions=keptSubs;
       return fresh;
     }
-    return migrate(merge(base,parsed));
+    var merged=merge(base,parsed);
+    /* marcas de "já aplicado" valem só para os dados deste aparelho */
+    if(!parsed.membersCleanupV1) merged.membersCleanupV1=false;
+    return migrate(merged);
   }catch(e){return base;}
 }
 function merge(a,b){
@@ -1088,6 +1091,7 @@ function migrate(s){
   if(!THEMES[s.church.theme]) s.church.theme="navy";
   try{fixDriveUrls(s.church);fixDriveUrls(s.departments);fixDriveUrls(s.directorate);fixDriveUrls(s.customPages);fixDriveUrls(s.layout);}catch(e){}
   if(!s.church.pageLogos||typeof s.church.pageLogos!=="object"||Array.isArray(s.church.pageLogos)) s.church.pageLogos={};
+  if(!s.membersCleanupV1){try{membersCleanup(s,true);}catch(e){}s.membersCleanupV1=true;}
   if(!s.ebdSeeded){
     if(!s.adminButtons.some(function(b){return b.area==="ebd";})){
       s.adminButtons.push({id:"b_ebd1",area:"ebd",title:"Falar com a Superintendência da EBD",type:"whatsapp",link:"https://wa.me/55"+String(s.church.secretaryWhatsapp||"41984253365").replace(/\D/g,"")+"?text="+encodeURIComponent("Olá, Paz do Senhor! Gostaria de falar com a Superintendência da EBD."),visibility:"membros_acima",icon:"book-open",badge:"EBD",isGabinetePastoral:false,active:true});
@@ -2129,6 +2133,7 @@ var ADMIN_TABS=[
   ["directorate","9. Diretoria & Equipes","users-round"],
   ["pages","10. Páginas Personalizadas","layout"],
   ["layout","11. Layout & Visibilidade","sliders"],
+  ["rolesfuncs","12. Cargos & Funções","users-round"],
   ["records","Registros ("+state.submissions.length+")","inbox"],
   ["backup","Backup & Publicar","share-2"]
 ];
@@ -2167,6 +2172,7 @@ function adminTabBody(tab){
   if(tab==="directorate") return tabDirectorate();
   if(tab==="pages") return tabPages();
   if(tab==="layout") return tabLayout();
+  if(tab==="rolesfuncs") return tabRolesFuncs();
   if(tab==="records") return tabRecords();
   if(tab==="backup") return tabBackup();
   return "";
@@ -2454,10 +2460,7 @@ function tabUsers(){
       ' <button type="button" data-act="deleteCustomFunc" data-fn="'+esc(fn)+'" aria-label="Excluir função" style="margin-left:.3rem;color:#9f1239;font-weight:900;cursor:pointer">✕</button></span>';
   }).join("");
 
-  var manageBox='<details class="adx-acc" style="margin-top:1rem"><summary>🏷️ Gerenciar Cargos e Funções Cadastrados</summary><div class="acc-body">'+
-    '<div><div style="font-weight:800;font-size:.84rem;margin-bottom:.4rem">Cargos do Sistema &amp; Personalizados</div><div style="display:grid;gap:.4rem">'+customRolesList+'</div></div>'+
-    '<div><div style="font-weight:800;font-size:.84rem;margin-bottom:.4rem">Funções Disponíveis</div><div style="display:flex;flex-wrap:wrap;gap:.4rem">'+(customFuncsList||'<span class="help">Nenhuma função cadastrada.</span>')+'</div></div>'+
-  '</div></details>';
+  var manageBox='<div class="card" style="margin-top:1rem;display:flex;justify-content:space-between;align-items:center;gap:.6rem;flex-wrap:wrap"><div><div style="font-weight:800;font-size:.86rem">🏷️ Cargos e Funções</div><div class="help" style="margin:0">Crie, edite e apague cargos e funções.</div></div><button class="btn-soft btn-sm" data-act="go" data-page="admin-panel" data-tab="rolesfuncs">Abrir Cargos &amp; Funções</button></div>';
 
   var importCard='<details class="adx-acc" style="margin-top:.5rem"><summary>📋 Importar Lista de Membros em Lote</summary><div class="acc-body" style="background:#fffbeb">'+
     '<p class="help" style="margin:0">Cole a lista com um nome por linha. O aplicativo mostra o que entendeu antes de salvar.</p>'+
@@ -4970,6 +4973,162 @@ A.accReset=function(){ui.userForm.perms={};ui.userForm.pages={};refreshAccessBox
 function restrictedPageHtml(){
   return '<section style="max-width:56rem;margin:-1.35rem auto 0;padding:0 .85rem;width:100%"><div class="card"><div style="font-weight:800">Acesso restrito</div><p class="help" style="margin:.2rem 0 .7rem">Seu cadastro não tem acesso a esta página. Se precisar, fale com a secretaria da igreja.</p><button class="btn-soft" style="width:100%" data-act="go" data-page="home">Voltar ao início</button></div></section>';
 }
+
+/* ======================================================================
+   CARGOS & FUNÇÕES (criar, editar, apagar) + LIMPEZA DE MEMBROS
+   ====================================================================== */
+var PROTECTED_ROLES={visitante:1,membro:1,admin_geral:1};
+function pkey(n){return plain(n).replace(/\s+/g," ");}
+/* nomes cadastrados na Diretoria e nas Equipes dos departamentos */
+function teamDirectoryNames(st){
+  st=st||state;
+  var names={};
+  (st.directorate||[]).forEach(function(d){if(d.name) names[pkey(d.name)]=1;});
+  (st.departments||[]).forEach(function(dep){(dep.team||[]).forEach(function(m){if(m.name) names[pkey(m.name)]=1;});});
+  return names;
+}
+/* quem não está na Diretoria/Equipes vira Membro, sem função (administrador não é alterado) */
+function membersCleanup(st,apply){
+  st=st||state;
+  var names=teamDirectoryNames(st),res={roles:0,funcs:0,total:0,kept:0};
+  (st.users||[]).forEach(function(u){
+    var lvl=((st.roles||DEFAULT_ROLES).find(function(r){return r.id===u.role;})||{}).level||0;
+    if(u.role==="admin_geral"||lvl>=4) return;
+    if(names[pkey(u.name)]){res.kept++;return;}
+    var ch=false;
+    if(u.role!=="membro"){res.roles++;ch=true;if(apply) u.role="membro";}
+    if(Array.isArray(u.functions)&&u.functions.length){res.funcs++;ch=true;if(apply) u.functions=[];}
+    if(ch) res.total++;
+  });
+  return res;
+}
+function roleCount(id){return state.users.filter(function(u){return u.role===id;}).length;}
+function funcCount(fn){return state.users.filter(function(u){return (u.functions||[]).indexOf(fn)>=0;}).length;}
+function tabRolesFuncs(){
+  if(!can("gerenciarUsuarios")) return errorBox("Seu cargo não tem permissão para gerenciar cargos e funções.");
+  var lvlOpts=[[0,"Nível 0 — Visitante"],[1,"Nível 1 — Membro"],[2,"Nível 2 — Liderança"],[3,"Nível 3 — Diretoria"],[4,"Nível 4 — Administrador"]];
+  function colorSel(id,cur){return '<select class="fld" id="'+id+'">'+BADGE_COLORS.map(function(c){return '<option value="'+c[0]+'"'+(c[0]===cur?" selected":"")+">"+esc(c[1])+"</option>";}).join("")+"</select>";}
+  function lvlSel(id,cur,dis){return '<select class="fld" id="'+id+'"'+(dis?" disabled":"")+">"+lvlOpts.map(function(o){return '<option value="'+o[0]+'"'+(+cur===o[0]?" selected":"")+">"+o[1]+"</option>";}).join("")+"</select>";}
+  var roles=allRoles().map(function(r){
+    var n=roleCount(r.id),prot=!!PROTECTED_ROLES[r.id];
+    return '<div class="card" style="display:grid;gap:.55rem;padding:.8rem">'+
+      '<div style="display:flex;justify-content:space-between;align-items:center;gap:.4rem;flex-wrap:wrap">'+roleBadge(r.id)+'<span class="help" style="margin:0">'+n+" pessoa"+(n===1?"":"s")+(r.system?" • cargo do sistema":" • cargo criado por você")+"</span></div>"+
+      '<div class="safe-grid-sm">'+
+        '<div><label class="lbl" for="rl_n_'+esc(r.id)+'">Nome do cargo</label><input class="fld" id="rl_n_'+esc(r.id)+'" value="'+esc(r.label)+'"></div>'+
+        '<div><label class="lbl" for="rl_c_'+esc(r.id)+'">Cor do selo</label>'+colorSel("rl_c_"+r.id,r.cls)+"</div>"+
+        '<div><label class="lbl" for="rl_l_'+esc(r.id)+'">Nível de acesso base</label>'+lvlSel("rl_l_"+r.id,r.level,r.system)+(r.system?'<div class="help">O nível dos cargos do sistema é fixo.</div>':"")+"</div>"+
+      "</div>"+
+      '<div style="display:flex;gap:.4rem;flex-wrap:wrap"><button class="btn-main btn-sm" data-act="roleSave" data-id="'+esc(r.id)+'">Salvar cargo</button>'+
+        (prot?'<span class="help" style="margin:0;align-self:center">Este cargo é essencial e não pode ser apagado.</span>':'<button class="btn-danger btn-sm" data-act="roleDelete" data-id="'+esc(r.id)+'">Apagar cargo</button>')+
+        '<button class="btn-soft btn-sm" data-act="go" data-page="admin-panel" data-tab="perms">Permissões do cargo</button>'+
+      "</div>"+
+    "</div>";
+  }).join("");
+  var funcs=(state.functions||[]).map(function(fn,i){
+    var n=funcCount(fn);
+    return '<div style="display:grid;grid-template-columns:1fr auto;gap:.45rem;align-items:end;padding:.55rem;border:1px solid #e7e5e4;border-radius:14px;background:#fff">'+
+      '<div><label class="lbl" for="fn_n_'+i+'">Função ('+n+" pessoa"+(n===1?"":"s")+')</label><input class="fld" id="fn_n_'+i+'" value="'+esc(fn)+'"></div>'+
+      '<div style="display:flex;gap:.3rem"><button class="btn-soft btn-sm" data-act="funcSave" data-i="'+i+'">Salvar</button><button class="btn-danger btn-sm" data-act="deleteCustomFunc" data-fn="'+esc(fn)+'">Apagar</button></div>'+
+    "</div>";
+  }).join("");
+  var prev=membersCleanup(state,false);
+  return hd("Cargos & Funções","Crie, edite e apague os cargos (níveis de acesso) e as funções/ministérios usados no cadastro das pessoas.")+
+    '<div class="safe-grid-2" style="align-items:start">'+
+      '<div style="display:grid;gap:.65rem">'+
+        '<div style="font-weight:900">🏷️ Cargos</div>'+
+        '<div class="card" style="display:grid;gap:.55rem;background:#eff6ff;border-color:#bfdbfe">'+
+          '<div style="font-weight:800;color:#1e3a8a">➕ Criar novo cargo</div>'+
+          '<input class="fld" id="rc_label" placeholder="Ex.: Diácono, Presbítero, Regente, Professor...">'+
+          '<div class="safe-grid-sm"><div><label class="lbl" for="rc_level">Nível de acesso base</label>'+lvlSel("rc_level",1,false)+'</div><div><label class="lbl" for="rc_cls">Cor do selo</label>'+colorSel("rc_cls","b-indigo")+"</div></div>"+
+          '<div class="help" style="margin:0">O novo cargo começa com as mesmas permissões do nível escolhido. Depois você ajusta em Permissões.</div>'+
+          '<button class="btn-main" data-act="roleCreate">Criar cargo</button>'+
+        "</div>"+
+        roles+
+      "</div>"+
+      '<div style="display:grid;gap:.65rem">'+
+        '<div style="font-weight:900">🙌 Funções / Ministérios</div>'+
+        '<div class="card" style="display:grid;gap:.55rem;background:#eff6ff;border-color:#bfdbfe">'+
+          '<div style="font-weight:800;color:#1e3a8a">➕ Criar nova função</div>'+
+          '<div style="display:flex;gap:.4rem"><input class="fld" id="fc_name" placeholder="Ex.: Coral, Mídia, Recepção, Professor EBD..." style="flex:1"><button class="btn-main" data-act="funcCreate">Criar</button></div>'+
+          '<div class="help" style="margin:0">Ao renomear, a função é atualizada em todas as pessoas. Ao apagar, ela é retirada de todas.</div>'+
+        "</div>"+
+        (funcs||'<div class="card"><p class="help" style="margin:0">Nenhuma função cadastrada.</p></div>')+
+        '<div class="card" style="display:grid;gap:.55rem;background:#fffbeb;border-color:#fde68a">'+
+          '<div style="font-weight:800">🧹 Padronizar membros</div>'+
+          '<p class="help" style="margin:0">Quem <b>não</b> está cadastrado na Diretoria nem nas Equipes dos departamentos passa a ser <b>Membro, sem função</b>. O Administrador não é alterado.</p>'+
+          '<div class="help" style="margin:0">Hoje: <b>'+prev.total+"</b> pessoa(s) seriam alteradas ("+prev.roles+" de cargo, "+prev.funcs+" com funções) • "+prev.kept+" estão na Diretoria/Equipes.</div>"+
+          (prev.total?'<button class="btn-soft" data-act="membersCleanup">Aplicar agora</button>':'<div class="help" style="margin:0;color:#065f46">✓ Tudo padronizado.</div>')+
+        "</div>"+
+      "</div>"+
+    "</div>";
+}
+A.roleSave=function(el){
+  var id=el.getAttribute("data-id"),r=allRoles().find(function(x){return x.id===id;});if(!r) return;
+  var lbl=v("rl_n_"+id).trim();
+  if(!lbl){toast("Informe o nome do cargo.","error");return;}
+  var dup=allRoles().find(function(x){return x.id!==id&&plain(x.label)===plain(lbl);});
+  if(dup){toast("Já existe um cargo com este nome.","error");return;}
+  r.label=lbl;r.cls=v("rl_c_"+id)||r.cls;
+  if(!r.system){var l=parseInt(v("rl_l_"+id),10);if(!isNaN(l)) r.level=Math.min(Math.max(l,0),4);}
+  save();render();toast('Cargo "'+lbl+'" salvo',"success");
+};
+A.roleDelete=function(el){
+  var id=el.getAttribute("data-id"),r=allRoles().find(function(x){return x.id===id;});
+  if(!r||PROTECTED_ROLES[id]) return;
+  var n=roleCount(id);
+  openConfirm('Apagar o cargo "'+r.label+'"?'+(n?" "+n+" pessoa(s) com este cargo passarão a ser Membro.":""),function(){
+    state.roles=allRoles().filter(function(x){return x.id!==id;});
+    state.users.forEach(function(u){if(u.role===id) u.role="membro";});
+    Object.keys(state.permissions).forEach(function(k){delete state.permissions[k][id];});
+    (state.customPages||[]).forEach(function(p){if(Array.isArray(p.visibleTo)) p.visibleTo=p.visibleTo.filter(function(x){return x!==id;});});
+    state.departments.forEach(function(d){if(Array.isArray(d.visibleTo)) d.visibleTo=d.visibleTo.filter(function(x){return x!==id;});});
+    if(ui.userFilter===id) ui.userFilter="todos";
+    save();render();toast("Cargo apagado");
+  });
+};
+A.roleCreate=function(){
+  var lbl=v("rc_label").trim();
+  if(!lbl){toast("Digite o nome do novo cargo.","error");return;}
+  if(allRoles().find(function(r){return plain(r.label)===plain(lbl);})){toast("Já existe um cargo com este nome.","error");return;}
+  var lvl=parseInt(v("rc_level"),10);if(isNaN(lvl)) lvl=1;
+  var id="cargo_"+Date.now();
+  if(!state.roles) state.roles=clone(DEFAULT_ROLES);
+  state.roles.push({id:id,label:lbl,cls:v("rc_cls")||"b-indigo",level:lvl,system:false});
+  var baseRole=DEFAULT_ROLES[Math.min(Math.max(lvl,0),4)].id;
+  PERM_VIEW.concat(PERM_MANAGE).forEach(function(x){
+    state.permissions[x.k]=state.permissions[x.k]||{};
+    state.permissions[x.k][id]=can(x.k,baseRole);
+  });
+  save();render();toast('Cargo "'+lbl+'" criado',"success");
+};
+A.funcSave=function(el){
+  var i=+el.getAttribute("data-i"),old=state.functions[i];if(old===undefined) return;
+  var nw=v("fn_n_"+i).trim();
+  if(!nw){toast("Informe o nome da função.","error");return;}
+  if(nw===old){toast("Nada para alterar.");return;}
+  var dup=state.functions.find(function(x,j){return j!==i&&plain(x)===plain(nw);});
+  if(dup){toast("Já existe uma função com este nome.","error");return;}
+  state.functions[i]=nw;
+  state.users.forEach(function(u){if(Array.isArray(u.functions)) u.functions=u.functions.map(function(x){return x===old?nw:x;});});
+  if(Array.isArray(ui.userForm.functions)) ui.userForm.functions=ui.userForm.functions.map(function(x){return x===old?nw:x;});
+  if(ui.funcFilter===old) ui.funcFilter=nw;
+  save();render();toast('Função renomeada para "'+nw+'"',"success");
+};
+A.funcCreate=function(){
+  var fn=v("fc_name").trim();
+  if(!fn){toast("Digite o nome da função.","error");return;}
+  if((state.functions||[]).find(function(x){return plain(x)===plain(fn);})){toast("Esta função já existe.","error");return;}
+  state.functions=state.functions||[];state.functions.push(fn);
+  save();render();toast('Função "'+fn+'" criada',"success");
+};
+A.membersCleanup=function(){
+  var prev=membersCleanup(state,false);
+  openConfirm("Padronizar "+prev.total+" pessoa(s) como Membro, sem função? Quem está na Diretoria ou nas Equipes não será alterado.",function(){
+    var r=membersCleanup(state,true);
+    state.membersCleanupV1=true;
+    save();render();toast(r.total+" pessoa(s) padronizada(s) como Membro","success");
+  });
+};
 
 /* generic click & input listeners */
 document.addEventListener("click",function(e){
