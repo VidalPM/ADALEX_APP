@@ -1008,7 +1008,7 @@ function load(){
     }
     var merged=merge(base,parsed);
     /* marcas de "já aplicado" valem só para os dados deste aparelho */
-    if(!parsed.membersCleanupV1) merged.membersCleanupV1=false;
+    if(!parsed.membersCleanupV2) merged.membersCleanupV2=false;
     return migrate(merged);
   }catch(e){return base;}
 }
@@ -1091,7 +1091,7 @@ function migrate(s){
   if(!THEMES[s.church.theme]) s.church.theme="navy";
   try{fixDriveUrls(s.church);fixDriveUrls(s.departments);fixDriveUrls(s.directorate);fixDriveUrls(s.customPages);fixDriveUrls(s.layout);}catch(e){}
   if(!s.church.pageLogos||typeof s.church.pageLogos!=="object"||Array.isArray(s.church.pageLogos)) s.church.pageLogos={};
-  if(!s.membersCleanupV1){try{membersCleanup(s,true);}catch(e){}s.membersCleanupV1=true;}
+  if(!s.membersCleanupV2){try{membersCleanup(s,true);}catch(e){}s.membersCleanupV1=true;s.membersCleanupV2=true;}
   if(!s.ebdSeeded){
     if(!s.adminButtons.some(function(b){return b.area==="ebd";})){
       s.adminButtons.push({id:"b_ebd1",area:"ebd",title:"Falar com a Superintendência da EBD",type:"whatsapp",link:"https://wa.me/55"+String(s.church.secretaryWhatsapp||"41984253365").replace(/\D/g,"")+"?text="+encodeURIComponent("Olá, Paz do Senhor! Gostaria de falar com a Superintendência da EBD."),visibility:"membros_acima",icon:"book-open",badge:"EBD",isGabinetePastoral:false,active:true});
@@ -2355,9 +2355,11 @@ function tabUsers(){
     '</div>'
     :"";
 
-  var funcChips=(state.functions||[]).map(function(fn){
-    var isOn=selFuncs.indexOf(fn)>=0;
-    return '<button type="button" class="func-chip '+(isOn?"on":"")+'" data-act="toggleUserFunc" data-fn="'+esc(fn)+'">'+(isOn?"✓ ":"+ ")+esc(fn)+"</button>";
+  var funcChips=selFuncs.map(function(fn){
+    return '<button type="button" class="func-chip on" data-act="toggleUserFunc" data-fn="'+esc(fn)+'" title="Remover esta função">✓ '+esc(fn)+' <span aria-hidden="true" style="margin-left:.2rem;opacity:.7">✕</span></button>';
+  }).join("");
+  var funcAvail=(state.functions||[]).filter(function(fn){return selFuncs.indexOf(fn)<0;}).map(function(fn){
+    return '<button type="button" class="func-chip" data-act="toggleUserFunc" data-fn="'+esc(fn)+'">+ '+esc(fn)+"</button>";
   }).join("");
 
   var form='<div class="card" style="display:grid;gap:.7rem">'+
@@ -2372,12 +2374,19 @@ function tabUsers(){
       newRoleBox+
     '</div>'+
     '<div>'+
-      '<label class="lbl">Funções na Igreja / Ministérios (selecione ou crie)</label>'+
-      '<div style="display:flex;flex-wrap:wrap;gap:.35rem;margin-bottom:.5rem">'+(funcChips||'<span class="help">Nenhuma função cadastrada.</span>')+'</div>'+
-      '<div style="display:flex;gap:.4rem">'+
-        '<input class="fld" id="nf_name" placeholder="Nova função (ex.: Coral, Mídia, EBD...)" style="flex:1">'+
-        '<button type="button" class="btn-soft" data-act="createInlineFunc" style="white-space:nowrap">+ Criar</button>'+
-      '</div>'+
+      '<label class="lbl">Funções desta pessoa na Igreja / Ministérios</label>'+
+      '<div style="display:flex;flex-wrap:wrap;gap:.35rem;margin-bottom:.5rem">'+(funcChips||'<span class="help">Sem função — apenas membro.</span>')+'</div>'+
+      (ui.showFuncPicker
+        ?'<div style="border:1px solid #e7e5e4;border-radius:14px;padding:.6rem;display:grid;gap:.5rem;background:#fafaf9">'+
+            '<div class="help" style="margin:0">Toque para adicionar:</div>'+
+            '<div style="display:flex;flex-wrap:wrap;gap:.35rem">'+(funcAvail||'<span class="help">Todas as funções já foram adicionadas.</span>')+'</div>'+
+            '<div style="display:flex;gap:.4rem">'+
+              '<input class="fld" id="nf_name" placeholder="Nova função (ex.: Coral, Mídia, EBD...)" style="flex:1">'+
+              '<button type="button" class="btn-soft" data-act="createInlineFunc" style="white-space:nowrap">+ Criar</button>'+
+            '</div>'+
+            '<button type="button" class="btn-soft btn-sm" data-act="toggleFuncPicker">Fechar</button>'+
+          '</div>'
+        :'<button type="button" class="btn-soft btn-sm" data-act="toggleFuncPicker">+ Adicionar função</button>')+
     '</div>'+
     '<div class="safe-grid-sm">'+
       field("CPF (somente números)","us_cpf",isHashed(v.cpf)?"":(v.cpf||""),isHashed(v.cpf)?"CPF já cadastrado (protegido). Deixe em branco para manter ou digite um novo.":"O membro entra no app digitando este CPF.","tel")+
@@ -3337,6 +3346,7 @@ A.deleteCustomRole=function(el){
     save();render();toast("Cargo excluído");
   });
 };
+A.toggleFuncPicker=function(){syncUserFormFromDom();ui.showFuncPicker=!ui.showFuncPicker;render();};
 A.toggleUserFunc=function(el){
   syncUserFormFromDom();
   var fn=el.getAttribute("data-fn");
@@ -3393,10 +3403,10 @@ A.userEdit=function(el){
   var u=findUser(el.getAttribute("data-id"));
   ui.userEditId=el.getAttribute("data-id");
   ui.userForm={functions:u&&Array.isArray(u.functions)?u.functions.slice():[],perms:clone((u&&u.perms)||{}),pages:clone((u&&u.pages)||{})};
-  ui.showNewRoleBox=false;
+  ui.showNewRoleBox=false;ui.showFuncPicker=false;
   render();window.scrollTo(0,0);
 };
-A.userCancel=function(){ui.userEditId=null;ui.userForm={functions:[]};ui.showNewRoleBox=false;render();};
+A.userCancel=function(){ui.userEditId=null;ui.userForm={functions:[]};ui.showNewRoleBox=false;ui.showFuncPicker=false;render();};
 A.saveUser=function(){
   var name=v("us_name").trim();
   if(!name){toast("Informe o nome completo.","error");return;}
@@ -4990,7 +5000,7 @@ function teamDirectoryNames(st){
 /* quem não está na Diretoria/Equipes vira Membro, sem função (administrador não é alterado) */
 function membersCleanup(st,apply){
   st=st||state;
-  var names=teamDirectoryNames(st),res={roles:0,funcs:0,total:0,kept:0};
+  var names=teamDirectoryNames(st),res={roles:0,funcs:0,depts:0,total:0,kept:0};
   (st.users||[]).forEach(function(u){
     var lvl=((st.roles||DEFAULT_ROLES).find(function(r){return r.id===u.role;})||{}).level||0;
     if(u.role==="admin_geral"||lvl>=4) return;
@@ -4998,6 +5008,8 @@ function membersCleanup(st,apply){
     var ch=false;
     if(u.role!=="membro"){res.roles++;ch=true;if(apply) u.role="membro";}
     if(Array.isArray(u.functions)&&u.functions.length){res.funcs++;ch=true;if(apply) u.functions=[];}
+    else if(u.functions&&!Array.isArray(u.functions)){res.funcs++;ch=true;if(apply) u.functions=[];}
+    if(u.department){res.depts++;ch=true;if(apply) u.department="";}
     if(ch) res.total++;
   });
   return res;
@@ -5055,8 +5067,8 @@ function tabRolesFuncs(){
         (funcs||'<div class="card"><p class="help" style="margin:0">Nenhuma função cadastrada.</p></div>')+
         '<div class="card" style="display:grid;gap:.55rem;background:#fffbeb;border-color:#fde68a">'+
           '<div style="font-weight:800">🧹 Padronizar membros</div>'+
-          '<p class="help" style="margin:0">Quem <b>não</b> está cadastrado na Diretoria nem nas Equipes dos departamentos passa a ser <b>Membro, sem função</b>. O Administrador não é alterado.</p>'+
-          '<div class="help" style="margin:0">Hoje: <b>'+prev.total+"</b> pessoa(s) seriam alteradas ("+prev.roles+" de cargo, "+prev.funcs+" com funções) • "+prev.kept+" estão na Diretoria/Equipes.</div>"+
+          '<p class="help" style="margin:0">Quem <b>não</b> está cadastrado na Diretoria nem nas Equipes dos departamentos passa a ser <b>Membro, sem função</b> e sem "Departamento principal". O Administrador não é alterado.</p>'+
+          '<div class="help" style="margin:0">Hoje: <b>'+prev.total+"</b> pessoa(s) seriam alteradas ("+prev.roles+" de cargo, "+prev.funcs+" com funções, "+prev.depts+" com departamento principal) • "+prev.kept+" estão na Diretoria/Equipes.</div>"+
           (prev.total?'<button class="btn-soft" data-act="membersCleanup">Aplicar agora</button>':'<div class="help" style="margin:0;color:#065f46">✓ Tudo padronizado.</div>')+
         "</div>"+
       "</div>"+
@@ -5125,7 +5137,7 @@ A.membersCleanup=function(){
   var prev=membersCleanup(state,false);
   openConfirm("Padronizar "+prev.total+" pessoa(s) como Membro, sem função? Quem está na Diretoria ou nas Equipes não será alterado.",function(){
     var r=membersCleanup(state,true);
-    state.membersCleanupV1=true;
+    state.membersCleanupV1=true;state.membersCleanupV2=true;
     save();render();toast(r.total+" pessoa(s) padronizada(s) como Membro","success");
   });
 };
