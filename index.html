@@ -811,6 +811,15 @@ body.skin-p4.p4-light .toast-item{background:#4a6378 !important;color:#fff !impo
 @keyframes updspin{to{transform:rotate(360deg)}}
 @media(max-width:760px){.upd-btn span{display:none}.upd-btn{padding:.45rem;width:38px;justify-content:center}}
 body.skin-p4:not(.p4-light) .upd-btn{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.15)}
+
+.fe-row{display:grid;grid-template-columns:1fr auto auto;align-items:center;gap:.35rem;padding:.5rem;border:1px solid #e7e5e4;border-radius:12px;margin-bottom:.4rem;background:#fafaf9}
+.fe-row [data-k="label"]{grid-column:1/-1}
+.fe-row [data-k="opts"]{grid-column:1/-1}
+@media(min-width:640px){.fe-row{grid-template-columns:2fr 1.2fr auto auto}.fe-row [data-k="label"]{grid-column:auto}}
+.fe-row [data-fe-del]{min-height:38px;width:40px;padding:0}
+.req-group:not([hidden]){display:grid;gap:.55rem}
+.req-opt.on{border-color:var(--p4-primary,#4a5d78);background:var(--p4-tint,#eef2f7)}
+.req-opt input{accent-color:var(--p4-primary,#4a5d78)}
 /* ===== Celular: aplicativo ===== */
 .m-tabs{display:none}
 @media(max-width:760px){
@@ -1376,6 +1385,13 @@ function migrate(s){
   try{fixDriveUrls(s.church);fixDriveUrls(s.departments);fixDriveUrls(s.directorate);fixDriveUrls(s.customPages);fixDriveUrls(s.layout);}catch(e){}
   if(!s.church.pageLogos||typeof s.church.pageLogos!=="object"||Array.isArray(s.church.pageLogos)) s.church.pageLogos={};
   if(!s.church.p4PaletteV2){if(!s.church.p4Palette||s.church.p4Palette==="verde") s.church.p4Palette="auto";s.church.p4PaletteV2=true;}
+  /* Pedido de Carta de Recomendação vira "Pedido de Documentação" com formulário */
+  (s.adminButtons||[]).forEach(function(b){
+    if(b.formMigrated||b.type==="form") return;
+    if(/carta de recomenda/i.test(b.title||"")&&(b.area||"secretaria")==="secretaria"){
+      b.formMigrated=true;b.oldLink=b.link;b.title="Pedido de Documentação";b.badge="Documentos";b.type="form";b.form=null;
+    }
+  });
   /* WhatsApp: mensagens prontas com o nome da pessoa */
   (s.adminButtons||[]).forEach(function(b){
     if(b.msg!=null||!/wa\.me|api\.whatsapp/i.test(String(b.link||""))) return;
@@ -2414,7 +2430,7 @@ function tmpOverride(obj,map,fn){
 }
 function secAreas(sec){return Array.isArray(sec.areas)?sec.areas:["secretaria","tesouraria","ebd"];}
 function adminBtnLink(b,t,strong){
-  return '<a href="'+esc(btnHref(b))+'" target="_blank" rel="noopener noreferrer" style="display:flex;justify-content:space-between;align-items:center;gap:.5rem;min-height:44px;padding:.7rem .85rem;border-radius:14px;border:1px solid '+t.hex+';'+(strong?"background:"+t.hexLight+";":"")+'color:'+t.hex+';text-decoration:none;font-weight:'+(strong?800:700)+';font-size:.82rem"><span>'+esc(b.title)+"</span>"+pill(b.badge||"","b-white")+"</a>";
+  return '<a '+btnAttrs(b)+' style="display:flex;justify-content:space-between;align-items:center;gap:.5rem;min-height:44px;padding:.7rem .85rem;border-radius:14px;border:1px solid '+t.hex+';'+(strong?"background:"+t.hexLight+";":"")+'color:'+t.hex+';text-decoration:none;font-weight:'+(strong?800:700)+';font-size:.82rem"><span>'+esc(b.title)+"</span>"+pill(b.badge||"","b-white")+"</a>";
 }
 
 /* ---- renderizadores das seções ---- */
@@ -2479,7 +2495,7 @@ function renderSys(sec,pg){
     var ab=state.adminButtons.filter(function(b){return b.active&&(b.area||"secretaria")===pg&&visible(b.visibility,session.role);});
     if(!ab.length&&sec.showEmpty===false) return '<div class="card">'+pageHeadHtml(pg,title,S||def[1])+"</div>";
     return '<div class="card">'+pageHeadHtml(pg,title,S||def[1])+'<div style="display:flex;flex-direction:column;gap:.6rem">'+
-      (ab.length?ab.map(function(b){return '<a href="'+esc(btnHref(b))+'" target="_blank" rel="noopener noreferrer" style="display:flex;justify-content:space-between;align-items:center;gap:.5rem;min-height:48px;padding:.75rem .9rem;border-radius:14px;border:1px solid '+t.hex+";background:"+t.hexLight+";color:"+t.hex+';text-decoration:none;font-weight:800;font-size:.86rem"><span>'+esc(b.title)+"</span>"+pill(b.badge||title,"b-white")+"</a>";}).join(""):'<p class="help">Nenhum serviço disponível para o seu nível de acesso. Entre com seu CPF de membro ou senha pessoal para liberar.</p>')+
+      (ab.length?ab.map(function(b){return (canEditButtons()?'<div style="display:flex;gap:.4rem;align-items:stretch"><div style="flex:1;min-width:0">':"")+'<a '+btnAttrs(b)+' style="display:flex;justify-content:space-between;align-items:center;gap:.5rem;min-height:48px;padding:.75rem .9rem;border-radius:14px;border:1px solid '+t.hex+";background:"+t.hexLight+";color:"+t.hex+';text-decoration:none;font-weight:800;font-size:.86rem"><span>'+esc(b.title)+"</span>"+pill(b.badge||title,"b-white")+"</a>"+(canEditButtons()?'</div><button type="button" class="btn-soft" style="min-width:44px;padding:0 .6rem" title="Editar este botão" data-act="quickEditBtn" data-id="'+esc(b.id)+'">✏️</button></div>':"");}).join(""):'<p class="help">Nenhum serviço disponível para o seu nível de acesso. Entre com seu CPF de membro ou senha pessoal para liberar.</p>')+
     "</div></div>";
   case "areaTeam":
     return areaTeamSectionHtml(pg,sec);
@@ -2749,7 +2765,7 @@ function linksHtml(){
   }).join("");
   var gab=state.adminButtons.filter(function(b){return b.active&&visible(b.visibility,session.role)&&(b.isGabinetePastoral?can("verGabinetePastoral"):true)&&linksGabOk(b);});
   var gabHtml=gab.map(function(b){
-    return '<a href="'+esc(btnHref(b))+'" target="_blank" rel="noopener noreferrer" style="display:flex;justify-content:space-between;align-items:center;gap:.5rem;min-height:44px;padding:.65rem .8rem;border-radius:14px;background:'+t.hexLight+';color:'+t.hex+';text-decoration:none;font-weight:700;font-size:.82rem"><span>'+esc(b.title)+"</span>"+pill(b.badge,"b-white")+"</a>";
+    return '<a '+btnAttrs(b)+' style="display:flex;justify-content:space-between;align-items:center;gap:.5rem;min-height:44px;padding:.65rem .8rem;border-radius:14px;background:'+t.hexLight+';color:'+t.hex+';text-decoration:none;font-weight:700;font-size:.82rem"><span>'+esc(b.title)+"</span>"+pill(b.badge,"b-white")+"</a>";
   }).join("");
   return '<div class="card"><div style="font-weight:800;font-size:1rem">'+esc(c.linksTitle||"Redes Sociais & Links")+'</div><p class="help" style="margin:.2rem 0 .7rem">'+esc(c.linksSubtitle||"Acompanhe a igreja e fale com a secretaria.")+'</p><div style="display:flex;flex-direction:column;gap:.55rem">'+body+gabHtml+"</div></div>";
 }
@@ -3217,7 +3233,9 @@ function tabButtons(area){
   var rows=filtered.map(function(b){
     return '<div class="card" style="display:grid;gap:.6rem;margin-bottom:.75rem"><div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:.4rem;align-items:center"><div style="font-weight:800;font-size:.88rem">'+esc(b.title)+'</div><div style="display:flex;gap:.35rem"><button class="btn-soft btn-sm" data-act="btnMove" data-id="'+b.id+'" data-dir="-1">↑</button><button class="btn-soft btn-sm" data-act="btnMove" data-id="'+b.id+'" data-dir="1">↓</button><button class="btn-danger btn-sm" data-act="btnDelete" data-id="'+b.id+'">Excluir</button></div></div>'+
       '<div class="safe-grid-sm">'+field("Título","bt_t_"+b.id,b.title)+field("Link ou WhatsApp (wa.me/...)","bt_l_"+b.id,b.link)+'<div><label class="lbl" for="bt_v_'+b.id+'">Visibilidade</label>'+visOptions(b.visibility,"bt_v_"+b.id)+"</div>"+field("Selo","bt_b_"+b.id,b.badge)+"</div>"+
-      (isWaLink(b.link)?waMsgField("bt_m_"+b.id,(b.msg!=null?b.msg:waTextOf(b.link)),"Mensagem pronta do WhatsApp"):"")+
+      selectF("Ao tocar no botão","bt_ty_"+b.id,BTN_TYPES,b.type==="form"?"form":(isWaLink(b.link)?"whatsapp":"link"))+
+      (b.type==="form"?'<div style="display:flex;gap:.5rem;flex-wrap:wrap;align-items:center"><button class="btn-main btn-sm" data-act="editReqForm" data-id="'+esc(b.id)+'">📝 Editar formulário</button><span class="help" style="margin:0">'+((b.form&&b.form.options||[]).length)+' tipo(s) de documento • campos específicos por tipo</span></div>':"")+
+      ((isWaLink(b.link)||b.type==="form")?waMsgField("bt_m_"+b.id,(b.msg!=null?b.msg:waTextOf(b.link)),b.type==="form"?"Início da mensagem enviada pelo formulário":"Mensagem pronta do WhatsApp"):"")+
       '<div style="display:flex;gap:.75rem;flex-wrap:wrap;align-items:center;justify-content:space-between;font-size:.8rem"><div style="display:flex;gap:.75rem;flex-wrap:wrap"><label><input type="checkbox" id="bt_a_'+b.id+'"'+(b.active?" checked":"")+'> Ativo</label>'+(isSec?'<label><input type="checkbox" id="bt_g_'+b.id+'"'+(b.isGabinetePastoral?" checked":"")+'> Exibir também no Início (Gabinete)</label>':"")+'</div><button class="btn-main btn-sm" data-act="btnSave" data-id="'+b.id+'">Salvar</button></div></div>';
   }).join("");
   var add='<div class="card" style="display:grid;gap:.6rem"><div style="font-weight:800">Novo botão para '+esc(areaName)+'</div>'+field("Título do botão","bt_new_t_"+area,"")+field("Link ou WhatsApp","bt_new_l_"+area,"https://")+waMsgField("bt_new_m_"+area,WA_DEFAULT_MSG,"Mensagem pronta do WhatsApp (se o link for de WhatsApp)")+field("Selo / Etiqueta","bt_new_b_"+area,areaName)+'<div><label class="lbl" for="bt_new_v_'+area+'">Quem pode ver</label>'+visOptions("membros_acima","bt_new_v_"+area)+'</div><button class="btn-main" style="width:100%" data-act="btnAdd" data-area="'+area+'">Adicionar botão em '+esc(areaName)+'</button></div>';
@@ -4191,7 +4209,9 @@ A.savePerms=function(){
 A.btnMove=function(el){var i=state.adminButtons.findIndex(function(b){return b.id===el.getAttribute("data-id");});var j=i+(+el.getAttribute("data-dir"));if(j<0||j>=state.adminButtons.length) return;var t=state.adminButtons[i];state.adminButtons[i]=state.adminButtons[j];state.adminButtons[j]=t;save();render();};
 A.btnSave=function(el){
   var id=el.getAttribute("data-id");var b=state.adminButtons.find(function(x){return x.id===id;});if(!b) return;
-  b.title=v("bt_t_"+id);b.link=v("bt_l_"+id);if(document.getElementById("bt_m_"+id)) b.msg=v("bt_m_"+id);else if(isWaLink(b.link)&&b.msg==null) b.msg=WA_DEFAULT_MSG;b.visibility=vis("bt_v_"+id);b.badge=v("bt_b_"+id);b.active=ch("bt_a_"+id);b.isGabinetePastoral=ch("bt_g_"+id);
+  b.title=v("bt_t_"+id);b.link=v("bt_l_"+id);
+  var ty=document.getElementById("bt_ty_"+id)?v("bt_ty_"+id):b.type;
+  if(ty==="form"){b.type="form";if(!b.form) b.form=defaultReqForm(b);}else b.type=isWaLink(b.link)?"whatsapp":"link";if(document.getElementById("bt_m_"+id)) b.msg=v("bt_m_"+id);else if(isWaLink(b.link)&&b.msg==null) b.msg=WA_DEFAULT_MSG;b.visibility=vis("bt_v_"+id);b.badge=v("bt_b_"+id);b.active=ch("bt_a_"+id);b.isGabinetePastoral=ch("bt_g_"+id);
   save();render();toast("Botão salvo","success");
 };
 A.btnDelete=function(el){var id=el.getAttribute("data-id");openConfirm("Excluir este botão?",function(){state.adminButtons=state.adminButtons.filter(function(b){return b.id!==id;});save();render();toast("Botão excluído");});};
@@ -4462,6 +4482,204 @@ function waPersonHref(phone,contato,assunto){
   return waBuild(phone,waFill(tpl,{contato:String(contato||"").split(" ")[0],assunto:assunto||state.church.name||"a igreja"}));
 }
 /* botões das páginas Secretaria / Tesouraria / EBD */
+/* ======================================================================
+   FORMULÁRIOS DE SOLICITAÇÃO (ex.: Pedido de Documentação)
+   Cada botão pode abrir um formulário com tipos de documento editáveis.
+   Cada tipo tem seus próprios campos, que só aparecem quando ele é escolhido.
+   O pedido vai para Registros (Painel Gestor) e/ou WhatsApp.
+   ====================================================================== */
+var BTN_TYPES=[["link","Abrir um link"],["whatsapp","Abrir o WhatsApp"],["form","Abrir um formulário de solicitação"]];
+var FIELD_TYPES=[["text","Texto curto"],["textarea","Texto longo"],["date","Data"],["number","Número"],["phone","Telefone/WhatsApp"],["email","E-mail"],["select","Lista de opções"],["yesno","Sim / Não"]];
+function canEditButtons(){return canAccessAdminPanel()&&(session.role==="admin_geral"||roleLevel(session.role)>=4||can("gerenciarSecretaria"));}
+function fid(){return "f"+Date.now().toString(36)+Math.random().toString(36).slice(2,6);}
+function mkF(label,type,req,extra){var f={id:fid(),label:label,type:type||"text",req:!!req};if(extra) for(var k in extra) f[k]=extra[k];return f;}
+function defaultReqForm(b){
+  var wa="";
+  if(isWaLink(b.link)) wa=b.link;
+  else{var o=state.adminButtons.filter(function(x){return x.area===b.area&&isWaLink(x.link);})[0];if(o) wa=o.link;}
+  return {
+    title:"Pedido de Documentação",
+    intro:"Escolha o documento e preencha os dados. A secretaria vai preparar e avisar você.",
+    question:"Qual documentação você precisa?",
+    sendReg:true,sendWa:!!wa,wa:wa,
+    thanks:"Pedido enviado, {primeironome}! A secretaria vai entrar em contato.",
+    options:[
+      {id:fid(),name:"Carta de Recomendação",desc:"Para visitar ou congregar temporariamente em outra igreja.",fields:[mkF("Igreja de destino","text",true),mkF("Cidade / UF","text",true),mkF("Data da visita","date",false)]},
+      {id:fid(),name:"Carta de Mudança (Transferência)",desc:"Para quem vai se transferir para outra igreja.",fields:[mkF("Igreja de destino","text",true),mkF("Cidade / UF","text",true),mkF("Motivo da mudança","textarea",false)]},
+      {id:fid(),name:"Declaração de Membro",desc:"Comprova que você é membro desta igreja.",fields:[mkF("Finalidade da declaração","select",true,{opts:"Trabalho;Escola/Faculdade;Banco;Outro"})]},
+      {id:fid(),name:"Certificado de Batismo (2ª via)",desc:"Nova via do certificado de batismo.",fields:[mkF("Data aproximada do batismo","date",false),mkF("Igreja/local do batismo","text",false)]}
+    ],
+    common:[mkF("Nome completo","text",true,{prefill:"nome"}),mkF("WhatsApp para contato","phone",true),mkF("Observações","textarea",false)]
+  };
+}
+function reqFieldInput(f,pfx){
+  var id=pfx+f.id,ph=f.ph||"",val=(f.prefill==="nome")?waSenderName():"";
+  var lbl='<label class="lbl" for="'+id+'">'+esc(f.label)+(f.req?' <span style="color:#b91c1c">*</span>':"")+"</label>";
+  var inp;
+  if(f.type==="textarea") inp='<textarea class="fld" id="'+id+'" rows="3" placeholder="'+esc(ph)+'"></textarea>';
+  else if(f.type==="select") inp='<select class="fld" id="'+id+'"><option value="">Escolha…</option>'+String(f.opts||"").split(";").map(function(o){o=o.trim();return o?'<option>'+esc(o)+"</option>":"";}).join("")+"</select>";
+  else if(f.type==="yesno") inp='<select class="fld" id="'+id+'"><option value="">Escolha…</option><option>Sim</option><option>Não</option></select>';
+  else{var tp={date:"date",number:"number",phone:"tel",email:"email"}[f.type]||"text";inp='<input class="fld" id="'+id+'" type="'+tp+'" value="'+esc(val)+'" placeholder="'+esc(ph)+'"'+(tp==="tel"?' inputmode="tel"':"")+">";}
+  return '<div data-req-field="'+esc(f.id)+'">'+lbl+inp+"</div>";
+}
+A.openReqForm=function(el){
+  var b=state.adminButtons.find(function(x){return x.id===el.getAttribute("data-id");});if(!b) return;
+  var F=b.form||(b.form=defaultReqForm(b));
+  var opts=(F.options||[]);
+  var chips=opts.map(function(o,i){return '<label class="vp-chip req-opt"><input type="radio" name="req_opt" value="'+esc(o.id)+'"><span>'+esc(o.name)+"</span></label>";}).join("");
+  var groups=opts.map(function(o){
+    return '<div class="req-group" data-req-group="'+esc(o.id)+'" hidden>'+(o.desc?'<p class="help" style="margin:0">'+esc(o.desc)+"</p>":"")+(o.fields||[]).map(function(f){return reqFieldInput(f,"rq_");}).join("")+"</div>";
+  }).join("");
+  var common=(F.common||[]).map(function(f){return reqFieldInput(f,"rqc_");}).join("");
+  openDialog('<div style="padding:1.15rem 1rem 1.2rem;display:grid;gap:.75rem">'+
+    '<div style="font-weight:900;font-size:1.08rem">'+esc(F.title||b.title)+"</div>"+
+    (F.intro?'<p class="help" style="margin:0">'+esc(F.intro)+"</p>":"")+
+    (opts.length?'<div><div class="lbl">'+esc(F.question||"Qual documentação você precisa?")+' <span style="color:#b91c1c">*</span></div><div class="vp-chips" style="margin-top:.35rem">'+chips+"</div></div>":"")+
+    groups+
+    (common?'<div style="display:grid;gap:.55rem;border-top:1px dashed #d6d3d1;padding-top:.7rem">'+common+"</div>":"")+
+    '<button class="btn-main" data-req-send>Enviar pedido</button></div>',function(d){
+    function cur(){var r=d.querySelector('input[name="req_opt"]:checked');return r?r.value:"";}
+    d.querySelectorAll('input[name="req_opt"]').forEach(function(r){r.addEventListener("change",function(){
+      d.querySelectorAll(".req-opt").forEach(function(c){c.classList.toggle("on",c.querySelector("input").checked);});
+      d.querySelectorAll("[data-req-group]").forEach(function(g){g.hidden=g.getAttribute("data-req-group")!==cur();});
+    });});
+    d.querySelector("[data-req-send]").addEventListener("click",function(){
+      var oid=cur();
+      if(opts.length&&!oid){toast("Escolha qual documentação você precisa.","error");return;}
+      var o=opts.filter(function(x){return x.id===oid;})[0];
+      var lines=[],miss=[],name="";
+      function collect(list,pfx){(list||[]).forEach(function(f){
+        var e=d.querySelector("#"+pfx+f.id);var val=e?String(e.value||"").trim():"";
+        if(f.req&&!val) miss.push(f.label);
+        if(val){lines.push("*"+f.label+":* "+val);if(f.prefill==="nome"||/^nome/i.test(f.label)) name=name||val;}
+      });}
+      if(o) collect(o.fields,"rq_");
+      collect(F.common,"rqc_");
+      if(miss.length){toast("Preencha: "+miss.join(", "),"error");return;}
+      var head=waFill((b.msg&&String(b.msg).trim())?b.msg:"Olá, Paz do Senhor! Meu nome é {nome}.",{assunto:o?o.name:b.title});
+      var msg=head+"\n\n*"+(F.title||b.title)+"*"+(o?"\n*Documento:* "+o.name:"")+"\n"+lines.join("\n")+"\n\nEnviado pelo app "+(state.church.name||"");
+      if(F.sendReg!==false){
+        state.submissions.unshift({id:"s"+Date.now(),type:(F.title||b.title)+(o?" • "+o.name:""),name:name||waSenderName()||"Sem nome",message:msg.replace(/\*/g,""),date:new Date().toLocaleString("pt-BR")});
+        gasSendSubmission(state.submissions[0]);save();
+      }
+      var waNum=F.sendWa?(F.wa||""):"";
+      d._allowClose=true;d.close();
+      if(waNum) window.open(waBuild(waNum,msg),"_blank","noopener,noreferrer");
+      var thanks=fillVars(F.thanks||"Pedido enviado, {primeironome}!",{nome:name});
+      openDialog('<div style="padding:1.4rem 1.2rem;display:grid;gap:.8rem;text-align:center"><div style="font-size:2.2rem">📄</div><div data-novars style="font-weight:800;font-size:1.05rem;line-height:1.4">'+esc(thanks)+'</div><button class="btn-main" data-close>Ok</button></div>');
+    });
+  });
+};
+
+/* ---------- editor do formulário (Painel) ---------- */
+function fieldEditorRow(f,key){
+  return '<div class="fe-row" data-fe="'+key+'" data-fid="'+esc(f.id)+'">'+
+    '<input class="fld" data-k="label" value="'+esc(f.label||"")+'" placeholder="Nome do campo">'+
+    '<select class="fld" data-k="type">'+FIELD_TYPES.map(function(t){return '<option value="'+t[0]+'"'+(f.type===t[0]?" selected":"")+">"+t[1]+"</option>";}).join("")+"</select>"+
+    '<input class="fld" data-k="opts" value="'+esc(f.opts||"")+'" placeholder="Opções separadas por ;" style="'+(f.type==="select"?"":"display:none")+'">'+
+    '<label style="font-size:.78rem;display:flex;align-items:center;gap:.3rem;white-space:nowrap"><input type="checkbox" data-k="req"'+(f.req?" checked":"")+'> Obrigatório</label>'+
+    (f.prefill?'<input type="hidden" data-k="prefill" value="'+esc(f.prefill)+'">':"")+
+    '<button type="button" class="btn-soft btn-sm" data-fe-del title="Remover campo">✕</button></div>';
+}
+function reqFormEditorHtml(F){
+  var opts=(F.options||[]).map(function(o,i){
+    return '<div class="card fe-opt" data-oid="'+esc(o.id)+'" style="display:grid;gap:.5rem;padding:.8rem">'+
+      '<div style="display:flex;gap:.4rem;align-items:center"><b style="font-size:.85rem">Tipo '+(i+1)+'</b><span style="flex:1"></span>'+
+      '<button type="button" class="btn-soft btn-sm" data-fe-up>↑</button><button type="button" class="btn-soft btn-sm" data-fe-down>↓</button><button type="button" class="btn-danger btn-sm" data-fe-delopt>Excluir</button></div>'+
+      '<input class="fld" data-o="name" value="'+esc(o.name||"")+'" placeholder="Nome do documento (ex.: Carta de Recomendação)">'+
+      '<input class="fld" data-o="desc" value="'+esc(o.desc||"")+'" placeholder="Explicação curta (opcional)">'+
+      '<div class="lbl" style="margin-top:.2rem">Campos que aparecem só para este documento</div>'+
+      '<div data-fe-list="o">'+(o.fields||[]).map(function(f){return fieldEditorRow(f,"o");}).join("")+"</div>"+
+      '<button type="button" class="btn-soft btn-sm" data-fe-add="o">+ Campo para este documento</button></div>';
+  }).join("");
+  return '<div style="display:grid;gap:.6rem">'+
+    field("Título do formulário","fe_title",F.title||"")+
+    areaF("Texto de introdução","fe_intro",F.intro||"","",2)+
+    field("Pergunta de escolha","fe_q",F.question||"Qual documentação você precisa?")+
+    '<div class="card" style="display:grid;gap:.45rem;padding:.8rem"><b style="font-size:.85rem">Para onde vai o pedido</b>'+
+      chk("fe_reg",F.sendReg!==false,"Registros do Painel Gestor (aba Registros)")+
+      chk("fe_wa",!!F.sendWa,"WhatsApp")+
+      field("Número ou link do WhatsApp que recebe","fe_wan",F.wa||"")+"</div>"+
+    areaF("Mensagem depois de enviar","fe_thanks",F.thanks||"","Use {nome} ou {primeironome}.",2)+
+    '<div style="font-weight:800;margin-top:.3rem">Tipos de documento</div><div data-fe-opts style="display:grid;gap:.6rem">'+opts+"</div>"+
+    '<button type="button" class="btn-soft" data-fe-addopt>+ Tipo de documento</button>'+
+    '<div style="font-weight:800;margin-top:.3rem">Campos que aparecem para todos</div>'+
+    '<div class="card" style="padding:.8rem"><div data-fe-list="c">'+(F.common||[]).map(function(f){return fieldEditorRow(f,"c");}).join("")+'</div><button type="button" class="btn-soft btn-sm" data-fe-add="c" style="margin-top:.4rem">+ Campo para todos</button></div>'+
+  "</div>";
+}
+function readReqFormEditor(d,F){
+  function rf(row){
+    var o={id:row.getAttribute("data-fid")};
+    row.querySelectorAll("[data-k]").forEach(function(e){var k=e.getAttribute("data-k");o[k]=e.type==="checkbox"?e.checked:e.value;});
+    o.label=String(o.label||"").trim();return o;
+  }
+  var N={title:d.querySelector("#fe_title").value.trim(),intro:d.querySelector("#fe_intro").value.trim(),question:d.querySelector("#fe_q").value.trim(),
+    sendReg:d.querySelector("#fe_reg").checked,sendWa:d.querySelector("#fe_wa").checked,wa:d.querySelector("#fe_wan").value.trim(),thanks:d.querySelector("#fe_thanks").value.trim(),options:[],common:[]};
+  d.querySelectorAll(".fe-opt").forEach(function(c){
+    var o={id:c.getAttribute("data-oid"),name:c.querySelector('[data-o="name"]').value.trim(),desc:c.querySelector('[data-o="desc"]').value.trim(),fields:[]};
+    c.querySelectorAll('[data-fe="o"]').forEach(function(r){var f=rf(r);if(f.label) o.fields.push(f);});
+    N.options.push(o);
+  });
+  d.querySelectorAll('[data-fe-list="c"] [data-fe="c"]').forEach(function(r){var f=rf(r);if(f.label) N.common.push(f);});
+  return N;
+}
+A.editReqForm=function(el){
+  var b=state.adminButtons.find(function(x){return x.id===el.getAttribute("data-id");});if(!b) return;
+  var draft=JSON.parse(JSON.stringify(b.form||defaultReqForm(b)));
+  openDialog('<div style="padding:1.1rem 1rem 1.2rem;display:grid;gap:.7rem"><div style="font-weight:900;font-size:1.05rem">📝 Formulário: '+esc(b.title)+'</div><div data-fe-body></div>'+
+    '<div style="position:sticky;bottom:-1.2rem;background:var(--p4-card,#fff);display:flex;gap:.5rem;padding:.6rem 0 .8rem;box-shadow:0 -8px 14px rgba(255,255,255,.9)"><button class="btn-main" data-fe-save style="flex:1">Salvar formulário</button><button class="btn-soft" data-fe-preview>Ver como fica</button></div></div>',function(d){
+    var body=d.querySelector("[data-fe-body]");
+    function draw(){body.innerHTML=reqFormEditorHtml(draft);}
+    function sync(){draft=readReqFormEditor(d,draft);}
+    draw();
+    d.addEventListener("change",function(e){
+      var t=e.target;if(t.matches&&t.matches('select[data-k="type"]')){var o=t.parentNode.querySelector('[data-k="opts"]');if(o) o.style.display=t.value==="select"?"":"none";}
+    });
+    d.addEventListener("click",function(e){
+      var t=e.target;
+      if(t.closest("[data-fe-addopt]")){sync();draft.options.push({id:fid(),name:"",desc:"",fields:[]});draw();return;}
+      var add=t.closest("[data-fe-add]");
+      if(add){sync();var f=mkF("","text",false);
+        if(add.getAttribute("data-fe-add")==="c") draft.common.push(f);
+        else{var oid=add.closest(".fe-opt").getAttribute("data-oid");draft.options.forEach(function(o){if(o.id===oid) o.fields.push(f);});}
+        draw();var rows=body.querySelectorAll('[data-fid="'+f.id+'"] [data-k="label"]');if(rows[0]) rows[0].focus();return;}
+      if(t.closest("[data-fe-del]")){sync();var fidv=t.closest(".fe-row").getAttribute("data-fid");
+        draft.common=draft.common.filter(function(x){return x.id!==fidv;});draft.options.forEach(function(o){o.fields=o.fields.filter(function(x){return x.id!==fidv;});});draw();return;}
+      if(t.closest("[data-fe-delopt]")){sync();var oid2=t.closest(".fe-opt").getAttribute("data-oid");draft.options=draft.options.filter(function(o){return o.id!==oid2;});draw();return;}
+      var mv=t.closest("[data-fe-up],[data-fe-down]");
+      if(mv){sync();var oid3=mv.closest(".fe-opt").getAttribute("data-oid");var i=draft.options.findIndex(function(o){return o.id===oid3;});var j=i+(mv.hasAttribute("data-fe-up")?-1:1);
+        if(j>=0&&j<draft.options.length){var tmp=draft.options[i];draft.options[i]=draft.options[j];draft.options[j]=tmp;}draw();return;}
+      if(t.closest("[data-fe-save]")){sync();draft.options=draft.options.filter(function(o){return o.name;});b.form=draft;b.type="form";save();d._allowClose=true;d.close();render();toast("Formulário salvo.","success");return;}
+      if(t.closest("[data-fe-preview]")){sync();var keep=b.form;b.form=draft;A.openReqForm({getAttribute:function(){return b.id;}});b.form=keep;return;}
+    });
+  });
+};
+A.quickEditBtn=function(el){
+  var b=state.adminButtons.find(function(x){return x.id===el.getAttribute("data-id");});if(!b) return;
+  var ty=b.type==="form"?"form":(isWaLink(b.link)?"whatsapp":"link");
+  openDialog('<div style="padding:1.1rem 1rem 1.2rem;display:grid;gap:.65rem"><div style="font-weight:900;font-size:1.05rem">✏️ Editar botão</div>'+
+    field("Nome do botão","qe_t",b.title)+field("Selo (etiqueta pequena)","qe_b",b.badge||"")+
+    selectF("Ao tocar no botão","qe_ty",BTN_TYPES,ty)+
+    field("Link ou WhatsApp","qe_l",b.link||"")+
+    waMsgField("qe_m",(b.msg!=null?b.msg:waTextOf(b.link)),"Mensagem do WhatsApp")+
+    '<div><label class="lbl">Quem vê</label>'+visPicker(b.visibility,"qe_v")+"</div>"+
+    '<div style="display:flex;gap:.5rem;flex-wrap:wrap"><button class="btn-main" data-qe-save style="flex:1">Salvar</button>'+
+    '<button class="btn-soft" data-qe-form>📝 Editar formulário</button></div></div>',function(d){
+    function apply(){
+      b.title=d.querySelector("#qe_t").value.trim()||b.title;b.badge=d.querySelector("#qe_b").value.trim();
+      b.link=d.querySelector("#qe_l").value.trim();b.msg=d.querySelector("#qe_m").value;b.visibility=d.querySelector("#qe_v").value;
+      var t=d.querySelector("#qe_ty").value;
+      if(t==="form"){b.type="form";if(!b.form) b.form=defaultReqForm(b);}else b.type=isWaLink(b.link)?"whatsapp":"link";
+      save();
+    }
+    d.querySelector("[data-qe-save]").addEventListener("click",function(){apply();d._allowClose=true;d.close();render();toast("Botão salvo.","success");});
+    d.querySelector("[data-qe-form]").addEventListener("click",function(){d.querySelector("#qe_ty").value="form";apply();d._allowClose=true;d.close();render();A.editReqForm({getAttribute:function(){return b.id;}});});
+  });
+};
+function btnAttrs(b){
+  if(b.type==="form") return 'href="#" data-act="openReqForm" data-id="'+esc(b.id)+'"';
+  return 'href="'+esc(btnHref(b))+'" target="_blank" rel="noopener noreferrer"';
+}
 function btnHref(b){
   if(!isWaLink(b.link)||/chat\.whatsapp\.com/i.test(b.link)) return safeUrl(b.link);
   var tpl=(b.msg!=null&&String(b.msg).trim())?b.msg:(waTextOf(b.link)||WA_DEFAULT_MSG);
@@ -5455,7 +5673,7 @@ function openShareDialog(url,text){
    ====================================================================== */
 /* A versão = "impressão digital" do código do app + data de publicação dos dados.
    Assim qualquer mudança (no código ou nos dados publicados) é reconhecida. */
-var APP_VERSION="3.8.0";var APP_BUILD=1795888572264;
+var APP_VERSION="3.9.0";var APP_BUILD=1795890437203;
 var IS_GAS=!!(window.google&&google.script&&google.script.run);
 var GAS=(typeof GAS_CONFIG!=="undefined"&&GAS_CONFIG)||{};
 var MAIN_SCRIPT_TEXT=(document.currentScript&&document.currentScript.textContent)||"";
