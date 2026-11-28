@@ -2207,11 +2207,17 @@ function openDialog(innerHtml,onOpen){
     innerHtml+"</div>";
   document.body.appendChild(d);
   if(ui.page!=="admin-panel"){applyVarsIn(d);decorateEditPens(d);}
-  d.addEventListener("close",function(){d.remove();});
-  d.addEventListener("click",function(e){
-    if(e.target===d){d.close();return;}
-    if(e.target.closest("[data-close]")){d.close();return;}
+  d.addEventListener("close",function(){
+    /* janela de edição fechada sem salvar (Esc / voltar do celular): reabre e pergunta */
+    if(d._guard&&!d._allowClose){try{d.showModal();}catch(x){}setTimeout(function(){guardedClose(d);},0);return;}
+    d.remove();
   });
+  d.addEventListener("click",function(e){
+    if(e.target===d||e.target.closest("[data-close]")){e.preventDefault();guardedClose(d);return;}
+  });
+  /* tecla Esc / botão voltar do Android */
+  d.addEventListener("keydown",function(e){if(e.key==="Escape"&&d._guard&&!d._asking){e.preventDefault();guardedClose(d);}});
+  d.addEventListener("cancel",function(e){if(d._guard){e.preventDefault();guardedClose(d);}});
   d.showModal();
   if(onOpen) onOpen(d);
   return d;
@@ -2811,7 +2817,7 @@ function memberFuncs(u){
 function newDocTemplate(blank){
   var id="dt"+Date.now();
   return {id:id,name:"Novo modelo",docName:"",bg:"",bgW:1240,bgH:1754,font:"serif",
-    photo:{show:true,x:.74,y:.08,w:.17,h:.15,round:false},
+    photo:{show:true,x:.75,y:.07,w:3/21,h:4/29.7,round:false,border:true},
     els:blank?[
       {id:"e1",src:"igreja.nome",x:.1,y:.09,w:.6,h:.05,size:.026,bold:true,align:"left",color:"#1c1917"},
       {id:"e2",src:"doc.tipo",x:.1,y:.28,w:.8,h:.05,size:.034,bold:true,align:"center",color:"#1c1917"},
@@ -2819,6 +2825,14 @@ function newDocTemplate(blank){
       {id:"e4",src:"data.extenso",x:.45,y:.68,w:.45,h:.04,size:.02,bold:false,align:"right",color:"#1c1917"},
       {id:"e5",src:"texto",text:"_______________________________\nPastor Presidente",x:.25,y:.8,w:.5,h:.08,size:.02,bold:false,align:"center",color:"#1c1917"}
     ]:[]};
+}
+/* foto 3x4: a página é tratada como A4 (21 cm de largura); a caixa da foto é no máximo 3 x 4 cm */
+function photoMax(t){var W=t.bg?(t.bgW||1240):1240,H=t.bg?(t.bgH||1754):1754;var pageHcm=21*H/W;return {w:3/21,h:4/pageHcm,ratio:(4/3)*(W/H)};}
+function fixPhotoBox(t){
+  var P=t.photo;if(!P) return;var m=photoMax(t);
+  P.w=Math.min(m.w,Math.max(.04,P.w||m.w));P.h=P.w*m.ratio;
+  if(P.h>m.h){P.h=m.h;P.w=P.h/m.ratio;}
+  P.x=Math.max(0,Math.min(1-P.w,P.x||0));P.y=Math.max(0,Math.min(1-P.h,P.y||0));
 }
 function docTplById(id){return (state.docTemplates||[]).filter(function(t){return t.id===id;})[0];}
 function docTplFor(docName){var n=String(docName||"").toLowerCase();return (state.docTemplates||[]).filter(function(t){return String(t.docName||t.name).toLowerCase()===n;})[0]||null;}
@@ -2894,8 +2908,9 @@ function docPickBackground(t,done){
 A.docDesign=function(el){
   var t=docTplById(el.getAttribute("data-id"));if(!t) return;
   var draft=clone(t),selId=null;
+  if(draft.photo&&draft.photo.show) fixPhotoBox(draft);
   var d=openDialog('<div class="dz-wrap"><div class="dz-top"><b style="font-size:1rem">📄 Layout do documento</b><span style="flex:1"></span><button class="btn-main btn-sm" data-dz="save">Salvar</button></div><div data-dz-body></div></div>',function(){});
-  d.classList.add("dz-dialog");
+  d.classList.add("dz-dialog");d._guard=EDIT_GUARD_MSG;
   var body=d.querySelector("[data-dz-body]");
   function srcOpts(sel){return docSources().map(function(o){return '<option value="'+esc(o[0])+'"'+(o[0]===sel?" selected":"")+">"+esc(o[1])+"</option>";}).join("");}
   function draw(){
@@ -2905,11 +2920,11 @@ A.docDesign=function(el){
       return '<div class="dz-el'+(e.id===selId?" sel":"")+'" data-el="'+e.id+'" style="left:'+(e.x*100)+'%;top:'+(e.y*100)+'%;width:'+(e.w*100)+'%;height:'+(e.h*100)+'%;text-align:'+(e.align==="justify"?"justify":e.align||"left")+';font-weight:'+(e.bold?800:400)+';font-style:'+(e.italic?"italic":"normal")+';color:'+esc(e.color||"#1c1917")+';font-family:'+docFontFamily(e.font||draft.font)+'" data-size="'+e.size+'" title="'+docPt(e.size)+' pt"><span class="dz-txt">'+esc(docSrcLabel(e)).replace(/\n/g,"<br>")+'</span><i class="dz-h" data-h></i></div>';
     }).join("");
     var ph=draft.photo||{};
-    var photo=ph.show?'<div class="dz-el dz-photo'+(selId==="photo"?" sel":"")+'" data-el="photo" style="left:'+(ph.x*100)+'%;top:'+(ph.y*100)+'%;width:'+(ph.w*100)+'%;height:'+(ph.h*100)+'%;border-radius:'+(ph.round?"50%":"6px")+'"><span class="dz-txt">📷 Foto</span><i class="dz-h" data-h></i></div>':"";
+    var photo=ph.show?'<div class="dz-el dz-photo'+(selId==="photo"?" sel":"")+'" data-el="photo" style="left:'+(ph.x*100)+'%;top:'+(ph.y*100)+'%;width:'+(ph.w*100)+'%;height:'+(ph.h*100)+'%;border-radius:'+(ph.round?"50%":"6px")+'"><span class="dz-txt">📷 Foto 3x4</span><i class="dz-h" data-h></i></div>':"";
     var sel=selId==="photo"?null:(draft.els||[]).filter(function(e){return e.id===selId;})[0];
     var props="";
     if(selId==="photo"){
-      props='<div class="dz-props"><b>Foto da pessoa</b><label class="vp-chip"><input type="checkbox" data-pp="round"'+(ph.round?" checked":"")+'> Redonda</label><label class="vp-chip"><input type="checkbox" data-pp="fill"'+(ph.fill?" checked":"")+'> Preencher o quadro todo (pode cortar)</label><button class="btn-danger btn-sm" data-dz="delphoto">Remover foto</button><p class="help" style="margin:0">Arraste para posicionar e use o canto para mudar o tamanho. A foto do cadastro aparece aqui quando o nome é escolhido.</p></div>';
+      props='<div class="dz-props"><b>Foto da pessoa</b><label class="vp-chip"><input type="checkbox" data-pp="border"'+(ph.border!==false?" checked":"")+'> Contorno fino na foto</label><label class="vp-chip"><input type="checkbox" data-pp="round"'+(ph.round?" checked":"")+'> Redonda (corta os cantos)</label><button class="btn-danger btn-sm" data-dz="delphoto">Remover foto</button><p class="help" style="margin:0">Arraste para posicionar. O quadro é no máximo 3 x 4 cm e o canto só diminui, sempre em 3x4. A foto entra inteira, sem corte: o contorno se ajusta ao formato da foto.</p></div>';
     }else if(sel){
       props='<div class="dz-props"><b>Campo selecionado</b>'+
         '<select class="fld" data-ep="src">'+srcOpts(sel.src)+'</select>'+
@@ -2960,7 +2975,8 @@ A.docDesign=function(el){
   body.addEventListener("pointermove",function(e){
     if(!drag) return;
     var dx=(e.clientX-drag.sx)/drag.pw,dy=(e.clientY-drag.sy)/drag.ph,o=drag.o;
-    if(drag.resize){o.w=Math.max(.03,Math.min(1-o.x,drag.w+dx));o.h=Math.max(.02,Math.min(1-o.y,drag.h+dy));}
+    if(drag.resize&&o===draft.photo){var m=photoMax(draft);o.w=Math.max(.04,Math.min(m.w,1-o.x,drag.w+dx));o.h=o.w*m.ratio;if(o.y+o.h>1){o.h=1-o.y;o.w=o.h/m.ratio;}}
+    else if(drag.resize){o.w=Math.max(.03,Math.min(1-o.x,drag.w+dx));o.h=Math.max(.02,Math.min(1-o.y,drag.h+dy));}
     else{o.x=Math.max(0,Math.min(1-o.w,drag.x+dx));o.y=Math.max(0,Math.min(1-o.h,drag.y+dy));}
     drag.el.style.left=(o.x*100)+"%";drag.el.style.top=(o.y*100)+"%";drag.el.style.width=(o.w*100)+"%";drag.el.style.height=(o.h*100)+"%";
   });
@@ -2983,7 +2999,7 @@ A.docDesign=function(el){
     var b=e.target.closest("[data-dz]");if(!b) return;var a=b.getAttribute("data-dz");
     syncSide();
     if(a==="add"){var src=body.querySelector("[data-dz-add]").value;var ne={id:"e"+Date.now(),src:src,x:.1,y:.45,w:.5,h:src==="texto"?.12:.045,size:.022,bold:false,align:"left",color:"#1c1917"};if(src==="texto") ne.text="Escreva o texto aqui. Use {nome}, {cargo}, {igreja}, {dataextenso}…";if(src==="livre") ne.label="Campo livre";draft.els.push(ne);selId=ne.id;draw();return;}
-    if(a==="addphoto"){draft.photo={show:true,x:.72,y:.08,w:.18,h:.16,round:false};selId="photo";draw();return;}
+    if(a==="addphoto"){draft.photo={show:true,x:.75,y:.07,w:1,h:1,round:false,border:true};fixPhotoBox(draft);selId="photo";draw();return;}
     if(a==="delphoto"){draft.photo.show=false;selId=null;draw();return;}
     if(a==="del"){draft.els=draft.els.filter(function(x){return x.id!==selId;});selId=null;draw();return;}
     if(a==="sizeall"){var o2=cur();if(!o2) return;draft.els.forEach(function(x){x.size=o2.size;});draw();toast("Todos os campos com "+docPt(o2.size)+" pt.","success");return;}
@@ -3052,21 +3068,14 @@ function docRender(t,vals,photoSrc){
     if(bg) ctx.drawImage(bg,0,0,W,H);
     var P=t.photo||{};
     if(P.show&&ph){
-      var bx=P.x*W,by=P.y*H,bw=P.w*W,bh=P.h*H;
-      var iw=ph.naturalWidth,ih=ph.naturalHeight;
-      ctx.save();ctx.beginPath();
-      if(P.round) ctx.ellipse(bx+bw/2,by+bh/2,bw/2,bh/2,0,0,Math.PI*2);else ctx.rect(bx,by,bw,bh);
-      ctx.clip();
-      if(P.fill){
-        /* preencher o quadro todo (pode cortar as bordas) */
-        var s=Math.max(bw/iw,bh/ih),sw=bw/s,sh=bh/s;
-        ctx.drawImage(ph,(iw-sw)/2,(ih-sh)/2,sw,sh,bx,by,bw,bh);
-      }else{
-        /* foto inteira: acompanha o tamanho do quadro, sem cortar */
-        var k=Math.min(bw/iw,bh/ih),dw=iw*k,dh=ih*k;
-        ctx.drawImage(ph,0,0,iw,ih,bx+(bw-dw)/2,by+(bh-dh)/2,dw,dh);
-      }
-      ctx.restore();
+      var bx=P.x*W,by=P.y*H,bw=P.w*W,bh=P.h*H,iw=ph.naturalWidth,ih=ph.naturalHeight;
+      /* foto inteira: o quadro se ajusta à foto (dentro do limite 3x4) */
+      var k=Math.min(bw/iw,bh/ih),dw=iw*k,dh=ih*k,dx=bx+(bw-dw)/2,dy=by;
+      ctx.save();
+      if(P.round){ctx.beginPath();ctx.ellipse(dx+dw/2,dy+dh/2,dw/2,dh/2,0,0,Math.PI*2);ctx.clip();}
+      ctx.drawImage(ph,0,0,iw,ih,dx,dy,dw,dh);ctx.restore();
+      if(P.border!==false){ctx.save();ctx.strokeStyle="#57534e";ctx.lineWidth=Math.max(1,W/700);
+        if(P.round){ctx.beginPath();ctx.ellipse(dx+dw/2,dy+dh/2,dw/2,dh/2,0,0,Math.PI*2);ctx.stroke();}else ctx.strokeRect(dx,dy,dw,dh);ctx.restore();}
     }
     (t.els||[]).forEach(function(e){
       var txt=e.src==="texto"?docFillText(e.text,vals):(e.src==="livre"?vals["livre:"+e.id]:vals[e.src]);
@@ -3130,14 +3139,16 @@ function docGenerateDialog(t,rec){
     return '<div><label class="lbl" for="'+id+'">'+esc(n.label)+'</label><input class="fld" id="'+id+'" data-key="'+esc(n.key)+'" value="'+esc(v)+'"></div>';
   }).join("");
   openDialog('<div style="padding:1.1rem 1rem 1.2rem;display:grid;gap:.6rem"><div style="font-weight:900;font-size:1.05rem">📄 '+esc(t.name)+'</div>'+
-    (t.photo&&t.photo.show?'<div style="display:flex;gap:.7rem;align-items:center"><div data-dg-photo style="width:72px;height:72px;border-radius:'+(t.photo.round?"50%":"10px")+';background:#f5f5f4;border:1px dashed #d6d3d1;display:flex;align-items:center;justify-content:center;overflow:hidden;font-size:1.4rem">📷</div><p class="help" style="margin:0" data-dg-ptxt>A foto aparece quando o nome de um membro cadastrado é escolhido.</p></div>':"")+
+    (t.photo&&t.photo.show?'<div style="display:flex;gap:.7rem;align-items:center"><div data-dg-photo style="width:66px;height:88px;flex:0 0 auto;border-radius:'+(t.photo.round?"50%":"6px")+';background:#f5f5f4;border:1px dashed #d6d3d1;display:flex;align-items:center;justify-content:center;overflow:hidden;font-size:1.4rem">📷</div><div style="display:grid;gap:.35rem"><p class="help" style="margin:0" data-dg-ptxt>A foto aparece quando o nome de um membro cadastrado é escolhido.</p><div style="display:flex;gap:.4rem;flex-wrap:wrap"><button type="button" class="btn-soft btn-sm" data-dg="photo">📷 Usar outra foto</button><label class="vp-chip" data-dg-savewrap hidden><input type="checkbox" data-dg-save checked> Salvar no cadastro do membro</label></div></div></div>':"")+
     rows+'<div style="display:flex;gap:.5rem;flex-wrap:wrap"><button class="btn-main" data-dg="pdf" style="flex:1">⬇️ Gerar PDF</button><button class="btn-soft" data-dg="view">Ver / imprimir</button></div><div data-dg-prev></div></div>',function(d){
-    var photo="";
+    var photo="",customPhoto="";
+    function showPhoto(){var box=d.querySelector("[data-dg-photo]");if(box) box.innerHTML=photo?'<img src="'+esc(photo)+'" alt="" style="max-width:100%;max-height:100%;object-fit:contain">':"📷";}
     function refreshMember(){
       var ni=d.querySelector('[data-key="pessoa.nome"]');var u=findMemberByName(ni&&ni.value);
       var box=d.querySelector("[data-dg-photo]"),tx=d.querySelector("[data-dg-ptxt]");
-      photo=u&&u.photo?imgSrc(u.photo):"";
-      if(box) box.innerHTML=photo?'<img src="'+esc(photo)+'" alt="" style="width:100%;height:100%;object-fit:'+(t.photo&&t.photo.fill?"cover":"contain")+'">':"📷";
+      photo=customPhoto||(u&&u.photo?imgSrc(u.photo):"");
+      showPhoto();
+      var sw=d.querySelector("[data-dg-savewrap]");if(sw) sw.hidden=!(customPhoto&&u);
       if(tx) tx.textContent=u?(photo?"Foto do cadastro de "+u.name.split(" ")[0]+".":"Este membro ainda não tem foto no cadastro."):"A foto aparece quando o nome de um membro cadastrado é escolhido.";
       if(u){
         var ce=d.querySelector('[data-key="pessoa.cargo"]');if(ce&&!ce.value) ce.value=(roleObj(u.role)||{}).label||"";
@@ -3150,7 +3161,13 @@ function docGenerateDialog(t,rec){
     function vals(){var o={};d.querySelectorAll("[data-key]").forEach(function(e){o[e.getAttribute("data-key")]=e.value.trim();});return o;}
     d.addEventListener("click",function(e){
       var b=e.target.closest("[data-dg]");if(!b) return;var a=b.getAttribute("data-dg");
+      if(a==="photo"){
+        var inp=document.createElement("input");inp.type="file";inp.accept="image/*";
+        inp.onchange=function(){var f=inp.files&&inp.files[0];if(!f) return;compressFile(f,"avatar",function(url){if(!url){toast("Imagem inválida.","error");return;}customPhoto=url;refreshMember();toast("Foto carregada (inteira, sem corte).","success");});};
+        inp.click();return;
+      }
       var v=vals();
+      if(customPhoto){var sv=d.querySelector("[data-dg-save]");var um=findMemberByName(v["pessoa.nome"]);if(um&&sv&&sv.checked&&um.photo!==customPhoto){um.photo=customPhoto;save();}}
       var win=null;if(a==="view"){try{win=window.open("","_blank");}catch(x){}}
       docRender(t,v,photo).then(function(cv){
         var jpg=cv.toDataURL("image/jpeg",0.92);
@@ -4124,6 +4141,16 @@ function openImportPreview(items){
 }
 
 /* ---------- confirm dialog ---------- */
+/* janelas de edição: perguntar antes de sair (d._guard = mensagem) */
+function guardedClose(d){
+  if(!d._guard){d.close();return;}
+  if(d._asking) return;d._asking=true;
+  var q=openDialog('<div style="padding:1.25rem;display:grid;gap:.75rem"><div style="font-weight:800;font-size:1rem">Parar de editar?</div><p class="help" style="margin:0;font-size:.85rem">'+esc(d._guard)+'</p><div style="display:flex;justify-content:flex-end;gap:.5rem;flex-wrap:wrap"><button class="btn-main" data-close>Continuar editando</button><button class="btn-danger" data-leave>Sair sem salvar</button></div></div>',function(c){
+    c.querySelector("[data-leave]").addEventListener("click",function(){d._guard=null;d._allowClose=true;c.close();d.close();});
+  });
+  q.addEventListener("close",function(){d._asking=false;});
+}
+var EDIT_GUARD_MSG="Você quer mesmo parar de editar e sair? As alterações que ainda não foram salvas serão perdidas.";
 function openConfirm(msg,onYes){
   openDialog('<div style="padding:1.25rem;display:grid;gap:.75rem"><div style="font-weight:800;font-size:1rem">Confirmar</div><p class="help" style="margin:0;font-size:.82rem">'+esc(msg)+'</p><div style="display:flex;justify-content:flex-end;gap:.5rem"><button class="btn-soft" data-close>Cancelar</button><button class="btn-danger" data-act="cfYes">Sim, continuar</button></div></div>',function(d){
     d.querySelector('[data-act="cfYes"]').addEventListener("click",function(){d.close();onYes();});
@@ -5121,6 +5148,7 @@ A.editReqForm=function(el){
   var draft=JSON.parse(JSON.stringify(b.form||defaultReqForm(b)));
   openDialog('<div style="padding:1.1rem 1rem 1.2rem;display:grid;gap:.7rem"><div style="font-weight:900;font-size:1.05rem">📝 Formulário: '+esc(b.title)+'</div><div data-fe-body></div>'+
     '<div style="position:sticky;bottom:-1.2rem;background:var(--p4-card,#fff);display:flex;gap:.5rem;padding:.6rem 0 .8rem;box-shadow:0 -8px 14px rgba(255,255,255,.9)"><button class="btn-main" data-fe-save style="flex:1">Salvar formulário</button><button class="btn-soft" data-fe-preview>Ver como fica</button></div></div>',function(d){
+    d._guard=EDIT_GUARD_MSG;
     var body=d.querySelector("[data-fe-body]");
     function draw(){body.innerHTML=reqFormEditorHtml(draft);}
     function sync(){draft=readReqFormEditor(d,draft);}
@@ -5158,6 +5186,7 @@ A.quickEditBtn=function(el){
     '<div><label class="lbl">Quem vê</label>'+visPicker(b.visibility,"qe_v")+"</div>"+
     '<div style="display:flex;gap:.5rem;flex-wrap:wrap"><button class="btn-main" data-qe-save style="flex:1">Salvar</button>'+
     '<button class="btn-soft" data-qe-form>📝 Editar formulário</button></div></div>',function(d){
+    d._guard=EDIT_GUARD_MSG;
     function apply(){
       b.title=d.querySelector("#qe_t").value.trim()||b.title;b.badge=d.querySelector("#qe_b").value.trim();
       b.link=d.querySelector("#qe_l").value.trim();b.msg=d.querySelector("#qe_m").value;b.visibility=d.querySelector("#qe_v").value;
@@ -6168,7 +6197,7 @@ function openShareDialog(url,text){
    ====================================================================== */
 /* A versão = "impressão digital" do código do app + data de publicação dos dados.
    Assim qualquer mudança (no código ou nos dados publicados) é reconhecida. */
-var APP_VERSION="4.0.2";var APP_BUILD=1795893062152;
+var APP_VERSION="4.0.4";var APP_BUILD=1795894076491;
 var IS_GAS=!!(window.google&&google.script&&google.script.run);
 var GAS=(typeof GAS_CONFIG!=="undefined"&&GAS_CONFIG)||{};
 var MAIN_SCRIPT_TEXT=(document.currentScript&&document.currentScript.textContent)||"";
