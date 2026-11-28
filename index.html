@@ -1987,7 +1987,7 @@ function fixDriveUrls(o){
    escolhe automaticamente o formato mais leve (WebP/JPEG; PNG/WebP quando há
    transparência) e baixa a qualidade só até atingir o tamanho-alvo. */
 var IMG_PROFILES={
-  avatar:{max:480,square:true,target:45000},   /* fotos de pessoas e departamentos */
+  avatar:{max:560,square:false,target:55000},  /* fotos de pessoas e departamentos (foto inteira, sem cortar) */
   logo:{max:512,square:false,target:60000},    /* logos (mantém fundo transparente) */
   banner:{max:1280,square:false,target:160000} /* imagens/banners das páginas */
 };
@@ -2764,6 +2764,8 @@ A.editItem=function(el,e){
    • Gera um PDF pronto para imprimir ou enviar.
    ====================================================================== */
 IMG_PROFILES.doc={max:1400,square:false,target:300000};
+var DOC_PT_W=595.28; /* largura da folha A4 em pontos: tamanho guardado = pt / largura */
+function docPt(size){var v=Math.round((+size||0)*DOC_PT_W*2)/2;return String(v||12);}
 var DOC_FONTS=[["serif","Clássica (serifa)"],["sans","Moderna (sem serifa)"],["script","Manuscrita"]];
 function docFontFamily(f){return f==="sans"?"Inter, Arial, Helvetica, sans-serif":(f==="script"?"'Brush Script MT','Segoe Script',cursive":"Georgia, 'Times New Roman', serif");}
 function docAllFieldLabels(){
@@ -2791,7 +2793,7 @@ function docSources(){
   return o;
 }
 function docSrcLabel(el){
-  if(el.src==="texto") return (el.text||"Texto").slice(0,60);
+  if(el.src==="texto") return (el.text||"Texto").slice(0,1200);
   if(el.src==="livre") return "["+(el.label||"Campo livre")+"]";
   var s=docSources().filter(function(x){return x.src===el.src||x[0]===el.src;})[0];
   return "["+(s?s[1].replace(/^Formulário: /,""):el.src.replace(/^campo:/,""))+"]";
@@ -2900,20 +2902,21 @@ A.docDesign=function(el){
     var types=docAllTypeNames();
     var ratio=(draft.bgH||1754)/(draft.bgW||1240)*100;
     var els=(draft.els||[]).map(function(e){
-      return '<div class="dz-el'+(e.id===selId?" sel":"")+'" data-el="'+e.id+'" style="left:'+(e.x*100)+'%;top:'+(e.y*100)+'%;width:'+(e.w*100)+'%;height:'+(e.h*100)+'%;text-align:'+(e.align==="justify"?"justify":e.align||"left")+';font-weight:'+(e.bold?800:400)+';font-style:'+(e.italic?"italic":"normal")+';color:'+esc(e.color||"#1c1917")+';font-family:'+docFontFamily(e.font||draft.font)+'" data-size="'+e.size+'"><span class="dz-txt">'+esc(docSrcLabel(e)).replace(/\n/g,"<br>")+'</span><i class="dz-h" data-h></i></div>';
+      return '<div class="dz-el'+(e.id===selId?" sel":"")+'" data-el="'+e.id+'" style="left:'+(e.x*100)+'%;top:'+(e.y*100)+'%;width:'+(e.w*100)+'%;height:'+(e.h*100)+'%;text-align:'+(e.align==="justify"?"justify":e.align||"left")+';font-weight:'+(e.bold?800:400)+';font-style:'+(e.italic?"italic":"normal")+';color:'+esc(e.color||"#1c1917")+';font-family:'+docFontFamily(e.font||draft.font)+'" data-size="'+e.size+'" title="'+docPt(e.size)+' pt"><span class="dz-txt">'+esc(docSrcLabel(e)).replace(/\n/g,"<br>")+'</span><i class="dz-h" data-h></i></div>';
     }).join("");
     var ph=draft.photo||{};
     var photo=ph.show?'<div class="dz-el dz-photo'+(selId==="photo"?" sel":"")+'" data-el="photo" style="left:'+(ph.x*100)+'%;top:'+(ph.y*100)+'%;width:'+(ph.w*100)+'%;height:'+(ph.h*100)+'%;border-radius:'+(ph.round?"50%":"6px")+'"><span class="dz-txt">📷 Foto</span><i class="dz-h" data-h></i></div>':"";
     var sel=selId==="photo"?null:(draft.els||[]).filter(function(e){return e.id===selId;})[0];
     var props="";
     if(selId==="photo"){
-      props='<div class="dz-props"><b>Foto da pessoa</b><label class="vp-chip"><input type="checkbox" data-pp="round"'+(ph.round?" checked":"")+'> Redonda</label><button class="btn-danger btn-sm" data-dz="delphoto">Remover foto</button><p class="help" style="margin:0">Arraste para posicionar e use o canto para mudar o tamanho. A foto do cadastro aparece aqui quando o nome é escolhido.</p></div>';
+      props='<div class="dz-props"><b>Foto da pessoa</b><label class="vp-chip"><input type="checkbox" data-pp="round"'+(ph.round?" checked":"")+'> Redonda</label><label class="vp-chip"><input type="checkbox" data-pp="fill"'+(ph.fill?" checked":"")+'> Preencher o quadro todo (pode cortar)</label><button class="btn-danger btn-sm" data-dz="delphoto">Remover foto</button><p class="help" style="margin:0">Arraste para posicionar e use o canto para mudar o tamanho. A foto do cadastro aparece aqui quando o nome é escolhido.</p></div>';
     }else if(sel){
       props='<div class="dz-props"><b>Campo selecionado</b>'+
         '<select class="fld" data-ep="src">'+srcOpts(sel.src)+'</select>'+
         (sel.src==="livre"?'<input class="fld" data-ep="label" value="'+esc(sel.label||"")+'" placeholder="Nome do campo livre (ex.: Número da carta)">':"")+
         (sel.src==="texto"?'<textarea class="fld" data-ep="text" rows="4" placeholder="Texto. Use {nome}, {cargo}, {funcoes}, {igreja}, {data}, {dataextenso}, {documento} ou {campo:Nome do campo}">'+esc(sel.text||"")+"</textarea>":"")+
-        '<div class="dz-row"><label>Tamanho <input type="range" min="0.010" max="0.070" step="0.001" data-ep="size" value="'+sel.size+'"></label>'+
+        '<div class="dz-row"><label>Tamanho da fonte <input class="fld" type="number" min="5" max="60" step="0.5" data-ep="sizept" value="'+docPt(sel.size)+'" style="width:84px"> pt</label><button type="button" class="btn-soft btn-sm" data-dz="sizeall" title="Aplica este tamanho em todos os campos do documento">Usar em todos</button></div>'+
+        '<div class="dz-row">'+
         '<select class="fld" data-ep="align"><option value="left"'+(sel.align==="left"?" selected":"")+'>Esquerda</option><option value="center"'+(sel.align==="center"?" selected":"")+'>Centro</option><option value="right"'+(sel.align==="right"?" selected":"")+'>Direita</option><option value="justify"'+(sel.align==="justify"?" selected":"")+'>Justificado</option></select></div>'+
         '<div class="dz-row"><label class="vp-chip"><input type="checkbox" data-ep="bold"'+(sel.bold?" checked":"")+'> Negrito</label><label class="vp-chip"><input type="checkbox" data-ep="italic"'+(sel.italic?" checked":"")+'> Itálico</label><input type="color" data-ep="color" value="'+esc(sel.color||"#1c1917")+'" style="width:44px;height:38px;border:0;background:none">'+
         '<select class="fld" data-ep="font">'+DOC_FONTS.map(function(f){return '<option value="'+f[0]+'"'+((sel.font||draft.font)===f[0]?" selected":"")+">"+f[1]+"</option>";}).join("")+'</select></div>'+
@@ -2964,6 +2967,7 @@ A.docDesign=function(el){
   body.addEventListener("pointerup",function(){drag=null;});
   body.addEventListener("input",function(e){
     var k=e.target.getAttribute("data-ep");var o=cur();
+    if(k==="sizept"&&o){var pt=parseFloat(String(e.target.value).replace(",","."));if(!(pt>0)) return;o.size=pt/DOC_PT_W;var ex=body.querySelector('[data-el="'+o.id+'"]');if(ex){ex.setAttribute("data-size",o.size);sizeFonts();}return;}
     if(k&&o){o[k]=e.target.type==="checkbox"?e.target.checked:(k==="size"?+e.target.value:e.target.value);
       var elx=body.querySelector('[data-el="'+o.id+'"]');
       if(elx){
@@ -2974,7 +2978,7 @@ A.docDesign=function(el){
       return;}
     var pp=e.target.getAttribute("data-pp");if(pp){draft.photo[pp]=e.target.checked;draw();}
   });
-  body.addEventListener("change",function(e){var k=e.target.getAttribute("data-ep");if(k&&k!=="text"&&k!=="label"&&k!=="size"){syncSide();draw();}});
+  body.addEventListener("change",function(e){var k=e.target.getAttribute("data-ep");if(k&&k!=="text"&&k!=="label"&&k!=="size"&&k!=="sizept"){syncSide();draw();}});
   d.addEventListener("click",function(e){
     var b=e.target.closest("[data-dz]");if(!b) return;var a=b.getAttribute("data-dz");
     syncSide();
@@ -2982,6 +2986,7 @@ A.docDesign=function(el){
     if(a==="addphoto"){draft.photo={show:true,x:.72,y:.08,w:.18,h:.16,round:false};selId="photo";draw();return;}
     if(a==="delphoto"){draft.photo.show=false;selId=null;draw();return;}
     if(a==="del"){draft.els=draft.els.filter(function(x){return x.id!==selId;});selId=null;draw();return;}
+    if(a==="sizeall"){var o2=cur();if(!o2) return;draft.els.forEach(function(x){x.size=o2.size;});draw();toast("Todos os campos com "+docPt(o2.size)+" pt.","success");return;}
     if(a==="bg"){docPickBackground(draft,draw);return;}
     if(a==="nobg"){draft.bg="";draft.bgW=1240;draft.bgH=1754;draw();return;}
     if(a==="preview"){var keep=clone(draft);docGenerateDialog(keep,null);return;}
@@ -3048,10 +3053,20 @@ function docRender(t,vals,photoSrc){
     var P=t.photo||{};
     if(P.show&&ph){
       var bx=P.x*W,by=P.y*H,bw=P.w*W,bh=P.h*H;
-      var s=Math.max(bw/ph.naturalWidth,bh/ph.naturalHeight),sw=bw/s,sh=bh/s,sx=(ph.naturalWidth-sw)/2,sy=(ph.naturalHeight-sh)/2;
+      var iw=ph.naturalWidth,ih=ph.naturalHeight;
       ctx.save();ctx.beginPath();
       if(P.round) ctx.ellipse(bx+bw/2,by+bh/2,bw/2,bh/2,0,0,Math.PI*2);else ctx.rect(bx,by,bw,bh);
-      ctx.clip();ctx.drawImage(ph,sx,sy,sw,sh,bx,by,bw,bh);ctx.restore();
+      ctx.clip();
+      if(P.fill){
+        /* preencher o quadro todo (pode cortar as bordas) */
+        var s=Math.max(bw/iw,bh/ih),sw=bw/s,sh=bh/s;
+        ctx.drawImage(ph,(iw-sw)/2,(ih-sh)/2,sw,sh,bx,by,bw,bh);
+      }else{
+        /* foto inteira: acompanha o tamanho do quadro, sem cortar */
+        var k=Math.min(bw/iw,bh/ih),dw=iw*k,dh=ih*k;
+        ctx.drawImage(ph,0,0,iw,ih,bx+(bw-dw)/2,by+(bh-dh)/2,dw,dh);
+      }
+      ctx.restore();
     }
     (t.els||[]).forEach(function(e){
       var txt=e.src==="texto"?docFillText(e.text,vals):(e.src==="livre"?vals["livre:"+e.id]:vals[e.src]);
@@ -3122,7 +3137,7 @@ function docGenerateDialog(t,rec){
       var ni=d.querySelector('[data-key="pessoa.nome"]');var u=findMemberByName(ni&&ni.value);
       var box=d.querySelector("[data-dg-photo]"),tx=d.querySelector("[data-dg-ptxt]");
       photo=u&&u.photo?imgSrc(u.photo):"";
-      if(box) box.innerHTML=photo?'<img src="'+esc(photo)+'" alt="" style="width:100%;height:100%;object-fit:cover">':"📷";
+      if(box) box.innerHTML=photo?'<img src="'+esc(photo)+'" alt="" style="width:100%;height:100%;object-fit:'+(t.photo&&t.photo.fill?"cover":"contain")+'">':"📷";
       if(tx) tx.textContent=u?(photo?"Foto do cadastro de "+u.name.split(" ")[0]+".":"Este membro ainda não tem foto no cadastro."):"A foto aparece quando o nome de um membro cadastrado é escolhido.";
       if(u){
         var ce=d.querySelector('[data-key="pessoa.cargo"]');if(ce&&!ce.value) ce.value=(roleObj(u.role)||{}).label||"";
@@ -6153,7 +6168,7 @@ function openShareDialog(url,text){
    ====================================================================== */
 /* A versão = "impressão digital" do código do app + data de publicação dos dados.
    Assim qualquer mudança (no código ou nos dados publicados) é reconhecida. */
-var APP_VERSION="4.0.0";var APP_BUILD=1795892201211;
+var APP_VERSION="4.0.2";var APP_BUILD=1795893062152;
 var IS_GAS=!!(window.google&&google.script&&google.script.run);
 var GAS=(typeof GAS_CONFIG!=="undefined"&&GAS_CONFIG)||{};
 var MAIN_SCRIPT_TEXT=(document.currentScript&&document.currentScript.textContent)||"";
