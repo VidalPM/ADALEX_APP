@@ -792,6 +792,35 @@ body.skin-p4.p4-light .toast-item{background:#4a6378 !important;color:#fff !impo
 
 @media(max-width:700px){.p4-compact .p4-chips{display:none}.p4-compact p{display:none}.p4-compact .p4-banner-in{padding-bottom:1.6rem}}
 .hl-wide .hl-txt small{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;white-space:normal}
+
+/* ===== Celular: aplicativo ===== */
+.m-tabs{display:none}
+@media(max-width:760px){
+  body.has-mtabs #navLeft{display:none!important}
+  body.has-mtabs #simBar{display:none}
+  body.has-mtabs{padding-bottom:calc(68px + env(safe-area-inset-bottom,0px))}
+  body.has-mtabs .m-tabs{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:60;background:var(--p4-card,#fff);border-top:1px solid rgba(15,23,42,.1);box-shadow:0 -6px 20px rgba(15,23,42,.08);padding:4px 4px calc(4px + env(safe-area-inset-bottom,0px))}
+  .m-tab{flex:1 1 0;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;border:0;background:none;color:inherit;opacity:.6;padding:6px 2px;min-height:56px;border-radius:14px;font:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}
+  .m-tab.on{opacity:1;color:var(--p4-primary,#4a5d78);background:var(--p4-tint,rgba(74,93,120,.1))}
+  .m-tab .m-ic{display:flex;align-items:center;justify-content:center;height:24px}
+  .m-tab .m-lb{font-size:.68rem;font-weight:700;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  /* toque e leitura */
+  input.fld,select.fld,textarea.fld,.fld{font-size:16px!important}
+  .btn-main,.btn-soft,.btn-danger{min-height:44px}
+  .btn-sm{min-height:38px}
+  .card{border-radius:18px}
+  /* painel gestor: abas em uma linha que rola para o lado */
+  .tabs-row{flex-wrap:nowrap!important;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;scroll-snap-type:x proximity}
+  .tabs-row::-webkit-scrollbar{display:none}
+  .tabs-row .tab-btn{flex:0 0 auto;scroll-snap-align:center;white-space:nowrap}
+  /* janelas: ocupam a largura e rolam por dentro */
+  dialog.adalex{max-height:92vh;overflow:auto}
+  table{display:block;overflow-x:auto;max-width:100%}
+  #footNavHome,#footNavPrayer{display:none}
+  .adx-foot{padding-bottom:1.2rem}
+}
+.m-more-row{display:flex;align-items:center;gap:.75rem;width:100%;text-align:left;padding:.85rem .9rem;border-radius:14px;border:1px solid rgba(15,23,42,.08);background:var(--p4-card,#fff);color:inherit;font:inherit;font-weight:700;font-size:.95rem;cursor:pointer;min-height:52px}
+.m-more-row .m-ic{width:28px;display:flex;justify-content:center;font-size:1.2rem}
 /* ===== Tela inicial em atalhos (celular) ===== */
 .hl-wrap{max-width:56rem;margin:-1.1rem auto 0;padding:0 .85rem;width:100%;display:flex;flex-direction:column;gap:.85rem;position:relative}
 .hl-hero{display:flex;align-items:center;justify-content:space-between;gap:.75rem;background:var(--p4-card,#fff);border:1px solid rgba(15,23,42,.08);border-radius:20px;padding:1rem 1.05rem;box-shadow:0 6px 20px rgba(15,23,42,.06)}
@@ -921,6 +950,7 @@ window.addEventListener("load",function(){setTimeout(function(){if(!window.__ada
 
 /* ---------- inline SVG icon helper ---------- */
 var ICONS={
+  menu:'<path d="M4 6h16"/><path d="M4 12h16"/><path d="M4 18h16"/>',
   church:'<path d="M10 9h4"/><path d="M12 7v5"/><path d="M14 22v-4a2 2 0 0 0-4 0v4"/><path d="M18 22V5.618a1 1 0 0 0-.553-.894l-4.553-2.277a2 2 0 0 0-1.788 0L6.553 4.724A1 1 0 0 0 6 5.618V22"/><path d="m18 7 3.447 1.724a1 1 0 0 1 .553.894V20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9.618a1 1 0 0 1 .553-.894L6 7"/>',
   "heart-handshake":'<path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/><path d="M12 5 9.04 7.96a2.17 2.17 0 0 0 0 3.08c.82.82 2.13.85 3 .07l2.07-1.9a2.82 2.82 0 0 1 3.79 0l2.96 2.66"/><path d="m18 15-2-2"/><path d="m15 18-2-2"/>',
   settings:'<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/>',
@@ -2032,6 +2062,63 @@ function renderNav(){
     sim+="</div>";
   }
   document.getElementById("simBar").innerHTML=sim;
+  renderMobileTabs();
+}
+/* ======================================================================
+   CELULAR: barra de abas fixa embaixo (como um aplicativo)
+   ====================================================================== */
+function mobileNavItems(){
+  var it=[];
+  function add(page,label,icon,cond){if(cond) it.push({page:page,label:label,icon:icon});}
+  add("home",navCfg("home").label||"Início",ico("church",22),navCfg("home").show!==false);
+  add("prayer",navCfg("prayer").label||"Oração",ico("heart-handshake",22),navCfg("prayer").show!==false&&can("verPaginaOracao"));
+  add("secretaria",navCfg("secretaria").label||"Secretaria",ico("file-text",22),navCfg("secretaria").show!==false&&can("verPaginaSecretaria"));
+  add("tesouraria",navCfg("tesouraria").label||"Tesouraria",ico("wallet",22),navCfg("tesouraria").show!==false&&can("verPaginaTesouraria"));
+  add("ebd",navCfg("ebd").label||"EBD",ico("book-open",22),navCfg("ebd").show!==false&&can("verPaginaEBD"));
+  customPagesFor("nav").forEach(function(p){
+    it.push({page:"cp:"+p.id,label:p.title||"Página",icon:p.logo?'<img src="'+esc(driveLink(safeUrl(p.logo)))+'" alt="" style="width:24px;height:24px;border-radius:7px;object-fit:cover">':'<span style="font-size:1.25rem;line-height:1">'+esc(p.icon||"📌")+"</span>"});
+  });
+  if(canAccessAdminPanel()) it.push({page:"admin-panel",label:L().nav.gestorLabel||"Gestor",icon:ico("settings",22)});
+  return it;
+}
+function renderMobileTabs(){
+  var el=document.getElementById("mTabs");
+  if(!el){el=document.createElement("nav");el.id="mTabs";el.className="m-tabs";el.setAttribute("aria-label","Navegação");document.body.appendChild(el);}
+  var gate=((state.church.requireIdentificationOnOpen!==false||state.church.requireLoginGate||ui.forceGate)&&!session.identified)||ui.welcomePreview;
+  var items=gate?[]:mobileNavItems();
+  document.body.classList.toggle("has-mtabs",items.length>1);
+  if(items.length<=1){el.innerHTML="";return;}
+  var shown=items.length<=5?items:items.slice(0,4);
+  var more=items.length<=5?[]:items.slice(4);
+  function cur(p){return ui.page===p||(p==="home"&&!ui.page);}
+  var h=shown.map(function(x){
+    return '<button type="button" class="m-tab'+(cur(x.page)?" on":"")+'" data-act="go" data-page="'+esc(x.page)+'"><span class="m-ic">'+x.icon+'</span><span class="m-lb">'+esc(x.label)+"</span></button>";
+  }).join("");
+  var moreOn=more.some(function(x){return cur(x.page);});
+  h+='<button type="button" class="m-tab'+(moreOn?" on":"")+'" data-act="mobileMore"><span class="m-ic">'+ico("menu",22)+'</span><span class="m-lb">Mais</span></button>';
+  el.innerHTML=h;
+}
+A.mobileMore=function(){
+  var items=mobileNavItems();
+  var more=items.length<=5?[]:items.slice(4);
+  var rows=more.map(function(x){
+    return '<button type="button" class="m-more-row" data-act="go" data-page="'+esc(x.page)+'"><span class="m-ic">'+x.icon+'</span><span>'+esc(x.label)+'</span><span style="margin-left:auto;opacity:.35">›</span></button>';
+  }).join("");
+  rows+='<button type="button" class="m-more-row" data-act="shareApp"><span class="m-ic">📲</span><span>Compartilhar o app</span></button>';
+  rows+='<button type="button" class="m-more-row" data-act="changeAccess"><span class="m-ic">👤</span><span>Trocar acesso / sair</span></button>';
+  var sim="";
+  if(session.realRole==="admin_geral"){
+    sim='<div style="font-size:.75rem;font-weight:800;letter-spacing:.05em;opacity:.6;margin:.6rem .2rem .3rem">SIMULAR VISÃO DE</div><div style="display:flex;flex-wrap:wrap;gap:.4rem">'+
+      allRoles().map(function(r){return '<button type="button" class="btn-soft btn-sm" data-act="simRole" data-role="'+esc(r.id)+'"'+(session.role===r.id?' style="font-weight:800;outline:2px solid currentColor"':"")+">"+esc(r.label)+"</button>";}).join("")+"</div>";
+  }
+  openDialog('<div style="padding:1.1rem 1rem 1.2rem;display:grid;gap:.45rem"><div style="font-weight:800;font-size:1.05rem;margin:0 .2rem .3rem">Menu</div>'+rows+sim+"</div>",function(d){
+    d.addEventListener("click",function(e){var b=e.target.closest("[data-act]");if(b&&b.getAttribute("data-act")!=="mobileMore"){d._allowClose=true;try{d.close();}catch(x){}}});
+  });
+};
+
+/* abas do Painel Gestor: no celular, rola até a aba ativa */
+function scrollActiveAdminTab(){
+  try{var t=document.querySelector(".tabs-row .tab-btn.on");if(t&&t.scrollIntoView&&window.innerWidth<=760) t.scrollIntoView({block:"nearest",inline:"center"});}catch(e){}
 }
 function findUser(id){return state.users.find(function(u){return u.id===id;});}
 
@@ -2070,7 +2157,7 @@ function headerP4Html(){
   var chips="";
   if(can("verCnpj")&&c.cnpj&&H.showCnpj!==false) chips+='<button class="p4-chip" data-act="copyCnpj">'+ico("copy",12)+"<span>CNPJ "+esc(c.cnpj)+"</span></button>";
   if(c.address&&H.showAddress!==false) chips+='<span class="p4-chip">'+ico("map-pin",12)+"<span>"+esc(c.address)+"</span></span>";
-  var compact=ui.page==="home"&&session.identified&&isLauncherHome();
+  var compact=session.identified;
   return '<header class="p4-banner'+(compact?" p4-compact":"")+'"><div class="p4-banner-in"><div style="min-width:0"><strong>'+esc(greet)+"</strong><p>"+esc(sub)+"</p></div>"+(chips?'<div class="p4-chips">'+chips+"</div>":"")+"</div></header>";
 }
 
@@ -3450,6 +3537,8 @@ function render(){
     document.getElementById("footInfo").hidden=(L().footer.showInfo===false);
     if(gateNow) setTimeout(function(){if(!session.identified&&!ui.welcomePreview) openLoginPopup();},60);
     else closeLoginDialog();
+    if(ui.page==="admin-panel") setTimeout(scrollActiveAdminTab,0);
+    renderMobileTabs();
   }catch(e){
     app.innerHTML='<div style="max-width:56rem;margin:1rem auto;padding:1rem;background:#fff1f2;color:#9f1239;border-radius:16px;font-size:.85rem"><b>Ocorreu um erro ao mostrar esta tela.</b><br>'+esc(e.message)+'<br><button class="btn-soft" style="margin-top:.5rem" onclick="location.reload()">Recarregar</button></div>';
   }
@@ -5123,7 +5212,7 @@ function openShareDialog(url,text){
    ====================================================================== */
 /* A versão = "impressão digital" do código do app + data de publicação dos dados.
    Assim qualquer mudança (no código ou nos dados publicados) é reconhecida. */
-var APP_VERSION="3.2.0";
+var APP_VERSION="3.3.0";
 var IS_GAS=!!(window.google&&google.script&&google.script.run);
 var GAS=(typeof GAS_CONFIG!=="undefined"&&GAS_CONFIG)||{};
 var MAIN_SCRIPT_TEXT=(document.currentScript&&document.currentScript.textContent)||"";
@@ -5177,6 +5266,7 @@ function checkForUpdate(force){
       if(!html||html.indexOf("__CUSTOM_STATE_START__")<0) return;
       var rv=parseRemoteVersion(html);
       if(!rv.version||rv.version===LOADED_VERSION) return;
+      if(autoUpdateNow(rv.version,force)) return;
       if(!rv.info.enabled) return;
       if(upd.shownFor===rv.version) return;
       try{if(sessionStorage.getItem("adalex_upd_later")===rv.version&&!rv.info.force) return;}catch(e){}
@@ -5240,6 +5330,35 @@ function applyUpdateNow(){
   Promise.all(jobs).then(go,go);
   setTimeout(go,2500);
 }
+/* Atualiza sozinho: ao abrir o app (ou ao voltar para ele fora do Painel Gestor),
+   se existir versão nova, recarrega na hora. Só tenta uma vez por versão, para nunca
+   ficar recarregando sem parar. */
+function autoUpdateNow(version,opening){
+  if(state.church.autoUpdate===false) return false;
+  var busyNow=ui.page==="admin-panel"||!!document.querySelector("dialog[open]:not(.login-dialog)")||
+    (document.activeElement&&/^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName)&&!(document.activeElement.closest&&document.activeElement.closest(".login-dialog")));
+  if(!opening&&busyNow) return false;
+  var k="adalex_auto_upd";
+  try{if(sessionStorage.getItem(k)===version) return false;sessionStorage.setItem(k,version);}catch(e){return false;}
+  if(IS_GAS){
+    /* no Google: código novo precisa de um toque (o Google só deixa recarregar a página com toque);
+       dados novos entram na hora, sem recarregar */
+    if(String(version).split("|")[0]!==APP_VERSION) return false;
+    gasRun("appDados",[],function(txt){
+      try{
+        var o=JSON.parse(txt);if(!o||typeof o!=="object") return;
+        EMBEDDED_STATE=o;state=load();
+        LOADED_PUBLISHED=String(o.publishedAt||"");LOADED_VERSION=APP_VERSION+"|"+LOADED_PUBLISHED;
+        try{localStorage.setItem(SEEN_KEY,LOADED_VERSION);}catch(e){}
+        render();toast("App atualizado com as últimas informações.","success");
+      }catch(e){}
+    },function(){});
+    return true;
+  }
+  try{toast("Atualizando o app…","success");}catch(e){}
+  setTimeout(applyUpdateNow,400);
+  return true;
+}
 /* já abriu na versão nova? mostra as novidades uma vez */
 function showWhatsNewIfUpdated(){
   var seen="";
@@ -5252,8 +5371,8 @@ function showWhatsNewIfUpdated(){
 }
 function initUpdateChecker(){
   setTimeout(function(){showWhatsNewIfUpdated();checkForUpdate(true);},1500);
-  document.addEventListener("visibilitychange",function(){if(document.visibilityState==="visible") checkForUpdate(false);});
-  window.addEventListener("online",function(){checkForUpdate(true);});
+  document.addEventListener("visibilitychange",function(){if(document.visibilityState==="visible"){upd.lastCheck=0;checkForUpdate(false);}});
+  window.addEventListener("online",function(){checkForUpdate(false);});
   setInterval(function(){checkForUpdate(false);},30*60*1000);
 }
 /* ---- admin: configurar o aviso ---- */
@@ -5262,7 +5381,8 @@ function updateAdminCardHtml(){
   return '<div class="card" style="display:grid;gap:.65rem;margin-bottom:1rem;border-color:#bfdbfe;background:#f8fbff">'+
     '<div style="font-weight:800">📣 Aviso de Nova Atualização</div>'+
     '<p class="help" style="margin:0">Quando você publicar um novo index.html no GitHub, quem abrir o app verá um aviso com as novidades e o botão <b>Atualizar agora</b>. Escreva as novidades <b>antes</b> de baixar o index.html personalizado.</p>'+
-    '<label style="font-size:.82rem;display:flex;align-items:center;gap:.45rem"><input type="checkbox" id="up_en"'+(u.enabled?" checked":"")+"> Mostrar aviso de atualização</label>"+
+    '<label style="font-size:.82rem;display:flex;align-items:center;gap:.45rem"><input type="checkbox" id="up_auto"'+(state.church.autoUpdate!==false?" checked":"")+"> Atualizar sozinho ao abrir o app (recomendado)</label>"+
+    '<label style="font-size:.82rem;display:flex;align-items:center;gap:.45rem"><input type="checkbox" id="up_en"'+(u.enabled?" checked":"")+"> Mostrar aviso com as novidades</label>"+
     field("Título do aviso","up_title",u.title)+
     areaF("Novidades desta versão (opcional)","up_notes",u.notes,"Uma novidade por linha. Ex.: • Nova página da EBD  • Equipes dos departamentos. **texto** fica em negrito.",4)+
     '<label style="font-size:.82rem;display:flex;align-items:center;gap:.45rem"><input type="checkbox" id="up_force"'+(u.force?" checked":"")+"> Atualização obrigatória (sem o botão Depois)</label>"+
@@ -5270,7 +5390,7 @@ function updateAdminCardHtml(){
     '<div style="display:flex;flex-wrap:wrap;gap:.5rem"><button class="btn-soft" data-act="updPreview">👁️ Ver como fica</button><button class="btn-main" style="flex:1" data-act="updSave">Salvar aviso</button></div>'+
   "</div>";
 }
-function readUpdForm(){return {enabled:ch("up_en"),title:v("up_title").trim(),notes:v("up_notes"),force:ch("up_force")};}
+function readUpdForm(){if(document.getElementById("up_auto")) state.church.autoUpdate=ch("up_auto");return {enabled:ch("up_en"),title:v("up_title").trim(),notes:v("up_notes"),force:ch("up_force")};}
 A.updSave=function(){state.updateInfo=readUpdForm();save();render();toast("Aviso salvo. Agora baixe o index.html personalizado e publique.","success");};
 A.updPreview=function(){showUpdatePopup(updInfo({updateInfo:readUpdForm()}),String(Date.now()),false);};
 
@@ -5724,6 +5844,7 @@ function gasCheckUpdate(force){
     if(!m||!m.publishedAt) return;
     var ver=(m.appVersion||APP_VERSION)+"|"+m.publishedAt;
     if(ver===LOADED_VERSION) return;
+    if(autoUpdateNow(ver,force)) return;
     var info=updInfo({updateInfo:m.updateInfo});
     if(!info.enabled||upd.shownFor===ver) return;
     try{if(sessionStorage.getItem("adalex_upd_later")===ver&&!info.force) return;}catch(e){}
