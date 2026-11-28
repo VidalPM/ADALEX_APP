@@ -792,6 +792,46 @@ body.skin-p4.p4-light .toast-item{background:#4a6378 !important;color:#fff !impo
 
 @media(max-width:700px){.p4-compact .p4-chips{display:none}.p4-compact p{display:none}.p4-compact .p4-banner-in{padding-bottom:1.6rem}}
 .hl-wide .hl-txt small{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;white-space:normal}
+
+
+/* visibilidade por caixas */
+.vp-box{display:grid;gap:.45rem;margin-top:.2rem}
+.vp-chips{display:flex;flex-wrap:wrap;gap:.4rem}
+.vp-chip{display:inline-flex;align-items:center;gap:.4rem;padding:.45rem .7rem;border-radius:999px;border:1px solid #d6d3d1;background:#fff;font-size:.82rem;font-weight:600;cursor:pointer;min-height:38px;user-select:none}
+.vp-chip input{width:18px;height:18px;margin:0;accent-color:var(--p4-primary,#4a5d78)}
+.vp-chip.on{border-color:var(--p4-primary,#4a5d78);background:var(--p4-tint,#eef2f7)}
+.vp-chip.adm{opacity:.6;cursor:default}
+.vp-chip small{font-weight:500;opacity:.8}
+.vp-pres{display:flex;flex-wrap:wrap;gap:.3rem}
+.vp-pre{border:0;background:none;color:var(--p4-primary,#4a5d78);font-size:.75rem;font-weight:700;padding:.25rem .4rem;cursor:pointer;text-decoration:underline;font-family:inherit}
+/* ===== Celular: aplicativo ===== */
+.m-tabs{display:none}
+@media(max-width:760px){
+  body.has-mtabs #navLeft{display:none!important}
+  body.has-mtabs #simBar{display:none}
+  body.has-mtabs{padding-bottom:calc(68px + env(safe-area-inset-bottom,0px))}
+  body.has-mtabs .m-tabs{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:60;background:var(--p4-card,#fff);border-top:1px solid rgba(15,23,42,.1);box-shadow:0 -6px 20px rgba(15,23,42,.08);padding:4px 4px calc(4px + env(safe-area-inset-bottom,0px))}
+  .m-tab{flex:1 1 0;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;border:0;background:none;color:inherit;opacity:.6;padding:6px 2px;min-height:56px;border-radius:14px;font:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}
+  .m-tab.on{opacity:1;color:var(--p4-primary,#4a5d78);background:var(--p4-tint,rgba(74,93,120,.1))}
+  .m-tab .m-ic{display:flex;align-items:center;justify-content:center;height:24px}
+  .m-tab .m-lb{font-size:.68rem;font-weight:700;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  /* toque e leitura */
+  input.fld,select.fld,textarea.fld,.fld{font-size:16px!important}
+  .btn-main,.btn-soft,.btn-danger{min-height:44px}
+  .btn-sm{min-height:38px}
+  .card{border-radius:18px}
+  /* painel gestor: abas em uma linha que rola para o lado */
+  .tabs-row{flex-wrap:nowrap!important;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;scroll-snap-type:x proximity}
+  .tabs-row::-webkit-scrollbar{display:none}
+  .tabs-row .tab-btn{flex:0 0 auto;scroll-snap-align:center;white-space:nowrap}
+  /* janelas: ocupam a largura e rolam por dentro */
+  dialog.adalex{max-height:92vh;overflow:auto}
+  table{display:block;overflow-x:auto;max-width:100%}
+  #footNavHome,#footNavPrayer{display:none}
+  .adx-foot{padding-bottom:1.2rem}
+}
+.m-more-row{display:flex;align-items:center;gap:.75rem;width:100%;text-align:left;padding:.85rem .9rem;border-radius:14px;border:1px solid rgba(15,23,42,.08);background:var(--p4-card,#fff);color:inherit;font:inherit;font-weight:700;font-size:.95rem;cursor:pointer;min-height:52px}
+.m-more-row .m-ic{width:28px;display:flex;justify-content:center;font-size:1.2rem}
 /* ===== Tela inicial em atalhos (celular) ===== */
 .hl-wrap{max-width:56rem;margin:-1.1rem auto 0;padding:0 .85rem;width:100%;display:flex;flex-direction:column;gap:.85rem;position:relative}
 .hl-hero{display:flex;align-items:center;justify-content:space-between;gap:.75rem;background:var(--p4-card,#fff);border:1px solid rgba(15,23,42,.08);border-radius:20px;padding:1rem 1.05rem;box-shadow:0 6px 20px rgba(15,23,42,.06)}
@@ -921,6 +961,7 @@ window.addEventListener("load",function(){setTimeout(function(){if(!window.__ada
 
 /* ---------- inline SVG icon helper ---------- */
 var ICONS={
+  menu:'<path d="M4 6h16"/><path d="M4 12h16"/><path d="M4 18h16"/>',
   church:'<path d="M10 9h4"/><path d="M12 7v5"/><path d="M14 22v-4a2 2 0 0 0-4 0v4"/><path d="M18 22V5.618a1 1 0 0 0-.553-.894l-4.553-2.277a2 2 0 0 0-1.788 0L6.553 4.724A1 1 0 0 0 6 5.618V22"/><path d="m18 7 3.447 1.724a1 1 0 0 1 .553.894V20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9.618a1 1 0 0 1 .553-.894L6 7"/>',
   "heart-handshake":'<path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/><path d="M12 5 9.04 7.96a2.17 2.17 0 0 0 0 3.08c.82.82 2.13.85 3 .07l2.07-1.9a2.82 2.82 0 0 1 3.79 0l2.96 2.66"/><path d="m18 15-2-2"/><path d="m15 18-2-2"/>',
   settings:'<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/>',
@@ -1083,6 +1124,7 @@ function defaultPerms(){
   });
   return p;
 }
+
 function baseDefaultState(){
   var deps=SEC_DEPTS.map(function(d,i){
     return {id:"dep"+(i+1),name:d[0],pixType:"E-mail",pixKey:d[1],icon:d[2],description:d[3],visibility:d[4],visibleTo:[],active:true,photo:"",team:[],leader:"",btnLabel:""};
@@ -1326,6 +1368,17 @@ function migrate(s){
   try{fixDriveUrls(s.church);fixDriveUrls(s.departments);fixDriveUrls(s.directorate);fixDriveUrls(s.customPages);fixDriveUrls(s.layout);}catch(e){}
   if(!s.church.pageLogos||typeof s.church.pageLogos!=="object"||Array.isArray(s.church.pageLogos)) s.church.pageLogos={};
   if(!s.church.p4PaletteV2){if(!s.church.p4Palette||s.church.p4Palette==="verde") s.church.p4Palette="auto";s.church.p4PaletteV2=true;}
+  /* WhatsApp: mensagens prontas com o nome da pessoa */
+  (s.adminButtons||[]).forEach(function(b){
+    if(b.msg!=null||!/wa\.me|api\.whatsapp/i.test(String(b.link||""))) return;
+    var tx="";try{var mm=String(b.link).match(/[?&]text=([^&#]*)/);tx=mm?decodeURIComponent(mm[1].replace(/\+/g," ")):"";}catch(e){}
+    if(!tx) b.msg="Olá, Paz do Senhor! Meu nome é {nome}. Vim pelo app da igreja. Assunto: {assunto}.";
+    else if(/\{nome\}/.test(tx)) b.msg=tx;
+    else if(/^Ol[áa],?\s*Paz do Senhor!?/i.test(tx)) b.msg=tx.replace(/^(Ol[áa],?\s*Paz do Senhor!?)/i,"$1 Meu nome é {nome}.");
+    else b.msg="Olá! Meu nome é {nome}. "+tx;
+  });
+  if(s.church&&s.church.prayerDefaultGreeting==="Olá, Paz do Senhor! Gostaria de deixar um pedido de oração na Secretaria da Igreja:")
+    s.church.prayerDefaultGreeting="Olá, Paz do Senhor! Meu nome é {nome}. Gostaria de deixar um pedido de oração na Secretaria da Igreja:";
   if(!s.membersCleanupV2){try{membersCleanup(s,true);}catch(e){}s.membersCleanupV1=true;s.membersCleanupV2=true;}
   if(!s.ebdSeeded){
     if(!s.adminButtons.some(function(b){return b.area==="ebd";})){
@@ -1748,7 +1801,39 @@ function avatar(photo,name,size,bg){
   if(photo) return '<img src="'+esc(imgSrc(photo))+'" alt="Foto de '+esc(name)+'" style="'+st+'" loading="lazy" referrerpolicy="no-referrer">';
   return '<div style="'+st+';display:flex;align-items:center;justify-content:center;font-weight:800;color:#fff;font-size:'+Math.round(size*.32)+'px;background:'+(bg||theme().hex)+'">'+esc(initials(name))+'</div>';
 }
+/* ======================================================================
+   VARIÁVEIS NOS TEXTOS: {nome} {primeironome} {igreja} {data}
+   Funcionam em qualquer texto que aparece no app (títulos, descrições,
+   avisos, mensagens de confirmação, botões...). No Painel Gestor os
+   códigos continuam aparecendo como estão, para você poder editar.
+   ====================================================================== */
+var VARS_HELP="Em qualquer texto do app você pode usar {nome} (nome de quem está usando o app), {primeironome}, {igreja} e {data}.";
+function fillVars(str,ctx){
+  str=String(str==null?"":str);
+  if(str.indexOf("{")<0) return str;
+  ctx=ctx||{};
+  var nome=String(ctx.nome!=null&&ctx.nome!==""?ctx.nome:(typeof waSenderName==="function"?waSenderName():"")).trim();
+  var prim=nome.split(" ")[0]||"";
+  if(!nome) str=str.replace(/[ ,]*\{(nome|primeironome)\}/gi,"");
+  return str.replace(/\{nome\}/gi,nome).replace(/\{primeironome\}/gi,prim)
+    .replace(/\{igreja\}/gi,state.church.name||"").replace(/\{data\}/gi,new Date().toLocaleDateString("pt-BR"));
+}
+function applyVarsIn(root,ctx){
+  if(!root||!document.createTreeWalker) return;
+  try{
+    var w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT,{acceptNode:function(n){
+      if(n.nodeValue.indexOf("{")<0) return NodeFilter.FILTER_REJECT;
+      var p=n.parentNode;
+      if(!p||/^(TEXTAREA|SCRIPT|STYLE|INPUT|CODE)$/.test(p.nodeName)) return NodeFilter.FILTER_REJECT;
+      if(p.closest&&p.closest("[data-novars],[contenteditable]")) return NodeFilter.FILTER_REJECT;
+      return NodeFilter.FILTER_ACCEPT;
+    }});
+    var list=[],n;while((n=w.nextNode())) list.push(n);
+    list.forEach(function(t){var v=fillVars(t.nodeValue,ctx);if(v!==t.nodeValue) t.nodeValue=v;});
+  }catch(e){}
+}
 function toast(msg,type){
+  msg=fillVars(msg);
   var c=document.getElementById("toastContainer");
   var t=document.createElement("div");
   t.className="toast-item";
@@ -1935,6 +2020,7 @@ function visible(vis,roleId,dep){
   if(roleId==="admin_geral"||ro.level>=4) return true;
   if(vis==="personalizado") return !!(dep&&dep.visibleTo&&dep.visibleTo.indexOf(roleId)>=0);
   if(vis==="visitantes") return roleId==="visitante";
+  if(typeof vis==="string"&&vis.indexOf("roles:")===0) return vis.slice(6).split(",").indexOf(roleId)>=0;
   var min=VIS_MIN[vis];
   if(min===undefined) return true;
   return (ro.level||0)>=min;
@@ -1945,13 +2031,67 @@ function canAdmin(){
 function canAccessAdminPanel(){return canAdmin();}
 function isManager(){return canAccessAdminPanel();}
 
-function visOptions(sel,id){
-  var h="";
-  Object.keys(VIS_OPTIONS).forEach(function(k){
-    h+='<option value="'+k+'"'+(sel===k?" selected":"")+">"+esc(VIS_OPTIONS[k])+"</option>";
-  });
-  return '<select class="fld" id="'+id+'">'+h+"</select>";
+/* ======================================================================
+   VISIBILIDADE POR CAIXAS DE SELEÇÃO
+   Marque exatamente quais cargos veem cada item. O valor fica guardado
+   como "roles:id1,id2" (ou "todos" quando todos estão marcados).
+   Cargos de administração sempre veem tudo.
+   ====================================================================== */
+function visRolesOf(sel,obj){
+  sel=sel||"todos";
+  if(String(sel).indexOf("roles:")===0) return String(sel).slice(6).split(",").filter(Boolean);
+  if(sel==="personalizado") return (obj&&obj.visibleTo||[]).slice();
+  return allRoles().filter(function(r){
+    if(r.id==="admin_geral"||(r.level||0)>=4) return false;
+    if(sel==="visitantes") return r.id==="visitante";
+    var min=VIS_MIN[sel];return min===undefined?true:(r.level||0)>=min;
+  }).map(function(r){return r.id;});
 }
+function visSummary(sel,obj){
+  var ids=visRolesOf(sel,obj),rs=allRoles().filter(function(r){return r.id!=="admin_geral"&&(r.level||0)<4;});
+  if(sel==="todos"||ids.length>=rs.length) return "Todos";
+  if(!ids.length) return "Só administradores";
+  return rs.filter(function(r){return ids.indexOf(r.id)>=0;}).map(function(r){return r.label;}).join(", ");
+}
+function visPicker(sel,id,obj){
+  var on=visRolesOf(sel,obj);
+  var roles=allRoles();
+  var chips=roles.map(function(r){
+    var adm=r.id==="admin_geral"||(r.level||0)>=4;
+    var ck=adm||on.indexOf(r.id)>=0;
+    return '<label class="vp-chip'+(ck?" on":"")+(adm?" adm":"")+'"><input type="checkbox" data-vp="'+esc(id)+'" value="'+esc(r.id)+'"'+(ck?" checked":"")+(adm?" disabled":"")+'><span>'+esc(r.label)+(adm?" <small>(sempre vê)</small>":"")+"</span></label>";
+  }).join("");
+  var pre=[["todos","Todos"],["visitantes","Só visitantes"],["membros_acima","Membros e acima"],["lideranca_acima","Liderança e acima"],["diretoria_acima","Diretoria e acima"],["nenhum","Desmarcar todos"]].map(function(p){
+    return '<button type="button" class="vp-pre" data-vp-pre="'+p[0]+'" data-vp-for="'+esc(id)+'">'+p[1]+"</button>";
+  }).join("");
+  var val=(sel==="personalizado")?("roles:"+on.join(",")):(sel||"todos");
+  return '<div class="vp-box" data-vp-box="'+esc(id)+'"><input type="hidden" id="'+esc(id)+'" value="'+esc(val)+'">'+
+    '<div class="vp-chips">'+chips+'</div><div class="vp-pres">'+pre+'</div></div>';
+}
+function visPickerSync(id){
+  var box=document.querySelector('[data-vp-box="'+id+'"]');if(!box) return;
+  var all=[],sel=[];
+  box.querySelectorAll('input[data-vp]').forEach(function(c){
+    c.closest(".vp-chip").classList.toggle("on",c.checked);
+    if(c.disabled) return;
+    all.push(c.value);if(c.checked) sel.push(c.value);
+  });
+  var hid=document.getElementById(id);
+  hid.value=(sel.length===all.length)?"todos":("roles:"+sel.join(","));
+  try{hid.dispatchEvent(new Event("input",{bubbles:true}));hid.dispatchEvent(new Event("change",{bubbles:true}));}catch(e){}
+}
+document.addEventListener("change",function(e){
+  var c=e.target;if(c&&c.matches&&c.matches("input[data-vp]")) visPickerSync(c.getAttribute("data-vp"));
+});
+document.addEventListener("click",function(e){
+  var b=e.target.closest&&e.target.closest("[data-vp-pre]");if(!b) return;
+  e.preventDefault();
+  var id=b.getAttribute("data-vp-for"),k=b.getAttribute("data-vp-pre");
+  var ids=k==="nenhum"?[]:visRolesOf(k);
+  document.querySelectorAll('[data-vp-box="'+id+'"] input[data-vp]').forEach(function(c){if(!c.disabled) c.checked=ids.indexOf(c.value)>=0;});
+  visPickerSync(id);
+});
+function visOptions(sel,id,obj){return visPicker(sel,id,obj);}
 function visCheckboxes(dep,prefix){
   var h='<div style="display:flex;flex-wrap:wrap;gap:.65rem;margin-top:.45rem">';
   allRoles().filter(function(r){return r.id!=="admin_geral";}).forEach(function(r){
@@ -1960,7 +2100,7 @@ function visCheckboxes(dep,prefix){
   });
   return h+"</div>";
 }
-function visLabel(v){return VIS_OPTIONS[v]||VIS_OPTIONS.todos;}
+function visLabel(v,obj){if(VIS_OPTIONS[v]&&v!=="personalizado") return VIS_OPTIONS[v];if(v==="personalizado"||String(v||"").indexOf("roles:")===0) return "Visível para: "+visSummary(v,obj);return VIS_OPTIONS.todos;}
 function pill(text,cls){return '<span class="pill '+cls+'">'+esc(text)+"</span>";}
 function roleBadge(rId){var i=roleObj(rId);return pill(i.label,i.cls||"b-sky");}
 
@@ -1973,6 +2113,7 @@ function openDialog(innerHtml,onOpen){
     '<button type="button" class="dialog-close-btn" data-close aria-label="Fechar">✕</button>'+
     innerHtml+"</div>";
   document.body.appendChild(d);
+  if(ui.page!=="admin-panel") applyVarsIn(d);
   d.addEventListener("close",function(){d.remove();});
   d.addEventListener("click",function(e){
     if(e.target===d){d.close();return;}
@@ -2032,6 +2173,63 @@ function renderNav(){
     sim+="</div>";
   }
   document.getElementById("simBar").innerHTML=sim;
+  renderMobileTabs();
+}
+/* ======================================================================
+   CELULAR: barra de abas fixa embaixo (como um aplicativo)
+   ====================================================================== */
+function mobileNavItems(){
+  var it=[];
+  function add(page,label,icon,cond){if(cond) it.push({page:page,label:label,icon:icon});}
+  add("home",navCfg("home").label||"Início",ico("church",22),navCfg("home").show!==false);
+  add("prayer",navCfg("prayer").label||"Oração",ico("heart-handshake",22),navCfg("prayer").show!==false&&can("verPaginaOracao"));
+  add("secretaria",navCfg("secretaria").label||"Secretaria",ico("file-text",22),navCfg("secretaria").show!==false&&can("verPaginaSecretaria"));
+  add("tesouraria",navCfg("tesouraria").label||"Tesouraria",ico("wallet",22),navCfg("tesouraria").show!==false&&can("verPaginaTesouraria"));
+  add("ebd",navCfg("ebd").label||"EBD",ico("book-open",22),navCfg("ebd").show!==false&&can("verPaginaEBD"));
+  customPagesFor("nav").forEach(function(p){
+    it.push({page:"cp:"+p.id,label:p.title||"Página",icon:p.logo?'<img src="'+esc(driveLink(safeUrl(p.logo)))+'" alt="" style="width:24px;height:24px;border-radius:7px;object-fit:cover">':'<span style="font-size:1.25rem;line-height:1">'+esc(p.icon||"📌")+"</span>"});
+  });
+  if(canAccessAdminPanel()) it.push({page:"admin-panel",label:L().nav.gestorLabel||"Gestor",icon:ico("settings",22)});
+  return it;
+}
+function renderMobileTabs(){
+  var el=document.getElementById("mTabs");
+  if(!el){el=document.createElement("nav");el.id="mTabs";el.className="m-tabs";el.setAttribute("aria-label","Navegação");document.body.appendChild(el);}
+  var gate=((state.church.requireIdentificationOnOpen!==false||state.church.requireLoginGate||ui.forceGate)&&!session.identified)||ui.welcomePreview;
+  var items=gate?[]:mobileNavItems();
+  document.body.classList.toggle("has-mtabs",items.length>1);
+  if(items.length<=1){el.innerHTML="";return;}
+  var shown=items.length<=5?items:items.slice(0,4);
+  var more=items.length<=5?[]:items.slice(4);
+  function cur(p){return ui.page===p||(p==="home"&&!ui.page);}
+  var h=shown.map(function(x){
+    return '<button type="button" class="m-tab'+(cur(x.page)?" on":"")+'" data-act="go" data-page="'+esc(x.page)+'"><span class="m-ic">'+x.icon+'</span><span class="m-lb">'+esc(x.label)+"</span></button>";
+  }).join("");
+  var moreOn=more.some(function(x){return cur(x.page);});
+  h+='<button type="button" class="m-tab'+(moreOn?" on":"")+'" data-act="mobileMore"><span class="m-ic">'+ico("menu",22)+'</span><span class="m-lb">'+esc(T("m_more","Mais"))+'</span></button>';
+  el.innerHTML=h;
+}
+A.mobileMore=function(){
+  var items=mobileNavItems();
+  var more=items.length<=5?[]:items.slice(4);
+  var rows=more.map(function(x){
+    return '<button type="button" class="m-more-row" data-act="go" data-page="'+esc(x.page)+'"><span class="m-ic">'+x.icon+'</span><span>'+esc(x.label)+'</span><span style="margin-left:auto;opacity:.35">›</span></button>';
+  }).join("");
+  rows+='<button type="button" class="m-more-row" data-act="shareApp"><span class="m-ic">📲</span><span>'+esc(T("m_share","Compartilhar o app"))+'</span></button>';
+  rows+='<button type="button" class="m-more-row" data-act="changeAccess"><span class="m-ic">👤</span><span>'+esc(T("m_change","Trocar acesso / sair"))+'</span></button>';
+  var sim="";
+  if(session.realRole==="admin_geral"){
+    sim='<div style="font-size:.75rem;font-weight:800;letter-spacing:.05em;opacity:.6;margin:.6rem .2rem .3rem">SIMULAR VISÃO DE</div><div style="display:flex;flex-wrap:wrap;gap:.4rem">'+
+      allRoles().map(function(r){return '<button type="button" class="btn-soft btn-sm" data-act="simRole" data-role="'+esc(r.id)+'"'+(session.role===r.id?' style="font-weight:800;outline:2px solid currentColor"':"")+">"+esc(r.label)+"</button>";}).join("")+"</div>";
+  }
+  openDialog('<div style="padding:1.1rem 1rem 1.2rem;display:grid;gap:.45rem"><div style="font-weight:800;font-size:1.05rem;margin:0 .2rem .3rem">'+esc(T("m_menu","Menu"))+'</div>'+rows+sim+"</div>",function(d){
+    d.addEventListener("click",function(e){var b=e.target.closest("[data-act]");if(b&&b.getAttribute("data-act")!=="mobileMore"){d._allowClose=true;try{d.close();}catch(x){}}});
+  });
+};
+
+/* abas do Painel Gestor: no celular, rola até a aba ativa */
+function scrollActiveAdminTab(){
+  try{var t=document.querySelector(".tabs-row .tab-btn.on");if(t&&t.scrollIntoView&&window.innerWidth<=760) t.scrollIntoView({block:"nearest",inline:"center"});}catch(e){}
 }
 function findUser(id){return state.users.find(function(u){return u.id===id;});}
 
@@ -2070,7 +2268,7 @@ function headerP4Html(){
   var chips="";
   if(can("verCnpj")&&c.cnpj&&H.showCnpj!==false) chips+='<button class="p4-chip" data-act="copyCnpj">'+ico("copy",12)+"<span>CNPJ "+esc(c.cnpj)+"</span></button>";
   if(c.address&&H.showAddress!==false) chips+='<span class="p4-chip">'+ico("map-pin",12)+"<span>"+esc(c.address)+"</span></span>";
-  var compact=ui.page==="home"&&session.identified&&isLauncherHome();
+  var compact=session.identified;
   return '<header class="p4-banner'+(compact?" p4-compact":"")+'"><div class="p4-banner-in"><div style="min-width:0"><strong>'+esc(greet)+"</strong><p>"+esc(sub)+"</p></div>"+(chips?'<div class="p4-chips">'+chips+"</div>":"")+"</div></header>";
 }
 
@@ -2206,7 +2404,7 @@ function tmpOverride(obj,map,fn){
 }
 function secAreas(sec){return Array.isArray(sec.areas)?sec.areas:["secretaria","tesouraria","ebd"];}
 function adminBtnLink(b,t,strong){
-  return '<a href="'+esc(b.link)+'" target="_blank" rel="noopener noreferrer" style="display:flex;justify-content:space-between;align-items:center;gap:.5rem;min-height:44px;padding:.7rem .85rem;border-radius:14px;border:1px solid '+t.hex+';'+(strong?"background:"+t.hexLight+";":"")+'color:'+t.hex+';text-decoration:none;font-weight:'+(strong?800:700)+';font-size:.82rem"><span>'+esc(b.title)+"</span>"+pill(b.badge||"","b-white")+"</a>";
+  return '<a href="'+esc(btnHref(b))+'" target="_blank" rel="noopener noreferrer" style="display:flex;justify-content:space-between;align-items:center;gap:.5rem;min-height:44px;padding:.7rem .85rem;border-radius:14px;border:1px solid '+t.hex+';'+(strong?"background:"+t.hexLight+";":"")+'color:'+t.hex+';text-decoration:none;font-weight:'+(strong?800:700)+';font-size:.82rem"><span>'+esc(b.title)+"</span>"+pill(b.badge||"","b-white")+"</a>";
 }
 
 /* ---- renderizadores das seções ---- */
@@ -2271,7 +2469,7 @@ function renderSys(sec,pg){
     var ab=state.adminButtons.filter(function(b){return b.active&&(b.area||"secretaria")===pg&&visible(b.visibility,session.role);});
     if(!ab.length&&sec.showEmpty===false) return '<div class="card">'+pageHeadHtml(pg,title,S||def[1])+"</div>";
     return '<div class="card">'+pageHeadHtml(pg,title,S||def[1])+'<div style="display:flex;flex-direction:column;gap:.6rem">'+
-      (ab.length?ab.map(function(b){return '<a href="'+esc(b.link)+'" target="_blank" rel="noopener noreferrer" style="display:flex;justify-content:space-between;align-items:center;gap:.5rem;min-height:48px;padding:.75rem .9rem;border-radius:14px;border:1px solid '+t.hex+";background:"+t.hexLight+";color:"+t.hex+';text-decoration:none;font-weight:800;font-size:.86rem"><span>'+esc(b.title)+"</span>"+pill(b.badge||title,"b-white")+"</a>";}).join(""):'<p class="help">Nenhum serviço disponível para o seu nível de acesso. Entre com seu CPF de membro ou senha pessoal para liberar.</p>')+
+      (ab.length?ab.map(function(b){return '<a href="'+esc(btnHref(b))+'" target="_blank" rel="noopener noreferrer" style="display:flex;justify-content:space-between;align-items:center;gap:.5rem;min-height:48px;padding:.75rem .9rem;border-radius:14px;border:1px solid '+t.hex+";background:"+t.hexLight+";color:"+t.hex+';text-decoration:none;font-weight:800;font-size:.86rem"><span>'+esc(b.title)+"</span>"+pill(b.badge||title,"b-white")+"</a>";}).join(""):'<p class="help">Nenhum serviço disponível para o seu nível de acesso. Entre com seu CPF de membro ou senha pessoal para liberar.</p>')+
     "</div></div>";
   case "areaTeam":
     return areaTeamSectionHtml(pg,sec);
@@ -2323,6 +2521,8 @@ function homeHtml(){
    Cada seção da página Início vira um botão grande; ao tocar, a seção
    abre sozinha, com botão de voltar. Configurável em Layout & Páginas.
    ====================================================================== */
+/* textos e nomes personalizados do app (Layout & Visibilidade → Nomes & Textos) */
+function T(k,def){var t=state.texts&&state.texts[k];return (t!=null&&String(t).trim()!=="")?String(t):def;}
 function isLauncherHome(){return (state.church.homeStyle||"atalhos")!=="lista";}
 var TILE_DEF={
   christ:["✝️","Entregar a vida a Cristo"],
@@ -2335,8 +2535,16 @@ var TILE_DEF={
   notices:["📢","Avisos"],
   links:["🔗","Redes & links"]
 };
-function tileIcon(it){return (it.tileIcon||"").trim()||(TILE_DEF[it.key]||["📌"])[0];}
-function tileLabel(it){return (it.tileLabel||"").trim()||(TILE_DEF[it.key]||[])[1]||(SYS[it.key]&&SYS[it.key].label)||"Abrir";}
+function tileIcon(it){return (it.tileIcon||"").trim()||T("tile_"+it.key+"_i",(TILE_DEF[it.key]||["📌"])[0]);}
+function tileLabel(it){
+  if((it.tileLabel||"").trim()) return it.tileLabel.trim();
+  /* se o título da seção foi trocado (em Layout ou em Personalização), o botão acompanha */
+  var def=SYS[it.key];
+  var t=(it.title||"").trim();
+  if(!t&&def&&def.defTitle){var dt=def.defTitle(state.church);if(dt&&dt!==def.label) t=dt;}
+  if(t) return t;
+  return T("tile_"+it.key+"_l",(TILE_DEF[it.key]||[])[1]||(def&&def.label)||"Abrir");
+}
 function tileSub(it){
   if((it.tileSub||"").trim()) return it.tileSub.trim();
   try{
@@ -2378,7 +2586,7 @@ function launcherHomeHtml(){
     var found=data.list.filter(function(x){return x.it.id===ui.homeSec;})[0];
     if(found){
       return '<section class="hl-wrap">'+
-        '<div class="hl-back-bar"><button type="button" class="hl-back" data-act="homeBack">‹ Início</button><div class="hl-back-title">'+tileIcon(found.it)+' '+esc(tileLabel(found.it))+'</div></div>'+
+        '<div class="hl-back-bar"><button type="button" class="hl-back" data-act="homeBack">'+esc(T("back_home","‹ Início"))+'</button><div class="hl-back-title">'+tileIcon(found.it)+' '+esc(tileLabel(found.it))+'</div></div>'+
         found.html+'</section>';
     }
     ui.homeSec=null;
@@ -2404,15 +2612,15 @@ function launcherHomeHtml(){
   var pages="";
   if(c.homePageTiles!==false){
     function pt(key,icon,label,cond){if(cond&&navCfg(key).show!==false) pages+=homeTileHtml(icon,navCfg(key).label||label,"",'data-act="go" data-page="'+key+'"',t,false);}
-    pt("prayer","🤲","Oração",can("verPaginaOracao"));
-    pt("secretaria","📄","Secretaria",can("verPaginaSecretaria"));
-    pt("tesouraria","💰","Tesouraria",can("verPaginaTesouraria"));
-    pt("ebd","📖","EBD",can("verPaginaEBD"));
+    pt("prayer",T("ptile_prayer","🤲"),"Oração",can("verPaginaOracao"));
+    pt("secretaria",T("ptile_secretaria","📄"),"Secretaria",can("verPaginaSecretaria"));
+    pt("tesouraria",T("ptile_tesouraria","💰"),"Tesouraria",can("verPaginaTesouraria"));
+    pt("ebd",T("ptile_ebd","📖"),"EBD",can("verPaginaEBD"));
     customPagesFor("nav").forEach(function(pg){
       var ic=pg.logo?'<img src="'+esc(driveLink(safeUrl(pg.logo)))+'" alt="" style="width:28px;height:28px;border-radius:8px;object-fit:cover">':(pg.icon||"📌");
       pages+=homeTileHtml(ic,pg.title||pg.name||"Página","",'data-act="go" data-page="cp:'+esc(pg.id)+'"',t,false);
     });
-    if(canAccessAdminPanel()) pages+=homeTileHtml("⚙️",L().nav.gestorLabel||"Painel Gestor","Administração",'data-act="go" data-page="admin-panel"',t,false);
+    if(canAccessAdminPanel()) pages+=homeTileHtml(T("ptile_admin","⚙️"),L().nav.gestorLabel||"Painel Gestor",T("ptile_admin_sub","Administração"),'data-act="go" data-page="admin-panel"',t,false);
   }
   return '<section class="hl-wrap">'+hero+
     (tiles?'<div class="hl-grid">'+tiles+'</div>':'')+
@@ -2471,7 +2679,7 @@ function directorateSectionHtml(){
     return "";
   }
   var list=filled.slice(0,dirMax()).map(function(d){
-    var wa=d.phone?'<a href="https://wa.me/55'+esc(String(d.phone).replace(/\D/g,""))+'" target="_blank" rel="noopener noreferrer" style="display:inline-block;margin-top:.15rem;font-size:.74rem;color:#15803d;font-weight:700">WhatsApp</a>':"";
+    var wa=d.phone?'<a href="'+esc(waPersonHref(d.phone,d.name,d.role||d.title||"a igreja"))+'" target="_blank" rel="noopener noreferrer" style="display:inline-block;margin-top:.15rem;font-size:.74rem;color:#15803d;font-weight:700">WhatsApp</a>':"";
     return '<div style="display:flex;gap:.65rem;align-items:center;padding:.35rem;border-radius:14px;background:#fafaf9">'+avatar(d.photo,d.name,56)+'<div style="min-width:0"><div style="font-weight:700;font-size:.85rem">'+esc(d.name)+'</div><div style="font-size:.72rem;font-weight:600;color:'+t.hex+'">'+esc(d.role)+"</div>"+wa+"</div></div>";
   }).join("");
   return '<div class="card"><div style="font-size:1rem;font-weight:800">'+esc(c.directorateTitle||"Nossa Diretoria")+'</div><p class="help" style="margin:.2rem 0 .75rem">'+esc(c.directorateSubtitle||"Quem cuida da obra no dia a dia.")+'</p><div class="safe-grid-sm">'+list+"</div>"+
@@ -2531,7 +2739,7 @@ function linksHtml(){
   }).join("");
   var gab=state.adminButtons.filter(function(b){return b.active&&visible(b.visibility,session.role)&&(b.isGabinetePastoral?can("verGabinetePastoral"):true)&&linksGabOk(b);});
   var gabHtml=gab.map(function(b){
-    return '<a href="'+esc(b.link)+'" target="_blank" rel="noopener noreferrer" style="display:flex;justify-content:space-between;align-items:center;gap:.5rem;min-height:44px;padding:.65rem .8rem;border-radius:14px;background:'+t.hexLight+';color:'+t.hex+';text-decoration:none;font-weight:700;font-size:.82rem"><span>'+esc(b.title)+"</span>"+pill(b.badge,"b-white")+"</a>";
+    return '<a href="'+esc(btnHref(b))+'" target="_blank" rel="noopener noreferrer" style="display:flex;justify-content:space-between;align-items:center;gap:.5rem;min-height:44px;padding:.65rem .8rem;border-radius:14px;background:'+t.hexLight+';color:'+t.hex+';text-decoration:none;font-weight:700;font-size:.82rem"><span>'+esc(b.title)+"</span>"+pill(b.badge,"b-white")+"</a>";
   }).join("");
   return '<div class="card"><div style="font-weight:800;font-size:1rem">'+esc(c.linksTitle||"Redes Sociais & Links")+'</div><p class="help" style="margin:.2rem 0 .7rem">'+esc(c.linksSubtitle||"Acompanhe a igreja e fale com a secretaria.")+'</p><div style="display:flex;flex-direction:column;gap:.55rem">'+body+gabHtml+"</div></div>";
 }
@@ -2573,7 +2781,8 @@ function adminHtml(){
     return '<div class="card" style="max-width:40rem;margin:1rem auto"><div style="font-weight:800">Acesso restrito</div><p class="help">Entre como gestor para acessar o painel.</p></div>';
   }
   var tabs=ADMIN_TABS.map(function(t){
-    return '<button class="tab-btn '+(ui.adminTab===t[0]?"on":"")+'" data-act="adminTab" data-tab="'+t[0]+'">'+ico(t[2],13)+'<span>'+esc(t[1])+"</span></button>";
+    var lb=t[0]==="records"?(T("tab_records","Registros")+" ("+state.submissions.length+")"):T("tab_"+t[0],t[1]);
+    return '<button class="tab-btn '+(ui.adminTab===t[0]?"on":"")+'" data-act="adminTab" data-tab="'+t[0]+'">'+ico(t[2],13)+'<span>'+esc(lb)+"</span></button>";
   }).join("");
   var body="";
   try{body=adminTabBody(ui.adminTab);}catch(e){body=errorBox("Erro ao carregar esta aba: "+e.message);}
@@ -2626,6 +2835,7 @@ function tabChurch(){
   });
 
   return hd("Personalização Total da Igreja","Altere cores, faixa superior, dados institucionais, textos dos cartões e comportamento.")+
+     '<div class="card" style="background:#f0f9ff;border:1px solid #bae6fd;margin-bottom:.8rem"><p class="help" style="margin:0;color:#0c4a6e">🔤 '+esc(VARS_HELP)+' Exemplo: <b>Olá {primeironome}!</b> aparece como <b>Olá '+esc((waSenderName()||"Maria").split(" ")[0])+'!</b></p></div>'+
     '<details class="adx-acc" open><summary>🎨 Cores, Tema &amp; Faixa Superior</summary><div class="acc-body">'+
       '<div><label class="lbl">Paleta de cores</label><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:.5rem">'+themes+'</div>'+(isSkinP4()?'<div class="help">No visual Padrão P4, a paleta define o tom do fundo, dos cartões, da barra e dos destaques (sempre em versão suave). Troque o estilo em Layout &amp; Visibilidade → Menu, Cabeçalho &amp; Rodapé.</div>':"")+'</div>'+
       '<div class="safe-grid-sm">'+
@@ -2677,7 +2887,10 @@ function tabChurch(){
       field("Título da central de oração","ch_prayTitle",c.prayerTitle)+
       areaF("Descrição da oração","ch_prayDesc",c.prayerDescription,"",2)+
       field("Botão de oração","ch_prayBtn",c.prayerBtnLabel||"Enviar pedido de oração")+
-      areaF("Saudação padrão WhatsApp Oração","ch_prayGreet",c.prayerDefaultGreeting,"",2)+
+      areaF("Saudação padrão WhatsApp Oração","ch_prayGreet",c.prayerDefaultGreeting,WA_VARS_HELP,2)+
+      areaF("Mensagem depois de enviar o pedido de oração","ch_prayThanks",c.prayerThanks||"Pedido enviado, {primeironome}! Estaremos orando por você.","{nome} e {primeironome} usam o nome que a pessoa digitou no pedido (ou o nome do login).",2)+
+      areaF("Mensagem do WhatsApp para falar com a equipe e a diretoria","ch_waTeam",c.waTeamMessage||WA_TEAM_MSG,"Usada no link WhatsApp de cada pessoa das equipes. "+WA_VARS_HELP,2)+
+      areaF("Mensagem do WhatsApp ao enviar comprovante do Pix","ch_waPix",c.waPixMessage||WA_PIX_MSG,"{assunto} vira o nome do departamento. "+WA_VARS_HELP,2)+
       '<hr style="border-top:1px solid #e7e5e4">'+
       '<div class="safe-grid-sm">'+
         field("Título seção Informações","ch_infoT",c.infoSectionTitle||"Informações sobre a Igreja")+
@@ -2731,7 +2944,7 @@ function tabDepts(){
     areaF("Descrição Curta","dp_desc",v.description,"",2)+
     '<div><label class="lbl" for="dp_leader">Dirigente</label><input class="fld" id="dp_leader" value="'+esc(v.leader||"")+'"><button class="btn-soft" style="width:100%;margin-top:.45rem" data-act="pickLeader">Escolher da lista de pessoas</button></div>'+
     '<div><label class="lbl">Foto / Logo</label><div style="display:flex;gap:.65rem;align-items:center"><div id="dp_photo_prev">'+avatar(currentPhoto,v.name||"D",56)+'</div><div style="display:flex;flex-wrap:wrap;gap:.4rem"><button class="btn-soft btn-sm" data-act="depPhotoForm">Do aparelho</button><button class="btn-soft btn-sm" data-act="depPhotoLink">Por link</button><button class="btn-danger btn-sm" data-act="depPhotoRemove">Remover</button></div></div></div>'+
-    '<div><label class="lbl" for="dp_vis">Visibilidade</label>'+visOptions(v.visibility,"dp_vis")+visCheckboxes(v,"dp")+"</div>"+
+    '<div><label class="lbl" for="dp_vis">Visibilidade</label>'+visOptions(v.visibility,"dp_vis",v)+"</div>"+
     '<label style="font-size:.82rem;display:flex;align-items:center;gap:.45rem"><input type="checkbox" id="dp_active"'+(v.active!==false?" checked":"")+'> Departamento ativo no aplicativo</label>'+
     '<div style="display:flex;flex-wrap:wrap;gap:.5rem;justify-content:flex-end">'+(editing?'<button class="btn-soft" data-act="depCancel">Cancelar</button>':"")+'<button class="btn-main" style="flex:1" data-act="saveDept">Salvar departamento</button></div></div>';
 
@@ -2754,7 +2967,7 @@ function tabDepts(){
     '</div>';
   }).join("");
 
-  return hd("Departamentos & Pix","Cadastre as contribuições e defina quem vê cada cartão.")+
+  return hd(T("tab_depts","2. Departamentos & Pix").replace(/^[\d.]+\s*/,""),"Cadastre as contribuições e defina quem vê cada cartão.")+
     '<div class="safe-grid-2" style="align-items:start">'+form+'<div style="display:flex;flex-direction:column;gap:.65rem">'+(list||'<p class="help">Nenhum departamento. Cadastre o primeiro acima.</p>')+"</div></div>";
 }
 
@@ -2992,9 +3205,10 @@ function tabButtons(area){
   var rows=filtered.map(function(b){
     return '<div class="card" style="display:grid;gap:.6rem;margin-bottom:.75rem"><div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:.4rem;align-items:center"><div style="font-weight:800;font-size:.88rem">'+esc(b.title)+'</div><div style="display:flex;gap:.35rem"><button class="btn-soft btn-sm" data-act="btnMove" data-id="'+b.id+'" data-dir="-1">↑</button><button class="btn-soft btn-sm" data-act="btnMove" data-id="'+b.id+'" data-dir="1">↓</button><button class="btn-danger btn-sm" data-act="btnDelete" data-id="'+b.id+'">Excluir</button></div></div>'+
       '<div class="safe-grid-sm">'+field("Título","bt_t_"+b.id,b.title)+field("Link ou WhatsApp (wa.me/...)","bt_l_"+b.id,b.link)+'<div><label class="lbl" for="bt_v_'+b.id+'">Visibilidade</label>'+visOptions(b.visibility,"bt_v_"+b.id)+"</div>"+field("Selo","bt_b_"+b.id,b.badge)+"</div>"+
+      (isWaLink(b.link)?waMsgField("bt_m_"+b.id,(b.msg!=null?b.msg:waTextOf(b.link)),"Mensagem pronta do WhatsApp"):"")+
       '<div style="display:flex;gap:.75rem;flex-wrap:wrap;align-items:center;justify-content:space-between;font-size:.8rem"><div style="display:flex;gap:.75rem;flex-wrap:wrap"><label><input type="checkbox" id="bt_a_'+b.id+'"'+(b.active?" checked":"")+'> Ativo</label>'+(isSec?'<label><input type="checkbox" id="bt_g_'+b.id+'"'+(b.isGabinetePastoral?" checked":"")+'> Exibir também no Início (Gabinete)</label>':"")+'</div><button class="btn-main btn-sm" data-act="btnSave" data-id="'+b.id+'">Salvar</button></div></div>';
   }).join("");
-  var add='<div class="card" style="display:grid;gap:.6rem"><div style="font-weight:800">Novo botão para '+esc(areaName)+'</div>'+field("Título do botão","bt_new_t_"+area,"")+field("Link ou WhatsApp","bt_new_l_"+area,"https://")+field("Selo / Etiqueta","bt_new_b_"+area,areaName)+'<div><label class="lbl" for="bt_new_v_'+area+'">Quem pode ver</label>'+visOptions("membros_acima","bt_new_v_"+area)+'</div><button class="btn-main" style="width:100%" data-act="btnAdd" data-area="'+area+'">Adicionar botão em '+esc(areaName)+'</button></div>';
+  var add='<div class="card" style="display:grid;gap:.6rem"><div style="font-weight:800">Novo botão para '+esc(areaName)+'</div>'+field("Título do botão","bt_new_t_"+area,"")+field("Link ou WhatsApp","bt_new_l_"+area,"https://")+waMsgField("bt_new_m_"+area,WA_DEFAULT_MSG,"Mensagem pronta do WhatsApp (se o link for de WhatsApp)")+field("Selo / Etiqueta","bt_new_b_"+area,areaName)+'<div><label class="lbl" for="bt_new_v_'+area+'">Quem pode ver</label>'+visOptions("membros_acima","bt_new_v_"+area)+'</div><button class="btn-main" style="width:100%" data-act="btnAdd" data-area="'+area+'">Adicionar botão em '+esc(areaName)+'</button></div>';
   var logoRow='<div class="card" style="display:flex;align-items:center;gap:.75rem;margin-bottom:.75rem">'+pageLogoHtml(getPageLogo(area),area,"",52)+'<div style="min-width:0;flex:1"><div style="font-weight:800;font-size:.86rem">Logo da página '+esc(areaName)+'</div><div class="help" style="margin:0">Aparece no topo da página. Compactada automaticamente.</div></div><button type="button" class="btn-soft btn-sm" data-act="pageLogoEdit" data-key="'+area+'">'+(getPageLogo(area)?"Alterar":"Adicionar")+'</button></div>';
   return hd(areaTitle,areaSub)+logoRow+(rows||'<p class="help">Nenhum botão cadastrado nesta página ainda.</p>')+add;
 }
@@ -3211,8 +3425,8 @@ function openPixDialog(dep){
   openDialog(html,function(d){
     var rc=d.querySelector('[data-act="pixReceipt"]');
     if(rc) rc.addEventListener("click",function(){
-      var msg="Olá! Segue o comprovante do Pix para o "+dep.name+". Enviado por: "+profile+".";
-      window.open("https://wa.me/55"+c.accountingWhatsapp+"?text="+encodeURIComponent(msg),"_blank","noopener,noreferrer");
+      var msg=waFill(c.waPixMessage||WA_PIX_MSG,{assunto:dep.name});
+      window.open(waBuild(c.accountingWhatsapp,msg),"_blank","noopener,noreferrer");
     });
     var rec=d.querySelector('[data-act="pixRecopy"]');
     if(rec) rec.addEventListener("click",function(){copyText(dep.pixKey,function(){toast("Chave copiada novamente","success");});});
@@ -3444,12 +3658,15 @@ function render(){
     else if(String(ui.page).indexOf("cp:")===0) html=headerHtml()+customPageHtml(ui.page.slice(3));
     else html=headerHtml()+homeHtml();
     app.innerHTML=html;
+    if(ui.page!=="admin-panel") applyVarsIn(app);
     document.getElementById("footName").textContent=state.church.name;
     document.getElementById("footInfo").textContent=state.church.address+(can("verCnpj")&&state.church.cnpj?" • CNPJ "+state.church.cnpj:"");
     document.getElementById("footName").hidden=(L().footer.showName===false);
     document.getElementById("footInfo").hidden=(L().footer.showInfo===false);
     if(gateNow) setTimeout(function(){if(!session.identified&&!ui.welcomePreview) openLoginPopup();},60);
     else closeLoginDialog();
+    if(ui.page==="admin-panel") setTimeout(scrollActiveAdminTab,0);
+    renderMobileTabs();
   }catch(e){
     app.innerHTML='<div style="max-width:56rem;margin:1rem auto;padding:1rem;background:#fff1f2;color:#9f1239;border-radius:16px;font-size:.85rem"><b>Ocorreu um erro ao mostrar esta tela.</b><br>'+esc(e.message)+'<br><button class="btn-soft" style="margin-top:.5rem" onclick="location.reload()">Recarregar</button></div>';
   }
@@ -3632,7 +3849,7 @@ A.prayerSend=function(el){
   var kind=el.getAttribute("data-kind");
   var c=state.church;
   if(kind==="whatsapp"){
-    window.open("https://wa.me/55"+c.prayerWhatsapp+"?text="+encodeURIComponent(c.prayerDefaultGreeting),"_blank","noopener,noreferrer");
+    window.open(waBuild(c.prayerWhatsapp,waFill(c.prayerDefaultGreeting||"Olá, Paz do Senhor! Meu nome é {nome}. Gostaria de deixar um pedido de oração:",{assunto:"pedido de oração"})),"_blank","noopener,noreferrer");
     return;
   }
   openDialog('<div style="padding:1.25rem;display:grid;gap:.7rem"><div style="font-weight:900;font-size:1.05rem">Pedido de oração</div><p class="help" style="margin:0">'+esc(c.prayerDescription)+'</p><div><label class="lbl" for="pr_n">Seu nome</label><input class="fld" id="pr_n" autocomplete="name"></div><div><label class="lbl" for="pr_m">Seu pedido</label><textarea class="fld" id="pr_m" rows="4"></textarea></div><button class="btn-main" style="width:100%" data-act="prSend">Enviar pedido</button></div>',function(d){
@@ -3641,7 +3858,9 @@ A.prayerSend=function(el){
       if(!m){toast("Escreva seu pedido.","error");return;}
       state.submissions.unshift({id:"s"+Date.now(),type:"Pedido de oração",name:n||"Anônimo",message:m,date:new Date().toLocaleString("pt-BR")});
       gasSendSubmission(state.submissions[0]);
-      save();d.close();toast("Pedido enviado. Estaremos orando por você!","success");
+      save();d.close();
+      var thanks=fillVars(c.prayerThanks||"Pedido enviado, {primeironome}! Estaremos orando por você.",{nome:n});
+      openDialog('<div style="padding:1.4rem 1.2rem;display:grid;gap:.8rem;text-align:center"><div style="font-size:2.2rem">🙏</div><div data-novars style="font-weight:800;font-size:1.05rem;line-height:1.4">'+esc(thanks)+'</div><button class="btn-main" data-close>Amém</button></div>');
     });
   });
 };
@@ -3667,7 +3886,7 @@ A.saveChurch=function(){
 
   c.welcomeGreeting=v("ch_wGreet");c.welcomeSubtext=v("ch_wSub");c.welcomeBtnText=v("ch_wBtn");
   c.christEyebrow=v("ch_christEye");c.christButtonTitle=v("ch_christBtn");c.christButtonSubtitle=v("ch_christSub");c.christActionLabel=v("ch_christAct");c.christInviteTitle=v("ch_invite");
-  c.prayerTitle=v("ch_prayTitle");c.prayerDescription=v("ch_prayDesc");c.prayerBtnLabel=v("ch_prayBtn");c.prayerDefaultGreeting=v("ch_prayGreet");
+  c.prayerTitle=v("ch_prayTitle");c.prayerDescription=v("ch_prayDesc");c.prayerBtnLabel=v("ch_prayBtn");c.prayerDefaultGreeting=v("ch_prayGreet");c.prayerThanks=v("ch_prayThanks");c.waTeamMessage=v("ch_waTeam");c.waPixMessage=v("ch_waPix");
   c.infoSectionTitle=v("ch_infoT");c.infoSectionSubtitle=v("ch_infoS");
   c.directorateTitle=v("ch_dirT");c.directorateSubtitle=v("ch_dirS");
   c.deptsTitle=v("ch_depT");c.deptsSubtitle=v("ch_depS");c.pixCopyBtnLabel=v("ch_pixBtn");
@@ -3940,7 +4159,7 @@ A.savePerms=function(){
 A.btnMove=function(el){var i=state.adminButtons.findIndex(function(b){return b.id===el.getAttribute("data-id");});var j=i+(+el.getAttribute("data-dir"));if(j<0||j>=state.adminButtons.length) return;var t=state.adminButtons[i];state.adminButtons[i]=state.adminButtons[j];state.adminButtons[j]=t;save();render();};
 A.btnSave=function(el){
   var id=el.getAttribute("data-id");var b=state.adminButtons.find(function(x){return x.id===id;});if(!b) return;
-  b.title=v("bt_t_"+id);b.link=v("bt_l_"+id);b.visibility=vis("bt_v_"+id);b.badge=v("bt_b_"+id);b.active=ch("bt_a_"+id);b.isGabinetePastoral=ch("bt_g_"+id);
+  b.title=v("bt_t_"+id);b.link=v("bt_l_"+id);if(document.getElementById("bt_m_"+id)) b.msg=v("bt_m_"+id);else if(isWaLink(b.link)&&b.msg==null) b.msg=WA_DEFAULT_MSG;b.visibility=vis("bt_v_"+id);b.badge=v("bt_b_"+id);b.active=ch("bt_a_"+id);b.isGabinetePastoral=ch("bt_g_"+id);
   save();render();toast("Botão salvo","success");
 };
 A.btnDelete=function(el){var id=el.getAttribute("data-id");openConfirm("Excluir este botão?",function(){state.adminButtons=state.adminButtons.filter(function(b){return b.id!==id;});save();render();toast("Botão excluído");});};
@@ -3949,7 +4168,7 @@ A.btnAdd=function(el){
   var t=v("bt_new_t_"+area).trim();if(!t){toast("Informe o título.","error");return;}
   var lnk=v("bt_new_l_"+area).trim();
   var bdg=v("bt_new_b_"+area).trim()||(AREA_NAMES[area]||"Secretaria");
-  state.adminButtons.push({id:"b"+Date.now(),area:area,title:t,type:(lnk.indexOf("wa.me")>=0?"whatsapp":"link"),link:lnk,visibility:vis("bt_new_v_"+area),icon:"link",badge:bdg,isGabinetePastoral:false,active:true});
+  state.adminButtons.push({id:"b"+Date.now(),area:area,title:t,type:(isWaLink(lnk)?"whatsapp":"link"),msg:(isWaLink(lnk)?(v("bt_new_m_"+area)||WA_DEFAULT_MSG):undefined),link:lnk,visibility:vis("bt_new_v_"+area),icon:"link",badge:bdg,isGabinetePastoral:false,active:true});
   save();render();toast("Botão adicionado","success");
 };
 
@@ -4169,13 +4388,62 @@ function pageTemplate(tpl){
   return p;
 }
 function safeUrl(u){u=String(u||"").trim();if(/^\s*(javascript|vbscript):/i.test(u)) return "#";if(/^\s*data:/i.test(u)&&!/^data:image\//i.test(u)) return "#";return u;}
+/* ======================================================================
+   WHATSAPP: mensagem pronta com o nome de quem envia
+   Variáveis: {nome} quem está usando o app • {assunto} o botão/assunto
+              {contato} quem vai receber • {igreja} • {data}
+   ====================================================================== */
+var WA_DEFAULT_MSG="Olá, Paz do Senhor! Meu nome é {nome}. Vim pelo app da igreja. Assunto: {assunto}.";
+var WA_TEAM_MSG="Olá, {contato}! Paz do Senhor! Meu nome é {nome}. Vim pelo app da igreja ({assunto}) e gostaria de falar com você.";
+var WA_PIX_MSG="Olá, Paz do Senhor! Meu nome é {nome}. Segue o comprovante do Pix para {assunto}.";
+var WA_VARS_HELP="Use {nome} para o nome de quem está enviando, {assunto} para o assunto do botão, {contato} para quem vai receber e {igreja} para o nome da igreja.";
+function waSenderName(){
+  if(session.userId){var u=findUser(session.userId);if(u&&u.name) return u.name;}
+  if(session.visitorName) return session.visitorName;
+  return "";
+}
+function waFill(tpl,ctx){
+  ctx=ctx||{};
+  var nome=waSenderName();
+  var t=String(tpl||"");
+  if(!nome) t=t.replace(/\s*Meu nome é \{nome\}[.,!]?/gi,"").replace(/\s*Sou \{nome\}[.,!]?/gi,"");
+  t=t.replace(/\{nome\}/gi,nome).replace(/\{assunto\}/gi,ctx.assunto||"").replace(/\{contato\}/gi,ctx.contato||"")
+     .replace(/\{igreja\}/gi,state.church.name||"").replace(/\{data\}/gi,new Date().toLocaleDateString("pt-BR"));
+  return t.replace(/[ \t]{2,}/g," ").replace(/\s+([.,!?:])/g,"$1").trim();
+}
+function isWaLink(u){return /(^|\/\/)(wa\.me|api\.whatsapp\.com|web\.whatsapp\.com|chat\.whatsapp\.com)/i.test(String(u||""));}
+function waNumberOf(v){
+  v=String(v||"").trim();
+  var m=v.match(/wa\.me\/(\+?\d+)/i)||v.match(/[?&]phone=(\+?\d+)/i);
+  var n=(m?m[1]:(isWaLink(v)?"":v)).replace(/\D/g,"");
+  if(n&&n.length<=11) n="55"+n;
+  return n;
+}
+function waTextOf(link){try{var m=String(link||"").match(/[?&]text=([^&#]*)/);return m?decodeURIComponent(m[1].replace(/\+/g," ")):"";}catch(e){return "";}}
+function waBuild(numOrLink,text){
+  if(/chat\.whatsapp\.com/i.test(String(numOrLink))) return safeUrl(numOrLink); /* link de grupo: sem mensagem */
+  var n=waNumberOf(numOrLink);
+  return "https://wa.me/"+n+(text?"?text="+encodeURIComponent(text):"");
+}
+function waPersonHref(phone,contato,assunto){
+  var tpl=state.church.waTeamMessage||WA_TEAM_MSG;
+  return waBuild(phone,waFill(tpl,{contato:String(contato||"").split(" ")[0],assunto:assunto||state.church.name||"a igreja"}));
+}
+/* botões das páginas Secretaria / Tesouraria / EBD */
+function btnHref(b){
+  if(!isWaLink(b.link)||/chat\.whatsapp\.com/i.test(b.link)) return safeUrl(b.link);
+  var tpl=(b.msg!=null&&String(b.msg).trim())?b.msg:(waTextOf(b.link)||WA_DEFAULT_MSG);
+  return waBuild(b.link,waFill(tpl,{assunto:b.title}));
+}
+function waMsgField(id,val,label){
+  return areaF(label||"Mensagem pronta do WhatsApp",id,val||"",WA_VARS_HELP,3);
+}
 function blockHref(b){
   var val=String(b.value||"").trim();
   if(b.action==="whatsapp"){
-    if(/^https?:\/\//i.test(val)) return safeUrl(val);
-    var n=val.replace(/\D/g,"");
-    if(n&&n.length<=11) n="55"+n;
-    return "https://wa.me/"+n+(b.message?"?text="+encodeURIComponent(b.message):"");
+    if(/^https?:\/\//i.test(val)&&!isWaLink(val)) return safeUrl(val);
+    var tpl=String(b.message||"").trim()||waTextOf(val)||WA_DEFAULT_MSG;
+    return waBuild(val,waFill(tpl,{assunto:b.label||b.text||b.title||""}));
   }
   if(b.action==="email") return "mailto:"+val+(b.message?"?subject="+encodeURIComponent(b.message):"");
   if(b.action==="phone") return "tel:"+val.replace(/[^\d+]/g,"");
@@ -4321,7 +4589,7 @@ function pageTargetOpts(excludeId){
 function actionFields(b,P){
   var draftId=ui.pageEdit&&ui.pageEdit.draft?ui.pageEdit.draft.id:null;
   var h=selectF("Ao tocar, abrir",P("action"),BTN_ACTIONS,b.action||"url");
-  if(b.action==="whatsapp") h+=field("Número do WhatsApp (com DDD)",P("value"),b.value,"Ex.: 41984253365 — ou cole um link wa.me pronto.","tel")+areaF("Mensagem pronta (opcional)",P("message"),b.message,"",2);
+  if(b.action==="whatsapp") h+=field("Número do WhatsApp (com DDD)",P("value"),b.value,"Ex.: 41984253365 — ou cole um link wa.me pronto.","tel")+waMsgField(P("message"),b.message,"Mensagem pronta do WhatsApp (vazio = mensagem padrão com o nome da pessoa)");
   else if(b.action==="page") h+=selectF("Página de destino",P("value"),pageTargetOpts(draftId),b.value||"home");
   else if(b.action==="email") h+=field("E-mail de destino",P("value"),b.value,"","email")+field("Assunto (opcional)",P("message"),b.message);
   else if(b.action==="phone") h+=field("Número de telefone",P("value"),b.value,"","tel");
@@ -4374,7 +4642,7 @@ function blockEditorFields(b){
   }else if(b.type==="divider"){
     h+='<p class="help" style="margin:0">Linha fina para separar seções.</p>';
   }
-  h+=selectF("Quem vê este bloco",P("visibility"),blockVisOpts(),b.visibility||"todos");
+  h+='<div><label class="lbl">Quem vê este bloco</label>'+visPicker(b.visibility||"todos",P("visibility"))+"</div>";
   return h;
 }
 function syncPageDraft(){
@@ -4404,7 +4672,7 @@ function pageEditorHtml(){
     field("Subtítulo (opcional)","pg_sub",p.subtitle)+
     '<div><label class="lbl">Logo da página (opcional)</label><div style="display:flex;gap:.65rem;align-items:center;flex-wrap:wrap">'+(p.logo?pageLogoImg(p.logo,56):'<div style="width:56px;height:56px;border-radius:16px;border:2px dashed #d6d3d1;display:flex;align-items:center;justify-content:center;font-size:1.4rem">'+esc(p.icon||"📄")+'</div>')+'<button type="button" class="btn-soft btn-sm" data-act="pageLogoEdit" data-key="draft">'+(p.logo?"Alterar logo":"Adicionar logo")+'</button></div><div class="help">Se tiver logo, ela aparece no lugar do ícone (no topo da página, no menu e no cartão da tela inicial). A imagem é compactada automaticamente.</div></div>'+
     '<div><label class="lbl" for="pg_icon">Ícone</label><div style="display:flex;gap:.5rem;align-items:center"><input class="fld" id="pg_icon" value="'+esc(p.icon)+'" style="width:84px;text-align:center;font-size:1.3rem"><span class="help" style="margin:0">Escolha abaixo ou digite qualquer emoji.</span></div><div style="display:flex;flex-wrap:wrap;gap:.3rem;margin-top:.45rem">'+emojiChips+"</div></div>"+
-    '<div><label class="lbl" for="pg_vis">Quem pode ver esta página</label>'+visOptions(p.visibility,"pg_vis")+visCheckboxes(p,"pg")+'<div class="help">"Escolher cargos manualmente" usa as caixinhas acima.</div></div>'+
+    '<div><label class="lbl" for="pg_vis">Quem pode ver esta página</label>'+visOptions(p.visibility,"pg_vis",p)+'</div>'+
     '<label style="font-size:.82rem;display:flex;align-items:center;gap:.45rem"><input type="checkbox" id="pg_active"'+(p.active!==false?" checked":"")+"> Página ativa (publicada)</label>"+
     '<label style="font-size:.82rem;display:flex;align-items:center;gap:.45rem"><input type="checkbox" id="pg_nav"'+(p.showInNav?" checked":"")+"> Mostrar botão no menu superior</label>"+
     '<label style="font-size:.82rem;display:flex;align-items:center;gap:.45rem"><input type="checkbox" id="pg_home"'+(p.showOnHome?" checked":"")+"> Mostrar cartão na tela inicial</label>"+
@@ -4795,7 +5063,7 @@ function sysEditorHtml(it,i,n,pg){
     h+='<div class="safe-grid-sm">'+inputPh("Botão na tela inicial: ícone (emoji)",P("tileIcon"),it.tileIcon,(TILE_DEF[it.key]||["📌"])[0])+inputPh("Botão: nome",P("tileLabel"),it.tileLabel,(TILE_DEF[it.key]||[])[1]||"")+"</div>"+
       inputPh("Botão: texto pequeno (deixe vazio para automático)",P("tileSub"),it.tileSub,"");
   }
-  h+=selectF("Quem vê esta seção",P("visibility"),blockVisOpts(),it.visibility||"todos");
+  h+='<div><label class="lbl">Quem vê esta seção</label>'+visPicker(it.visibility||"todos",P("visibility"))+"</div>";
   if(S.note) h+='<p class="help" style="margin:0">ℹ️ '+esc(S.note)+"</p>";
   return h+"</div>";
 }
@@ -4856,15 +5124,42 @@ function chromeEditorHtml(){
     '<button class="btn-main" style="width:100%" data-act="saveChrome">Salvar menu, cabeçalho e rodapé</button>'+
   "</div>";
 }
+/* ---------- Nomes & Textos do app ---------- */
+function textsEditorHtml(){
+  function row(k,label,def){
+    return '<div><label class="lbl" for="tx_'+k+'">'+esc(label)+'</label><input class="fld" id="tx_'+k+'" data-tx="'+k+'" value="'+esc((state.texts||{})[k]||"")+'" placeholder="'+esc(def)+'"></div>';
+  }
+  var tiles=Object.keys(TILE_DEF).map(function(k){
+    return '<div class="safe-grid-sm">'+row("tile_"+k+"_i","Ícone · "+TILE_DEF[k][1],TILE_DEF[k][0])+row("tile_"+k+"_l","Nome do botão",TILE_DEF[k][1])+"</div>";
+  }).join("");
+  var tabs=ADMIN_TABS.map(function(t){return t[0]==="records"?row("tab_records","Aba do Painel: Registros","Registros"):row("tab_"+t[0],"Aba do Painel",t[1]);}).join("");
+  var box=function(title,help,inner){return '<div class="card" style="display:grid;gap:.6rem;margin-bottom:.8rem"><div style="font-weight:800">'+title+'</div>'+(help?'<p class="help" style="margin:0">'+help+"</p>":"")+inner+"</div>";};
+  return '<span id="tx_marker" hidden></span>'+
+    '<div class="card" style="background:#f5f5f4;margin-bottom:.8rem"><p class="help" style="margin:0 0 .4rem">🔤 '+esc(VARS_HELP)+'</p><p class="help" style="margin:0">Troque qualquer nome ou ícone do app. Deixe o campo vazio para usar o texto padrão (mostrado em cinza). Os nomes das páginas do menu ficam em <b>Menu, Cabeçalho &amp; Rodapé</b>, e os títulos das seções em cada página desta aba.</p></div>'+
+    box("Botões da tela inicial","Vale para todos. Se uma seção tiver nome próprio (em Layout → Início), o nome da seção vale mais.",tiles)+
+    box("Botões de acesso às páginas","",'<div class="safe-grid-sm">'+row("ptile_prayer","Ícone · Oração","🤲")+row("ptile_secretaria","Ícone · Secretaria","📄")+row("ptile_tesouraria","Ícone · Tesouraria","💰")+row("ptile_ebd","Ícone · EBD","📖")+row("ptile_admin","Ícone · Painel Gestor","⚙️")+row("ptile_admin_sub","Texto pequeno · Painel Gestor","Administração")+"</div>")+
+    box("Celular: barra de baixo e menu","",'<div class="safe-grid-sm">'+row("m_more","Botão “Mais”","Mais")+row("m_menu","Título do menu","Menu")+row("m_share","Compartilhar","Compartilhar o app")+row("m_change","Trocar acesso","Trocar acesso / sair")+row("back_home","Botão de voltar das seções","‹ Início")+"</div>")+
+    box("Abas do Painel Gestor","",'<div class="safe-grid-sm">'+tabs+"</div>")+
+    '<div style="position:sticky;bottom:.5rem;display:flex;gap:.5rem;flex-wrap:wrap"><button class="btn-main" data-act="textsSave">Salvar nomes e textos</button><button class="btn-soft" data-act="textsReset">Voltar tudo ao padrão</button></div>';
+}
+A.textsSave=function(){
+  var t={};
+  document.querySelectorAll("[data-tx]").forEach(function(el){var v=el.value.trim();if(v) t[el.getAttribute("data-tx")]=v;});
+  state.texts=t;save();render();toast("Nomes e textos salvos.","success");
+};
+A.textsReset=function(){
+  openConfirm("Voltar todos os nomes e textos personalizados ao padrão?",function(){state.texts={};save();render();toast("Textos restaurados.","success");});
+};
 function tabLayout(){
   if(!canManagePages()&&!can("gerenciarIdentidade")) return errorBox("Seu cargo não tem permissão para alterar o layout.");
   var pg=ui.layoutPage||"home";
-  var pills=LAYOUT_PAGES.concat([["chrome","Menu, Cabeçalho & Rodapé"]]).map(function(p){
+  var pills=LAYOUT_PAGES.concat([["chrome","Menu, Cabeçalho & Rodapé"],["texts","✏️ Nomes & Textos do app"]]).map(function(p){
     return '<button class="tab-btn '+(pg===p[0]?"on":"")+'" data-act="lyPage" data-page="'+p[0]+'">'+esc(p[1])+"</button>";
   }).join("");
   var head=hd("Layout & Visibilidade das Páginas","Escolha tudo o que aparece em cada página: mostre, oculte, reordene, renomeie, limite por cargo, remova seções ou complemente com blocos livres (textos, botões, links, imagens, vídeos, Pix...).")+
     '<div style="display:flex;flex-wrap:wrap;gap:.35rem;margin-bottom:.9rem">'+pills+"</div>";
   if(pg==="chrome") return head+chromeEditorHtml();
+  if(pg==="texts") return head+textsEditorHtml();
   var list=layoutDraft();
   var items=list.map(function(it,i){return it.type==="sys"?sysEditorHtml(it,i,list.length,pg):customItemEditorHtml(it,i);}).join("");
   var present={};list.forEach(function(it){if(it.type==="sys") present[it.key]=1;});
@@ -4999,11 +5294,13 @@ function areaTeamMembers(pg,sec){
   return out;
 }
 
+var WA_SUBJ="";
 function teamListHtml(list,title,sub,showPhone){
   var t=theme();
+  WA_SUBJ=String(sub||title||"").split("•").pop().trim();
   var cards=list.map(function(m){
     var num=String(m.phone||"").replace(/\D/g,"");
-    var wa=showPhone&&num?'<a href="https://wa.me/'+(num.length<=11?"55":"")+num+'" target="_blank" rel="noopener noreferrer" style="display:inline-block;margin-top:.15rem;font-size:.74rem;color:#15803d;font-weight:700">WhatsApp</a>':"";
+    var wa=showPhone&&num?'<a href="'+esc(waPersonHref(num,m.name,WA_SUBJ||""))+'" target="_blank" rel="noopener noreferrer" style="display:inline-block;margin-top:.15rem;font-size:.74rem;color:#15803d;font-weight:700">WhatsApp</a>':"";
     return '<div style="display:flex;gap:.65rem;align-items:center;padding:.45rem;border-radius:14px;background:'+(m.leader?t.hexLight:"#fafaf9")+';border:1px solid '+(m.leader?t.hex:"#e7e5e4")+'">'+avatar(m.photo,m.name,52)+
       '<div style="min-width:0"><div style="font-weight:700;font-size:.85rem">'+esc(m.name)+'</div><div style="font-size:.72rem;font-weight:600;color:'+t.hex+'">'+esc(m.role)+"</div>"+wa+"</div></div>";
   }).join("");
@@ -5028,9 +5325,10 @@ function teamSectionHtml(dep,opts){
     return canManagePages()?'<div style="border:2px dashed #d6d3d1;border-radius:16px;padding:.9rem" class="help">👥 <b>'+esc(title)+'</b>: nenhum integrante encontrado para "'+esc(dep.name)+'". Cadastre a equipe em Diretoria &amp; Equipes → Equipes dos departamentos — a página atualiza sozinha.</div>':"";
   }
   var showPhone=opts.showPhone!=="no";
+  WA_SUBJ=dep.name||"";
   var cards=list.map(function(m){
     var num=String(m.phone||"").replace(/\D/g,"");
-    var wa=showPhone&&num?'<a href="https://wa.me/'+(num.length<=11?"55":"")+num+'" target="_blank" rel="noopener noreferrer" style="display:inline-block;margin-top:.15rem;font-size:.74rem;color:#15803d;font-weight:700">WhatsApp</a>':"";
+    var wa=showPhone&&num?'<a href="'+esc(waPersonHref(num,m.name,WA_SUBJ||""))+'" target="_blank" rel="noopener noreferrer" style="display:inline-block;margin-top:.15rem;font-size:.74rem;color:#15803d;font-weight:700">WhatsApp</a>':"";
     return '<div style="display:flex;gap:.65rem;align-items:center;padding:.45rem;border-radius:14px;background:'+(m.leader?t.hexLight:"#fafaf9")+';border:1px solid '+(m.leader?t.hex:"#e7e5e4")+'">'+avatar(m.photo,m.name,52)+
       '<div style="min-width:0"><div style="font-weight:700;font-size:.85rem">'+esc(m.name)+'</div><div style="font-size:.72rem;font-weight:600;color:'+t.hex+'">'+esc(m.role)+"</div>"+wa+"</div></div>";
   }).join("");
@@ -5123,7 +5421,7 @@ function openShareDialog(url,text){
    ====================================================================== */
 /* A versão = "impressão digital" do código do app + data de publicação dos dados.
    Assim qualquer mudança (no código ou nos dados publicados) é reconhecida. */
-var APP_VERSION="3.2.0";
+var APP_VERSION="3.6.0";
 var IS_GAS=!!(window.google&&google.script&&google.script.run);
 var GAS=(typeof GAS_CONFIG!=="undefined"&&GAS_CONFIG)||{};
 var MAIN_SCRIPT_TEXT=(document.currentScript&&document.currentScript.textContent)||"";
@@ -5177,6 +5475,7 @@ function checkForUpdate(force){
       if(!html||html.indexOf("__CUSTOM_STATE_START__")<0) return;
       var rv=parseRemoteVersion(html);
       if(!rv.version||rv.version===LOADED_VERSION) return;
+      if(autoUpdateNow(rv.version,force)) return;
       if(!rv.info.enabled) return;
       if(upd.shownFor===rv.version) return;
       try{if(sessionStorage.getItem("adalex_upd_later")===rv.version&&!rv.info.force) return;}catch(e){}
@@ -5240,6 +5539,35 @@ function applyUpdateNow(){
   Promise.all(jobs).then(go,go);
   setTimeout(go,2500);
 }
+/* Atualiza sozinho: ao abrir o app (ou ao voltar para ele fora do Painel Gestor),
+   se existir versão nova, recarrega na hora. Só tenta uma vez por versão, para nunca
+   ficar recarregando sem parar. */
+function autoUpdateNow(version,opening){
+  if(state.church.autoUpdate===false) return false;
+  var busyNow=ui.page==="admin-panel"||!!document.querySelector("dialog[open]:not(.login-dialog)")||
+    (document.activeElement&&/^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName)&&!(document.activeElement.closest&&document.activeElement.closest(".login-dialog")));
+  if(!opening&&busyNow) return false;
+  var k="adalex_auto_upd";
+  try{if(sessionStorage.getItem(k)===version) return false;sessionStorage.setItem(k,version);}catch(e){return false;}
+  if(IS_GAS){
+    /* no Google: código novo precisa de um toque (o Google só deixa recarregar a página com toque);
+       dados novos entram na hora, sem recarregar */
+    if(String(version).split("|")[0]!==APP_VERSION) return false;
+    gasRun("appDados",[],function(txt){
+      try{
+        var o=JSON.parse(txt);if(!o||typeof o!=="object") return;
+        EMBEDDED_STATE=o;state=load();
+        LOADED_PUBLISHED=String(o.publishedAt||"");LOADED_VERSION=APP_VERSION+"|"+LOADED_PUBLISHED;
+        try{localStorage.setItem(SEEN_KEY,LOADED_VERSION);}catch(e){}
+        render();toast("App atualizado com as últimas informações.","success");
+      }catch(e){}
+    },function(){});
+    return true;
+  }
+  try{toast("Atualizando o app…","success");}catch(e){}
+  setTimeout(applyUpdateNow,400);
+  return true;
+}
 /* já abriu na versão nova? mostra as novidades uma vez */
 function showWhatsNewIfUpdated(){
   var seen="";
@@ -5252,8 +5580,8 @@ function showWhatsNewIfUpdated(){
 }
 function initUpdateChecker(){
   setTimeout(function(){showWhatsNewIfUpdated();checkForUpdate(true);},1500);
-  document.addEventListener("visibilitychange",function(){if(document.visibilityState==="visible") checkForUpdate(false);});
-  window.addEventListener("online",function(){checkForUpdate(true);});
+  document.addEventListener("visibilitychange",function(){if(document.visibilityState==="visible"){upd.lastCheck=0;checkForUpdate(false);}});
+  window.addEventListener("online",function(){checkForUpdate(false);});
   setInterval(function(){checkForUpdate(false);},30*60*1000);
 }
 /* ---- admin: configurar o aviso ---- */
@@ -5262,7 +5590,8 @@ function updateAdminCardHtml(){
   return '<div class="card" style="display:grid;gap:.65rem;margin-bottom:1rem;border-color:#bfdbfe;background:#f8fbff">'+
     '<div style="font-weight:800">📣 Aviso de Nova Atualização</div>'+
     '<p class="help" style="margin:0">Quando você publicar um novo index.html no GitHub, quem abrir o app verá um aviso com as novidades e o botão <b>Atualizar agora</b>. Escreva as novidades <b>antes</b> de baixar o index.html personalizado.</p>'+
-    '<label style="font-size:.82rem;display:flex;align-items:center;gap:.45rem"><input type="checkbox" id="up_en"'+(u.enabled?" checked":"")+"> Mostrar aviso de atualização</label>"+
+    '<label style="font-size:.82rem;display:flex;align-items:center;gap:.45rem"><input type="checkbox" id="up_auto"'+(state.church.autoUpdate!==false?" checked":"")+"> Atualizar sozinho ao abrir o app (recomendado)</label>"+
+    '<label style="font-size:.82rem;display:flex;align-items:center;gap:.45rem"><input type="checkbox" id="up_en"'+(u.enabled?" checked":"")+"> Mostrar aviso com as novidades</label>"+
     field("Título do aviso","up_title",u.title)+
     areaF("Novidades desta versão (opcional)","up_notes",u.notes,"Uma novidade por linha. Ex.: • Nova página da EBD  • Equipes dos departamentos. **texto** fica em negrito.",4)+
     '<label style="font-size:.82rem;display:flex;align-items:center;gap:.45rem"><input type="checkbox" id="up_force"'+(u.force?" checked":"")+"> Atualização obrigatória (sem o botão Depois)</label>"+
@@ -5270,7 +5599,7 @@ function updateAdminCardHtml(){
     '<div style="display:flex;flex-wrap:wrap;gap:.5rem"><button class="btn-soft" data-act="updPreview">👁️ Ver como fica</button><button class="btn-main" style="flex:1" data-act="updSave">Salvar aviso</button></div>'+
   "</div>";
 }
-function readUpdForm(){return {enabled:ch("up_en"),title:v("up_title").trim(),notes:v("up_notes"),force:ch("up_force")};}
+function readUpdForm(){if(document.getElementById("up_auto")) state.church.autoUpdate=ch("up_auto");return {enabled:ch("up_en"),title:v("up_title").trim(),notes:v("up_notes"),force:ch("up_force")};}
 A.updSave=function(){state.updateInfo=readUpdForm();save();render();toast("Aviso salvo. Agora baixe o index.html personalizado e publique.","success");};
 A.updPreview=function(){showUpdatePopup(updInfo({updateInfo:readUpdForm()}),String(Date.now()),false);};
 
@@ -5724,6 +6053,7 @@ function gasCheckUpdate(force){
     if(!m||!m.publishedAt) return;
     var ver=(m.appVersion||APP_VERSION)+"|"+m.publishedAt;
     if(ver===LOADED_VERSION) return;
+    if(autoUpdateNow(ver,force)) return;
     var info=updInfo({updateInfo:m.updateInfo});
     if(!info.enabled||upd.shownFor===ver) return;
     try{if(sessionStorage.getItem("adalex_upd_later")===ver&&!info.force) return;}catch(e){}
@@ -5827,4 +6157,4 @@ window.__adalexBooted=true;
 </script>
 
 </body></html>
-<!--ADALEX_FIM:1770930-->
+<!--ADALEX_FIM:1795671-->
