@@ -2855,7 +2855,9 @@ function tabChurch(){
       '</div>'+
       '<hr style="border-top:1px solid #e7e5e4">'+
       '<label style="font-size:.82rem;display:flex;align-items:center;gap:.45rem"><input type="checkbox" id="ch_showBanner"'+(c.showTopBanner!==false?" checked":"")+'> Exibir faixa superior de aviso no topo</label>'+
-      field("Texto da faixa superior","ch_bannerTxt",c.topBannerText||"ADALEX DIGITAL • CONECTANDO A IGREJA Versão 1.0")+
+      field("Texto da faixa superior","ch_bannerTxt",c.topBannerText||"ADALEX DIGITAL • CONECTANDO A IGREJA")+
+      chk("ch_bannerAuto",c.bannerAutoVersion!==false,"Mostrar a versão e a data da última atualização na faixa (mudam sozinhas)")+
+      '<p class="help" style="margin:-.2rem 0 0">Fica assim: <b>'+esc(bannerWithVersion(c.topBannerText||"ADALEX DIGITAL"))+'</b>. Para escolher o lugar, escreva {versao} e {data} no texto.</p>'+
       '<div class="safe-grid-sm">'+
         field("Cor de fundo da faixa","ch_bannerBg",c.topBannerBg||"#f59e0b","","color")+
         field("Cor do texto da faixa","ch_bannerClr",c.topBannerColor||"#1c1917","","color")+
@@ -3636,7 +3638,7 @@ function applyChromeStyles(){
     banner.style.background=c.topBannerBg||"#f59e0b";
     banner.style.color=c.topBannerColor||"#1c1917";
   }
-  if(bTxt) bTxt.textContent=c.topBannerText||"ADALEX DIGITAL • CONECTANDO A IGREJA Versão 1.0";
+  if(bTxt) bTxt.textContent=bannerWithVersion(c.topBannerText||"ADALEX DIGITAL • CONECTANDO A IGREJA");
 
   var fHome=document.getElementById("footNavHome");
   var fPray=document.getElementById("footNavPrayer");
@@ -3648,9 +3650,29 @@ function applyChromeStyles(){
   if(fPray){fPray.textContent=F.prayerLabel||"Administração & Oração";fPray.hidden=(F.prayerShow===false);}
   var fShare=document.getElementById("footNavShare");
   if(fShare){fShare.textContent=F.shareLabel||"📲 Compartilhar o App";fShare.hidden=(F.shareShow===false);}
-  if(fNote){fNote.textContent=c.footerNote||"v2.0 • Dados salvos localmente neste navegador";fNote.hidden=(F.showNote===false);}
+  if(fNote){fNote.textContent=footNoteWithVersion(c.footerNote||"");fNote.hidden=(F.showNote===false);}
 }
 
+/* ---------- versão e data no topo (mudam sozinhas a cada atualização) ---------- */
+function appUpdatedAt(){return Math.max(Number(APP_BUILD)||0,Number(state.publishedAt)||0,Number(LOADED_PUBLISHED)||0);}
+function fmtDateTime(ms){
+  if(!ms) return "";
+  try{return new Date(ms).toLocaleString("pt-BR",{day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit"}).replace(",","");}catch(e){return "";}
+}
+function appVersionLabel(){return "Versão "+APP_VERSION+" • "+fmtDateTime(appUpdatedAt());}
+function stripOldVersion(t){
+  return String(t||"").replace(/\s*[-–•|·]?\s*(vers[aã]o|v)\.?\s*\d+(\.\d+)*\s*$/i,"").replace(/^\s*v\d+(\.\d+)*\s*[•|·-]\s*/i,"").trim();
+}
+function bannerWithVersion(t){
+  if(state.church.bannerAutoVersion===false) return t;
+  if(/\{versao\}|\{vers[aã]o\}|\{data\}/i.test(t)) return t.replace(/\{vers[aã]o\}/gi,"Versão "+APP_VERSION).replace(/\{data\}/gi,fmtDateTime(appUpdatedAt()));
+  var base=stripOldVersion(t);
+  return (base?base+" • ":"")+appVersionLabel();
+}
+function footNoteWithVersion(t){
+  var base=stripOldVersion(t).replace(/Dados salvos localmente neste navegador/i,"").replace(/^[\s•|·-]+|[\s•|·-]+$/g,"");
+  return "v"+APP_VERSION+" • atualizado em "+fmtDateTime(appUpdatedAt())+(base?" • "+base:"");
+}
 /* ---------- render & action dispatcher ---------- */
 function render(){
   var app=document.getElementById("appRoot");
@@ -3886,7 +3908,7 @@ A.saveChurch=function(){
   c.customSecondaryHex=v("ch_c2")||"#312e81";
   c.customBgHex=v("ch_cbg")||"#f5f5f4";
   c.showTopBanner=ch("ch_showBanner");
-  c.topBannerText=v("ch_bannerTxt");
+  c.topBannerText=v("ch_bannerTxt");if(document.getElementById("ch_bannerAuto")) c.bannerAutoVersion=ch("ch_bannerAuto");
   c.topBannerBg=v("ch_bannerBg")||"#f59e0b";
   c.topBannerColor=v("ch_bannerClr")||"#1c1917";
 
@@ -5433,7 +5455,7 @@ function openShareDialog(url,text){
    ====================================================================== */
 /* A versão = "impressão digital" do código do app + data de publicação dos dados.
    Assim qualquer mudança (no código ou nos dados publicados) é reconhecida. */
-var APP_VERSION="3.7.0";
+var APP_VERSION="3.8.0";var APP_BUILD=1795888572264;
 var IS_GAS=!!(window.google&&google.script&&google.script.run);
 var GAS=(typeof GAS_CONFIG!=="undefined"&&GAS_CONFIG)||{};
 var MAIN_SCRIPT_TEXT=(document.currentScript&&document.currentScript.textContent)||"";
