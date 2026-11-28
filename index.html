@@ -605,6 +605,190 @@ footer.adx-foot {
 .blk-card { border: 1px solid #e7e5e4; border-radius: 16px; padding: .85rem; background: #fff; display: grid; gap: .6rem; box-shadow: var(--shadow); }
 .blk-head { display: flex; justify-content: space-between; align-items: center; gap: .4rem; flex-wrap: wrap; padding-bottom: .45rem; border-bottom: 1px dashed #e7e5e4; }
 .add-blk-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: .45rem; }
+
+/* ======================================================================
+   ESTILO VISUAL "PADRÃO P4" (escuro, cartões e destaque dourado)
+   Ativo quando o <body> tem a classe skin-p4.
+   ====================================================================== */
+body.skin-p4{
+  --bg:var(--p4-bg,#14281d);--card:var(--p4-card,#1e3a2a);--primary:var(--p4-primary,#2f5d45);
+  --gold:var(--p4-accent,#c9a227);--on-accent:#1a1a1a;--ink:#e9efe9;--mut:var(--p4-mut,#a9bbad);--line:rgba(255,255,255,.14);
+  --ok:#2e9e5b;--err:#c0392b;--text:var(--ink);--text-muted:var(--mut);--surface:var(--card);
+  color-scheme:dark;
+  background:radial-gradient(circle at 30% 0%,var(--p4-glow,#20402d) 0%,var(--bg) 55%) fixed !important;
+  background-color:var(--bg) !important;
+  color:var(--ink);
+  font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+}
+body.skin-p4 ::-webkit-scrollbar-thumb{background:rgba(255,255,255,.18)}
+/* faixa superior (como a faixa dourada do P4) */
+body.skin-p4 .build-banner{background:#8a6d13 !important;color:#fff !important;font-weight:700;letter-spacing:.03em}
+body.skin-p4 .offline-chip{background:rgba(0,0,0,.35);color:#fde68a}
+/* barra do topo: marca + ações, linha dourada */
+body.skin-p4 nav.top-nav{background:var(--card);border-bottom:2px solid var(--gold);box-shadow:0 6px 18px rgba(0,0,0,.35)}
+body.skin-p4 .nav-inner{max-width:none;padding:0;display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"brand right" "tabs tabs";gap:0}
+body.skin-p4 #navBrand{grid-area:brand;display:flex;align-items:center;gap:10px;min-width:0;padding:10px 16px}
+body.skin-p4 #navRight{grid-area:right;padding:10px 16px;display:flex;align-items:center;gap:6px}
+body.skin-p4 #navLeft{grid-area:tabs;padding:9px 16px;border-top:1px solid var(--line);gap:7px}
+#navBrand{display:none}
+.nav-brand-logo{width:38px;height:38px;border-radius:10px;object-fit:contain;background:#fff;padding:2px;flex-shrink:0}
+.nav-brand-ico{font-size:1.7rem;line-height:1;flex-shrink:0}
+.nav-brand-txt{min-width:0}
+.nav-brand-txt b{display:block;font-size:.9rem;letter-spacing:.04em;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--ink)}
+.nav-brand-txt small{display:block;font-size:.68rem;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* abas em pílula */
+body.skin-p4 .nav-btn{min-height:34px;padding:7px 12px;border-radius:999px;border:1px solid var(--line);background:transparent;color:var(--mut);font-size:.76rem;font-weight:600}
+body.skin-p4 .nav-btn.on{background:var(--gold);color:#1a1a1a;border-color:var(--gold)}
+body.skin-p4 .nav-btn.gold{background:var(--primary);color:#fff;border-color:var(--primary)}
+body.skin-p4 .nav-btn.install{background:rgba(46,158,91,.2);color:#6fe0a0;border-color:rgba(46,158,91,.55)}
+body.skin-p4 .profile-btn{background:rgba(255,255,255,.06);border:1px solid var(--line);border-radius:8px;color:var(--ink);font-weight:600}
+body.skin-p4 .sim-bar{background:rgba(201,162,39,.12);color:#e6c95a;border-top:1px solid var(--line)}
+/* faixa de saudação (banner do P4) */
+.p4-banner{background:linear-gradient(90deg,rgba(201,162,39,.16),transparent);border-bottom:1px solid var(--line)}
+.p4-banner-in{max-width:56rem;margin:0 auto;padding:14px 16px;display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center;justify-content:space-between}
+.p4-banner strong{font-size:.98rem;color:var(--ink)}
+.p4-banner p{margin:3px 0 0;font-size:.76rem;color:var(--mut)}
+.p4-chips{display:flex;flex-wrap:wrap;gap:6px}
+.p4-chip{display:inline-flex;align-items:center;gap:.35rem;border:1px solid var(--line);background:rgba(255,255,255,.05);color:var(--mut);border-radius:999px;padding:.3rem .7rem;font-size:.7rem;font-weight:600;cursor:default}
+button.p4-chip{cursor:pointer}
+body.skin-p4 #appRoot > section[style*="margin:-1.35rem"]{margin-top:16px !important}
+/* cartões */
+body.skin-p4 .card,body.skin-p4 .dept-card,body.skin-p4 details.adx-acc,body.skin-p4 .blk-card{background:var(--card) !important;border:1px solid var(--line) !important;border-radius:12px;box-shadow:0 6px 18px rgba(0,0,0,.25);color:var(--ink)}
+body.skin-p4 .dept-title{color:var(--ink)}
+body.skin-p4 details.adx-acc > summary{background:rgba(0,0,0,.15);color:var(--ink)}
+body.skin-p4 details.adx-acc > summary::after{color:var(--gold)}
+body.skin-p4 details.adx-acc > .acc-body{border-top-color:var(--line)}
+body.skin-p4 .blk-head{border-bottom-color:var(--line)}
+/* textos */
+body.skin-p4 .help{color:var(--mut)}
+body.skin-p4 .lbl{color:var(--mut);font-weight:600}
+body.skin-p4 .hero-title{color:var(--ink)}
+/* campos */
+body.skin-p4 .fld{background:rgba(0,0,0,.25) !important;border:1px solid var(--line) !important;color:var(--ink) !important;border-radius:8px}
+body.skin-p4 .fld::placeholder{color:rgba(233,239,233,.45)}
+body.skin-p4 .fld:focus{border-color:var(--gold) !important;box-shadow:0 0 0 3px rgba(201,162,39,.18)}
+body.skin-p4 select.fld option{background:var(--card);color:var(--ink)}
+body.skin-p4 input[type="checkbox"]{accent-color:var(--gold)}
+/* botões */
+body.skin-p4 .btn-main{background:var(--gold) !important;color:#1a1a1a !important;border:1px solid var(--gold);border-radius:8px;font-weight:700}
+body.skin-p4 .btn-soft{background:rgba(255,255,255,.06) !important;color:var(--ink) !important;border:1px solid var(--line) !important;border-radius:8px;font-weight:600}
+body.skin-p4 .btn-soft:hover{background:rgba(255,255,255,.14) !important}
+body.skin-p4 .btn-danger{background:rgba(192,57,43,.18) !important;color:#f08e80 !important;border:1px solid rgba(192,57,43,.55) !important;border-radius:8px}
+body.skin-p4 .func-chip{background:transparent;border-color:var(--line);color:var(--mut)}
+body.skin-p4 .func-chip.on{background:var(--gold);color:#1a1a1a;border-color:var(--gold)}
+/* abas do Painel */
+body.skin-p4 .tabs-row{border-bottom-color:var(--line)}
+body.skin-p4 .tab-btn{background:transparent;border:1px solid var(--line);color:var(--mut);font-weight:600}
+body.skin-p4 .tab-btn.on{background:var(--gold);color:#1a1a1a;border-color:var(--gold)}
+/* selos (como .bdg do P4) */
+body.skin-p4 .pill{font-weight:700;letter-spacing:.02em}
+body.skin-p4 .b-sky{background:rgba(43,127,191,.2);color:#79c0f2;border-color:rgba(43,127,191,.55)}
+body.skin-p4 .b-emerald,body.skin-p4 .b-teal{background:rgba(46,158,91,.18);color:#6fe0a0;border-color:rgba(46,158,91,.55)}
+body.skin-p4 .b-amber{background:rgba(201,162,39,.18);color:#e6c95a;border-color:rgba(201,162,39,.55)}
+body.skin-p4 .b-rose{background:rgba(192,57,43,.2);color:#f08e80;border-color:rgba(192,57,43,.55)}
+body.skin-p4 .b-purple{background:rgba(142,90,200,.2);color:#cfa8f5;border-color:rgba(142,90,200,.55)}
+body.skin-p4 .b-indigo{background:rgba(90,110,210,.2);color:#aab8f5;border-color:rgba(90,110,210,.55)}
+body.skin-p4 .b-stone,body.skin-p4 .b-white{background:rgba(255,255,255,.08);color:var(--mut);border-color:var(--line)}
+/* janelas */
+body.skin-p4 .adalex-panel{background:var(--card);color:var(--ink);border:1px solid var(--line);box-shadow:0 24px 60px rgba(0,0,0,.6)}
+body.skin-p4 dialog.adalex::backdrop{background:rgba(0,0,0,.68)}
+body.skin-p4 .sheet-handle{background:rgba(255,255,255,.25)}
+body.skin-p4 .dialog-close-btn{background:transparent;border:1px solid var(--line);color:var(--mut)}
+/* avisos */
+body.skin-p4 .toast-item{background:#2b5d8a;color:#fff;border-radius:9px}
+/* tabelas */
+body.skin-p4 table.adx th,body.skin-p4 table.adx th.nm{background:rgba(0,0,0,.3);color:var(--mut);text-transform:uppercase;font-size:.68rem;letter-spacing:.04em}
+body.skin-p4 table.adx td{border-bottom-color:rgba(255,255,255,.06)}
+body.skin-p4 table.adx td.nm{background:var(--card)}
+/* rodapé */
+body.skin-p4 footer.adx-foot{background:transparent;color:var(--mut);border-top:1px solid var(--line);text-align:center}
+body.skin-p4 footer.adx-foot > div{align-items:center}
+body.skin-p4 #footName{color:var(--ink) !important}
+body.skin-p4 #footNavHome,body.skin-p4 #footNavPrayer,body.skin-p4 #footNavShare{color:var(--gold) !important}
+/* ---- cores escritas direto nos elementos: convertidas ao tema escuro ---- */
+body.skin-p4:not(.p4-light) #appRoot [style*="background:#fff;"],body.skin-p4:not(.p4-light) #appRoot [style*="background:#fff\""],body.skin-p4:not(.p4-light) dialog [style*="background:#fff;"],
+body.skin-p4:not(.p4-light) [style*="background:#fafaf9"],body.skin-p4:not(.p4-light) [style*="background:#f5f5f4"],body.skin-p4:not(.p4-light) [style*="background:#f8fafc"],
+body.skin-p4:not(.p4-light) [style*="background:#f8fbff"],body.skin-p4:not(.p4-light) [style*="background:#e2e8f0"],body.skin-p4:not(.p4-light) [style*="background:#e7e5e4"]{background:rgba(0,0,0,.2) !important}
+body.skin-p4:not(.p4-light) [style*="background:#eff6ff"],body.skin-p4:not(.p4-light) [style*="background:#dbeafe"]{background:rgba(43,127,191,.13) !important}
+body.skin-p4:not(.p4-light) [style*="background:#fffbeb"],body.skin-p4:not(.p4-light) [style*="background:#fef3c7"]{background:rgba(201,162,39,.12) !important}
+body.skin-p4:not(.p4-light) [style*="background:#ecfdf5"],body.skin-p4:not(.p4-light) [style*="background:#f0fdf4"]{background:rgba(46,158,91,.13) !important}
+body.skin-p4:not(.p4-light) [style*="background:#fff1f2"]{background:rgba(192,57,43,.16) !important}
+body.skin-p4:not(.p4-light) [style*="color:#1c1917"],body.skin-p4:not(.p4-light) [style*="color:#334155"],body.skin-p4:not(.p4-light) [style*="color:#44403c"],body.skin-p4:not(.p4-light) [style*="color:#0c0a09"]:not(.nav-btn){color:var(--ink) !important}
+body.skin-p4:not(.p4-light) [style*="color:#1e3a8a"],body.skin-p4:not(.p4-light) [style*="color:#1e40af"]{color:#79c0f2 !important}
+body.skin-p4:not(.p4-light) [style*="color:#78716c"],body.skin-p4:not(.p4-light) [style*="color:#475569"],body.skin-p4:not(.p4-light) [style*="color:#64748b"],body.skin-p4:not(.p4-light) [style*="color:#57534e"]{color:var(--mut) !important}
+body.skin-p4:not(.p4-light) [style*="color:#065f46"],body.skin-p4:not(.p4-light) [style*="color:#15803d"]{color:#6fe0a0 !important}
+body.skin-p4:not(.p4-light) [style*="color:#78350f"]{color:#e6c95a !important}
+body.skin-p4:not(.p4-light) [style*="color:#9f1239"],body.skin-p4:not(.p4-light) [style*="color:#881337"]{color:#f08e80 !important}
+body.skin-p4:not(.p4-light) [style*="solid #e7e5e4"],body.skin-p4:not(.p4-light) [style*="solid #d6d3d1"],body.skin-p4:not(.p4-light) [style*="dashed #d6d3d1"],body.skin-p4:not(.p4-light) [style*="solid #e2e8f0"]{border-color:var(--line) !important}
+body.skin-p4:not(.p4-light) [style*="solid #bfdbfe"],body.skin-p4:not(.p4-light) [style*="border-color:#bfdbfe"]{border-color:rgba(43,127,191,.45) !important}
+body.skin-p4:not(.p4-light) [style*="solid #fde68a"],body.skin-p4:not(.p4-light) [style*="border-color:#fde68a"]{border-color:rgba(201,162,39,.45) !important}
+body.skin-p4:not(.p4-light) [style*="solid #a7f3d0"],body.skin-p4:not(.p4-light) [style*="border-color:#a7f3d0"]{border-color:rgba(46,158,91,.45) !important}
+body.skin-p4:not(.p4-light) [style*="solid #fecdd3"]{border-color:rgba(192,57,43,.45) !important}
+/* logos e fotos continuam sobre fundo claro para manter a leitura */
+body.skin-p4 img[style*="background:#fff"]{background:#fff !important}
+
+body.skin-p4:not(.p4-light) [style*="background:#1c1917"]{background:rgba(0,0,0,.28) !important;border-bottom:2px solid var(--gold)}
+body.skin-p4:not(.p4-light) #appRoot [style*="background:#fff;border-radius:22px"]{background:var(--card) !important;border:1px solid var(--line);border-radius:14px !important;box-shadow:0 18px 50px rgba(0,0,0,.35) !important}
+body.skin-p4:not(.p4-light) [style*="background:#16a34a"]{background:var(--primary) !important;color:#fff !important;border:1px solid var(--primary) !important;border-radius:8px !important}
+body.skin-p4:not(.p4-light) [style*="background:#f59e0b"]:not(.build-banner){background:var(--gold) !important;color:#1a1a1a !important;border-radius:8px !important}
+
+/* ---- Padrão P4 • tom CLARO, suave e frio ---- */
+body.skin-p4.p4-light{color-scheme:light;--ink:#1f2a37;--line:rgba(31,42,55,.12);--on-accent:#ffffff;color:var(--ink)}
+body.skin-p4.p4-light ::-webkit-scrollbar-thumb{background:rgba(31,42,55,.18)}
+body.skin-p4.p4-light .build-banner{background:var(--primary) !important;color:#fff !important}
+body.skin-p4.p4-light .offline-chip{background:rgba(255,255,255,.25);color:#fff}
+body.skin-p4.p4-light nav.top-nav{background:var(--card);border-bottom:2px solid var(--gold);box-shadow:0 4px 14px rgba(31,42,55,.08)}
+body.skin-p4.p4-light .nav-btn{color:var(--mut);border-color:var(--line)}
+body.skin-p4.p4-light .nav-btn.on,body.skin-p4.p4-light .tab-btn.on,body.skin-p4.p4-light .func-chip.on{background:var(--gold);border-color:var(--gold);color:#fff !important}
+body.skin-p4.p4-light .nav-btn.gold{background:var(--primary);border-color:var(--primary);color:#fff}
+body.skin-p4.p4-light .nav-btn.install{background:#e5f1ec;color:#2f6a52;border-color:#bfdccf}
+body.skin-p4.p4-light .profile-btn{background:rgba(31,42,55,.04);color:var(--ink);border-color:var(--line)}
+body.skin-p4.p4-light .sim-bar{background:rgba(31,42,55,.05);color:var(--mut)}
+body.skin-p4.p4-light .p4-banner{background:linear-gradient(90deg,var(--p4-tint,rgba(79,109,138,.12)),transparent)}
+body.skin-p4.p4-light .p4-chip{background:rgba(255,255,255,.7);color:var(--mut)}
+body.skin-p4.p4-light .card,body.skin-p4.p4-light .dept-card,body.skin-p4.p4-light details.adx-acc,body.skin-p4.p4-light .blk-card{box-shadow:0 2px 10px rgba(31,42,55,.06);color:var(--ink)}
+body.skin-p4.p4-light details.adx-acc > summary{background:rgba(31,42,55,.03)}
+body.skin-p4.p4-light .fld{background:#fff !important;border:1px solid rgba(31,42,55,.18) !important;color:var(--ink) !important}
+body.skin-p4.p4-light .fld::placeholder{color:#94a3b8}
+body.skin-p4.p4-light .fld:focus{border-color:var(--gold) !important;box-shadow:0 0 0 3px var(--p4-tint,rgba(79,109,138,.15))}
+body.skin-p4.p4-light select.fld option{background:#fff;color:var(--ink)}
+body.skin-p4.p4-light .btn-main{color:#fff !important}
+body.skin-p4.p4-light .btn-soft{background:rgba(31,42,55,.04) !important;color:var(--ink) !important;border:1px solid var(--line) !important}
+body.skin-p4.p4-light .btn-soft:hover{background:rgba(31,42,55,.08) !important}
+body.skin-p4.p4-light .btn-danger{background:#f6ecee !important;color:#8f3c48 !important;border:1px solid #e6c9ce !important}
+body.skin-p4.p4-light .func-chip{color:var(--mut)}
+body.skin-p4.p4-light .tab-btn{color:var(--mut)}
+body.skin-p4.p4-light .b-sky{background:#e6eef6;color:#2f5878;border-color:#c3d4e6}
+body.skin-p4.p4-light .b-emerald,body.skin-p4.p4-light .b-teal{background:#e5f1ec;color:#2f6a52;border-color:#bfdccf}
+body.skin-p4.p4-light .b-amber{background:#f3efe4;color:#76612f;border-color:#ddd1ae}
+body.skin-p4.p4-light .b-rose{background:#f4eaec;color:#86404b;border-color:#e2c6cb}
+body.skin-p4.p4-light .b-purple{background:#eeeaf4;color:#5b4a78;border-color:#d4cbe3}
+body.skin-p4.p4-light .b-indigo{background:#e8eaf5;color:#3f4a78;border-color:#cbd0e7}
+body.skin-p4.p4-light .b-stone,body.skin-p4.p4-light .b-white{background:#eef1f4;color:#4b5866;border-color:#d5dce3}
+body.skin-p4.p4-light .adalex-panel{background:var(--card);color:var(--ink);box-shadow:0 20px 50px rgba(31,42,55,.25)}
+body.skin-p4.p4-light dialog.adalex::backdrop{background:rgba(31,42,55,.45)}
+body.skin-p4.p4-light .sheet-handle{background:rgba(31,42,55,.2)}
+body.skin-p4.p4-light .toast-item{background:#3b5b78}
+body.skin-p4.p4-light table.adx th,body.skin-p4.p4-light table.adx th.nm{background:rgba(31,42,55,.06);color:var(--mut)}
+body.skin-p4.p4-light table.adx td{border-bottom-color:rgba(31,42,55,.08)}
+body.skin-p4.p4-light footer.adx-foot{color:var(--mut)}
+body.skin-p4.p4-light #appRoot [style*="background:#1c1917"]{background:var(--primary) !important;color:#fff !important;border-bottom:2px solid var(--gold)}
+body.skin-p4.p4-light #appRoot [style*="background:#fff;border-radius:22px"]{background:var(--card) !important;border:1px solid var(--line);border-radius:14px !important;box-shadow:0 8px 24px rgba(31,42,55,.08) !important}
+body.skin-p4.p4-light [style*="background:#16a34a"]{background:var(--primary) !important;color:#fff !important;border-radius:8px !important}
+body.skin-p4.p4-light [style*="background:#f59e0b"]:not(.build-banner){background:var(--gold) !important;color:#fff !important;border-radius:8px !important}
+body.skin-p4.p4-light [style*="background:#fff;"]:not(img){background:var(--card) !important}
+
+/* cartão "Decisão importante": degradê suave nas cores do tema */
+body.skin-p4 [data-act="christDecision"].card{background:linear-gradient(120deg,var(--primary),var(--gold)) !important;color:#fff !important;border:0 !important}
+body.skin-p4 [data-act="christDecision"] span[style*="background:#fff"]{background:rgba(255,255,255,.92) !important;color:var(--primary) !important}
+
+/* simulador de cargos legível nos dois tons */
+body.skin-p4 #simBar button[data-act="simRole"]{border-color:var(--line) !important;border-radius:999px !important}
+body.skin-p4 #simBar button[data-act="simRole"][style*="transparent"]{color:var(--mut) !important;background:transparent !important}
+body.skin-p4 #simBar button[data-act="simRole"][style*="#fcd34d"]{background:var(--gold) !important;color:var(--on-accent) !important;border-color:var(--gold) !important}
+body.skin-p4.p4-light #simBar button[data-act="simRole"][style*="#fcd34d"]{color:#fff !important}
+
+body.skin-p4.p4-light .toast-item{background:#4a6378 !important;color:#fff !important;box-shadow:0 8px 22px rgba(31,42,55,.18)}
 </style>
 </head>
 <body>
@@ -617,6 +801,7 @@ footer.adx-foot {
 
 <nav class="top-nav" id="topNav">
   <div class="nav-inner">
+    <div id="navBrand" class="nav-brand"></div>
     <div id="navLeft" class="nav-scroll"></div>
     <div id="navRight"></div>
   </div>
@@ -1091,6 +1276,7 @@ function migrate(s){
   if(!THEMES[s.church.theme]) s.church.theme="navy";
   try{fixDriveUrls(s.church);fixDriveUrls(s.departments);fixDriveUrls(s.directorate);fixDriveUrls(s.customPages);fixDriveUrls(s.layout);}catch(e){}
   if(!s.church.pageLogos||typeof s.church.pageLogos!=="object"||Array.isArray(s.church.pageLogos)) s.church.pageLogos={};
+  if(!s.church.p4PaletteV2){if(!s.church.p4Palette||s.church.p4Palette==="verde") s.church.p4Palette="auto";s.church.p4PaletteV2=true;}
   if(!s.membersCleanupV2){try{membersCleanup(s,true);}catch(e){}s.membersCleanupV1=true;s.membersCleanupV2=true;}
   if(!s.ebdSeeded){
     if(!s.adminButtons.some(function(b){return b.area==="ebd";})){
@@ -1118,8 +1304,45 @@ function roleObj(id,st){
 }
 function allRoles(){return state.roles||DEFAULT_ROLES;}
 function roleLevel(id){return roleObj(id).level||0;}
+var P4_PALETTES={
+  verde:{label:"Verde & Dourado (padrão P4)",bg:"#14281d",card:"#1e3a2a",primary:"#2f5d45",mut:"#a9bbad",glow:"#20402d"},
+  azul:{label:"Azul-marinho & Dourado",bg:"#0f1d33",card:"#172a47",primary:"#24426e",mut:"#a9b8cc",glow:"#1c3456"},
+  vinho:{label:"Vinho & Dourado",bg:"#2a1218",card:"#3d1a23",primary:"#6b2737",mut:"#c9aab1",glow:"#4a1f2a"},
+  grafite:{label:"Grafite & Dourado",bg:"#17191c",card:"#24272b",primary:"#3a3f46",mut:"#aab0b8",glow:"#2c3036"}
+};
+function isSkinP4(){return (state.church.visualStyle||"p4")==="p4";}
+/* cor-base do tema escolhido em Personalização (Azul Marinho, Bordô, Esmeralda...) */
+function classicThemeHex(){
+  var c=state.church;
+  if(c.theme==="custom") return c.customPrimaryHex||"#1e40af";
+  return (THEMES[c.theme]||THEMES.navy).hex;
+}
+function hexRgb(h){h=String(h||"").replace("#","");if(h.length===3) h=h.replace(/(.)/g,"$1$1");var n=parseInt(h.slice(0,6),16);if(isNaN(n)) n=0x1e40af;return [(n>>16)&255,(n>>8)&255,n&255];}
+function mixHex(h,target,t){var a=hexRgb(h),b=hexRgb(target);return "#"+a.map(function(x,i){var v=Math.round(x+(b[i]-x)*t);return ("0"+v.toString(16)).slice(-2);}).join("");}
+/* paleta escura do Padrão P4 gerada a partir da cor do tema */
+function paletteFromHex(hex){
+  return {label:"Tema da igreja",bg:mixHex(hex,"#06080a",0.80),card:mixHex(hex,"#06080a",0.68),primary:mixHex(hex,"#000000",0.30),mut:mixHex(hex,"#ffffff",0.70),glow:mixHex(hex,"#06080a",0.62)};
+}
+function isP4Light(){return (state.church.p4Tone||"light")==="light";}
+/* tom claro, suave e frio: mistura a cor do tema com cinza-azulado e clareia */
+function lightPaletteFromHex(hex){
+  var base=mixHex(mixHex(hex,"#6b7f94",0.70),"#5a7086",0.18);
+  return {label:"Claro e frio",bg:mixHex(base,"#ffffff",0.90),card:mixHex(base,"#ffffff",0.97),primary:mixHex(base,"#1f2a37",0.30),
+    mut:mixHex(base,"#2b3542",0.45),glow:mixHex(base,"#ffffff",0.80),accent:mixHex(base,"#1f2a37",0.12),tint:mixHex(base,"#ffffff",0.82)};
+}
+function p4Palette(){
+  var k=state.church.p4Palette||"auto";
+  var fixed=(k!=="auto"&&P4_PALETTES[k])?P4_PALETTES[k]:null;
+  if(isP4Light()) return lightPaletteFromHex(fixed?fixed.primary:classicThemeHex());
+  if(fixed) return fixed;
+  return paletteFromHex(classicThemeHex());
+}
 function theme(){
   var c=state.church;
+  if(isSkinP4()){
+    if(isP4Light()){var lp=p4Palette();return {label:"Padrão P4 claro",hex:lp.accent,hex2:lp.primary,hexLight:lp.tint};}
+    return {label:"Padrão P4",hex:"#c9a227",hex2:"#a8841a",hexLight:"rgba(201,162,39,.14)"};
+  }
   if(c.theme==="custom"){
     var hex=c.customPrimaryHex||"#1e40af";
     var hex2=c.customSecondaryHex||"#312e81";
@@ -1168,7 +1391,7 @@ function buildAppIconPng(size,bgHex){
 function setupPwa(){
   var t=theme();
   var meta=document.getElementById("metaThemeColor");
-  if(meta) meta.setAttribute("content",t.hex);
+  if(meta) meta.setAttribute("content",isSkinP4()?p4Palette().card:t.hex);
 
   var icon192=buildAppIconPng(192,t.hex);
   var icon512=buildAppIconPng(512,t.hex);
@@ -1716,7 +1939,14 @@ window.appActions={};
 var A=window.appActions;
 
 /* ---------- nav ---------- */
+function renderNavBrand(){
+  var el=document.getElementById("navBrand");if(!el) return;
+  var c=state.church,H=L().header;
+  var logo=(H.showLogo!==false&&c.logoUrl)?'<img class="nav-brand-logo" src="'+esc(imgSrc(c.logoUrl))+'" alt="">':'<span class="nav-brand-ico" aria-hidden="true">⛪</span>';
+  el.innerHTML=logo+'<div class="nav-brand-txt">'+(H.showName!==false?"<b>"+esc(c.name)+"</b>":"")+(H.showSubtitle!==false&&c.subtitle?"<small>"+esc(c.subtitle)+"</small>":"")+"</div>";
+}
 function renderNav(){
+  renderNavBrand();
   var left=(navCfg("home").show!==false?'<button class="nav-btn '+(ui.page==="home"?"on":"")+'" data-act="go" data-page="home">'+ico("church",15)+'<span>'+esc(navCfg("home").label||"Início")+'</span></button>':"")+
     (navCfg("prayer").show!==false&&can("verPaginaOracao")?'<button class="nav-btn '+(ui.page==="prayer"?"on":"")+'" data-act="go" data-page="prayer">'+ico("heart-handshake",15)+'<span>'+esc(navCfg("prayer").label||"Oração")+'</span></button>':"");
   if(can("verPaginaSecretaria")&&navCfg("secretaria").show!==false){
@@ -1757,6 +1987,7 @@ function findUser(id){return state.users.find(function(u){return u.id===id;});}
 
 /* ---------- header ---------- */
 function headerHtml(){
+  if(isSkinP4()) return headerP4Html();
   var c=state.church,t=theme();
   var logo=c.logoUrl
     ?'<img src="'+esc(driveLink(c.logoUrl))+'" alt="Logo da igreja" style="width:84px;height:84px;border-radius:22px;border:3px solid #fff;object-fit:contain;padding:4px;background:#fff;box-shadow:0 6px 18px rgba(0,0,0,.22)">'
@@ -1778,6 +2009,18 @@ function headerHtml(){
       "</div>"+
     "</div>"+
   "</header>";
+}
+
+function headerP4Html(){
+  var c=state.church,H=L().header;
+  var hoje="";
+  try{hoje=new Date().toLocaleDateString("pt-BR",{weekday:"long",day:"numeric",month:"long"});hoje=hoje.charAt(0).toUpperCase()+hoje.slice(1);}catch(e){}
+  var greet="📅 "+hoje;
+  var sub=session.identified?(c.subtitle||""):"Identifique-se para acessar o aplicativo.";
+  var chips="";
+  if(can("verCnpj")&&c.cnpj&&H.showCnpj!==false) chips+='<button class="p4-chip" data-act="copyCnpj">'+ico("copy",12)+"<span>CNPJ "+esc(c.cnpj)+"</span></button>";
+  if(c.address&&H.showAddress!==false) chips+='<span class="p4-chip">'+ico("map-pin",12)+"<span>"+esc(c.address)+"</span></span>";
+  return '<header class="p4-banner"><div class="p4-banner-in"><div style="min-width:0"><strong>'+esc(greet)+"</strong><p>"+esc(sub)+"</p></div>"+(chips?'<div class="p4-chips">'+chips+"</div>":"")+"</div></header>";
 }
 
 /* ---------- identification gate ---------- */
@@ -2196,7 +2439,7 @@ function tabChurch(){
 
   return hd("Personalização Total da Igreja","Altere cores, faixa superior, dados institucionais, textos dos cartões e comportamento.")+
     '<details class="adx-acc" open><summary>🎨 Cores, Tema &amp; Faixa Superior</summary><div class="acc-body">'+
-      '<div><label class="lbl">Paleta de cores</label><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:.5rem">'+themes+'</div></div>'+
+      '<div><label class="lbl">Paleta de cores</label><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:.5rem">'+themes+'</div>'+(isSkinP4()?'<div class="help">No visual Padrão P4, a paleta define o tom do fundo, dos cartões, da barra e dos destaques (sempre em versão suave). Troque o estilo em Layout &amp; Visibilidade → Menu, Cabeçalho &amp; Rodapé.</div>':"")+'</div>'+
       '<div class="safe-grid-sm">'+
         field("Cor Principal (Modo Personalizado)","ch_c1",c.customPrimaryHex||"#1e40af","","color")+
         field("Cor Secundária / Degradê","ch_c2",c.customSecondaryHex||"#312e81","","color")+
@@ -2960,7 +3203,13 @@ function openConfirm(msg,onYes){
 function applyChromeStyles(){
   var c=state.church,t=theme();
   document.documentElement.style.setProperty("--accent",t.hex);
-  document.body.style.background=c.customBgHex||"#f5f5f4";
+  var skin=isSkinP4(),pal=p4Palette();
+  document.body.classList.toggle("skin-p4",skin);
+  document.body.classList.toggle("p4-light",skin&&isP4Light());
+  ["bg","card","primary","mut","glow","accent","tint"].forEach(function(k){if(pal[k]) document.body.style.setProperty("--p4-"+k,pal[k]); else document.body.style.removeProperty("--p4-"+k);});
+  document.body.style.background=skin?"":(c.customBgHex||"#f5f5f4");
+  var meta=document.getElementById("metaThemeColor");
+  if(meta) meta.setAttribute("content",skin?pal.card:t.hex);
 
   var banner=document.getElementById("buildBanner");
   var bTxt=document.getElementById("buildBannerText");
@@ -4370,6 +4619,12 @@ function chromeEditorHtml(){
       chk("nv_inst",n.showInstall!==false,"Mostrar botão Instalar App no menu")+
       inputPh("Nome do botão Instalar","nv_instL",n.installLabel,"Instalar App")+
     "</div></details>"+
+    '<details class="adx-acc" open><summary>🎨 Estilo visual do app</summary><div class="acc-body">'+
+      selectF("Estilo",'vs_style',[["p4","Padrão P4 (escuro, cartões e destaques dourados)"],["classic","Clássico (claro, cores do tema)"]],state.church.visualStyle||"p4")+
+      selectF("Tom do Padrão P4",'vs_tone',[["light","Claro, suave e frio"],["dark","Escuro (igual ao P4 1ª Cia)"]],state.church.p4Tone||"light")+
+      selectF("Cores do Padrão P4",'vs_pal',[["auto","Seguir o tema escolhido em Personalização (Paleta de cores)"]].concat(Object.keys(P4_PALETTES).map(function(k){return [k,"Fixa: "+P4_PALETTES[k].label];})),state.church.p4Palette||"auto")+
+      '<div class="help" style="margin:0">O Padrão P4 segue o mesmo layout do app P4 1ª Cia: barra superior com a logo e linha dourada, faixa de saudação, abas em pílula e cartões escuros. As cores do tema clássico continuam em Personalização.</div>'+
+    "</div></details>"+
     '<details class="adx-acc" open><summary>🏛️ Cabeçalho (topo de todas as páginas)</summary><div class="acc-body">'+
       chk("hd_logo",hd2.showLogo!==false,"Mostrar logo da igreja")+
       chk("hd_name",hd2.showName!==false,"Mostrar nome da igreja")+
@@ -4462,6 +4717,7 @@ A.saveChrome=function(){
   LAYOUT_PAGES.forEach(function(p){l.nav[p[0]]={label:v("nv_l_"+p[0]).trim()||p[1],show:ch("nv_s_"+p[0])};});
   l.nav.gestorLabel=v("nv_gestor").trim()||"Gestor";
   l.nav.showInstall=ch("nv_inst");l.nav.installLabel=v("nv_instL").trim()||"Instalar App";
+  state.church.visualStyle=v("vs_style")||"p4";state.church.p4Palette=v("vs_pal")||"auto";state.church.p4Tone=v("vs_tone")||"light";
   l.header={showLogo:ch("hd_logo"),showName:ch("hd_name"),showSubtitle:ch("hd_sub"),showCnpj:ch("hd_cnpj"),showAddress:ch("hd_addr")};
   l.footer={show:ch("ft_show"),showName:ch("ft_name"),showInfo:ch("ft_info"),homeShow:ch("ft_hs"),homeLabel:v("ft_hl").trim()||"Início & Pix",prayerShow:ch("ft_ps"),prayerLabel:v("ft_pl").trim()||"Administração & Oração",showNote:ch("ft_note"),shareShow:ch("ft_ss"),shareLabel:v("ft_sl").trim()||"📲 Compartilhar o App",shareText:v("ft_st").trim()};
   save();render();toast("Menu, cabeçalho e rodapé salvos!","success");
