@@ -804,6 +804,13 @@ body.skin-p4.p4-light .toast-item{background:#4a6378 !important;color:#fff !impo
 .vp-chip small{font-weight:500;opacity:.8}
 .vp-pres{display:flex;flex-wrap:wrap;gap:.3rem}
 .vp-pre{border:0;background:none;color:var(--p4-primary,#4a5d78);font-size:.75rem;font-weight:700;padding:.25rem .4rem;cursor:pointer;text-decoration:underline;font-family:inherit}
+
+.upd-btn{display:inline-flex;align-items:center;gap:.35rem;border:1px solid rgba(15,23,42,.12);background:rgba(255,255,255,.7);color:inherit;border-radius:999px;padding:.4rem .75rem;font:inherit;font-size:.78rem;font-weight:700;cursor:pointer;margin-right:.4rem;min-height:36px;white-space:nowrap}
+.upd-btn svg{flex:0 0 auto}
+.upd-btn.spin svg{animation:updspin .8s linear infinite}
+@keyframes updspin{to{transform:rotate(360deg)}}
+@media(max-width:760px){.upd-btn span{display:none}.upd-btn{padding:.45rem;width:38px;justify-content:center}}
+body.skin-p4:not(.p4-light) .upd-btn{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.15)}
 /* ===== Celular: aplicativo ===== */
 .m-tabs{display:none}
 @media(max-width:760px){
@@ -961,6 +968,7 @@ window.addEventListener("load",function(){setTimeout(function(){if(!window.__ada
 
 /* ---------- inline SVG icon helper ---------- */
 var ICONS={
+  refresh:'<path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/>',
   menu:'<path d="M4 6h16"/><path d="M4 12h16"/><path d="M4 18h16"/>',
   church:'<path d="M10 9h4"/><path d="M12 7v5"/><path d="M14 22v-4a2 2 0 0 0-4 0v4"/><path d="M18 22V5.618a1 1 0 0 0-.553-.894l-4.553-2.277a2 2 0 0 0-1.788 0L6.553 4.724A1 1 0 0 0 6 5.618V22"/><path d="m18 7 3.447 1.724a1 1 0 0 1 .553.894V20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9.618a1 1 0 0 1 .553-.894L6 7"/>',
   "heart-handshake":'<path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/><path d="M12 5 9.04 7.96a2.17 2.17 0 0 0 0 3.08c.82.82 2.13.85 3 .07l2.07-1.9a2.82 2.82 0 0 1 3.79 0l2.96 2.66"/><path d="m18 15-2-2"/><path d="m15 18-2-2"/>',
@@ -2162,7 +2170,8 @@ function renderNav(){
   var name=session.userId?(findUser(session.userId)||{}).name:(session.visitorName||"");
   var role=session.role;
   var label=name?name.split(" ")[0]:"Entrar";
-  document.getElementById("navRight").innerHTML='<button class="profile-btn" data-act="profile"><span>'+esc(label)+'</span>'+roleBadge(role)+"</button>";
+  var updBtn=(L().nav.showUpdBtn!==false)?'<button type="button" class="upd-btn" data-act="checkUpdateNow" title="'+esc(T("upd_btn","Procurar atualização"))+'" aria-label="'+esc(T("upd_btn","Procurar atualização"))+'">'+ico("refresh",16)+'<span>'+esc(T("upd_btn","Procurar atualização"))+"</span></button>":"";
+  document.getElementById("navRight").innerHTML=updBtn+'<button class="profile-btn" data-act="profile"><span>'+esc(label)+'</span>'+roleBadge(role)+"</button>";
 
   var sim="";
   if(session.realRole==="admin_geral"){
@@ -2215,6 +2224,7 @@ A.mobileMore=function(){
   var rows=more.map(function(x){
     return '<button type="button" class="m-more-row" data-act="go" data-page="'+esc(x.page)+'"><span class="m-ic">'+x.icon+'</span><span>'+esc(x.label)+'</span><span style="margin-left:auto;opacity:.35">›</span></button>';
   }).join("");
+  rows+='<button type="button" class="m-more-row" data-act="checkUpdateNow"><span class="m-ic">🔄</span><span>'+esc(T("upd_btn","Procurar atualização"))+'</span></button>';
   rows+='<button type="button" class="m-more-row" data-act="shareApp"><span class="m-ic">📲</span><span>'+esc(T("m_share","Compartilhar o app"))+'</span></button>';
   rows+='<button type="button" class="m-more-row" data-act="changeAccess"><span class="m-ic">👤</span><span>'+esc(T("m_change","Trocar acesso / sair"))+'</span></button>';
   var sim="";
@@ -5090,6 +5100,7 @@ function chromeEditorHtml(){
       '<p class="help" style="margin:0">Marque para mostrar no menu e edite o nome de cada botão. (A página continua respeitando as Permissões por cargo.) As Páginas Personalizadas são configuradas na aba delas.</p>'+
       navRows+
       inputPh("Nome do botão do Painel Gestor","nv_gestor",n.gestorLabel,"Gestor")+
+      chk("nv_upd",n.showUpdBtn!==false,"Mostrar o botão “Procurar atualização” no topo")+
       chk("nv_inst",n.showInstall!==false,"Mostrar botão Instalar App no menu")+
       inputPh("Nome do botão Instalar","nv_instL",n.installLabel,"Instalar App")+
     "</div></details>"+
@@ -5138,7 +5149,7 @@ function textsEditorHtml(){
     '<div class="card" style="background:#f5f5f4;margin-bottom:.8rem"><p class="help" style="margin:0 0 .4rem">🔤 '+esc(VARS_HELP)+'</p><p class="help" style="margin:0">Troque qualquer nome ou ícone do app. Deixe o campo vazio para usar o texto padrão (mostrado em cinza). Os nomes das páginas do menu ficam em <b>Menu, Cabeçalho &amp; Rodapé</b>, e os títulos das seções em cada página desta aba.</p></div>'+
     box("Botões da tela inicial","Vale para todos. Se uma seção tiver nome próprio (em Layout → Início), o nome da seção vale mais.",tiles)+
     box("Botões de acesso às páginas","",'<div class="safe-grid-sm">'+row("ptile_prayer","Ícone · Oração","🤲")+row("ptile_secretaria","Ícone · Secretaria","📄")+row("ptile_tesouraria","Ícone · Tesouraria","💰")+row("ptile_ebd","Ícone · EBD","📖")+row("ptile_admin","Ícone · Painel Gestor","⚙️")+row("ptile_admin_sub","Texto pequeno · Painel Gestor","Administração")+"</div>")+
-    box("Celular: barra de baixo e menu","",'<div class="safe-grid-sm">'+row("m_more","Botão “Mais”","Mais")+row("m_menu","Título do menu","Menu")+row("m_share","Compartilhar","Compartilhar o app")+row("m_change","Trocar acesso","Trocar acesso / sair")+row("back_home","Botão de voltar das seções","‹ Início")+"</div>")+
+    box("Celular: barra de baixo e menu","",'<div class="safe-grid-sm">'+row("m_more","Botão “Mais”","Mais")+row("m_menu","Título do menu","Menu")+row("m_share","Compartilhar","Compartilhar o app")+row("m_change","Trocar acesso","Trocar acesso / sair")+row("back_home","Botão de voltar das seções","‹ Início")+row("upd_btn","Botão de atualização (topo)","Procurar atualização")+"</div>")+
     box("Abas do Painel Gestor","",'<div class="safe-grid-sm">'+tabs+"</div>")+
     '<div style="position:sticky;bottom:.5rem;display:flex;gap:.5rem;flex-wrap:wrap"><button class="btn-main" data-act="textsSave">Salvar nomes e textos</button><button class="btn-soft" data-act="textsReset">Voltar tudo ao padrão</button></div>';
 }
@@ -5222,6 +5233,7 @@ A.saveChrome=function(){
   var l=state.layout=state.layout||defaultLayoutState();
   LAYOUT_PAGES.forEach(function(p){l.nav[p[0]]={label:v("nv_l_"+p[0]).trim()||p[1],show:ch("nv_s_"+p[0])};});
   l.nav.gestorLabel=v("nv_gestor").trim()||"Gestor";
+  if(document.getElementById("nv_upd")) l.nav.showUpdBtn=ch("nv_upd");
   l.nav.showInstall=ch("nv_inst");l.nav.installLabel=v("nv_instL").trim()||"Instalar App";
   state.church.visualStyle=v("vs_style")||"p4";state.church.p4Palette=v("vs_pal")||"auto";state.church.p4Tone=v("vs_tone")||"light";
   state.church.homeStyle=v("vs_home")||"atalhos";state.church.homeLauncherText=v("vs_home_txt").trim();state.church.homePageTiles=ch("vs_home_pages");state.church.homePagesTitle=v("vs_home_pt").trim();
@@ -5421,7 +5433,7 @@ function openShareDialog(url,text){
    ====================================================================== */
 /* A versão = "impressão digital" do código do app + data de publicação dos dados.
    Assim qualquer mudança (no código ou nos dados publicados) é reconhecida. */
-var APP_VERSION="3.6.0";
+var APP_VERSION="3.7.0";
 var IS_GAS=!!(window.google&&google.script&&google.script.run);
 var GAS=(typeof GAS_CONFIG!=="undefined"&&GAS_CONFIG)||{};
 var MAIN_SCRIPT_TEXT=(document.currentScript&&document.currentScript.textContent)||"";
@@ -5568,6 +5580,55 @@ function autoUpdateNow(version,opening){
   setTimeout(applyUpdateNow,400);
   return true;
 }
+/* ---------- botão "Procurar atualização" ---------- */
+function gasSoftRefresh(done){
+  gasRun("appDados",[],function(txt){
+    try{
+      var o=JSON.parse(txt);if(!o||typeof o!=="object"){done&&done(false);return;}
+      var changed=String(o.publishedAt||"")!==String(LOADED_PUBLISHED);
+      EMBEDDED_STATE=o;state=load();
+      LOADED_PUBLISHED=String(o.publishedAt||"");LOADED_VERSION=APP_VERSION+"|"+LOADED_PUBLISHED;
+      try{localStorage.setItem(SEEN_KEY,LOADED_VERSION);}catch(e){}
+      render();done&&done(changed);
+    }catch(e){done&&done(false);}
+  },function(){done&&done(false);});
+}
+var updBusy=false;
+A.checkUpdateNow=function(el){
+  if(updBusy) return;
+  if(navigator.onLine===false){toast("Sem internet. Conecte-se e tente de novo.","error");return;}
+  updBusy=true;
+  document.querySelectorAll(".upd-btn").forEach(function(b){b.classList.add("spin");});
+  function end(){updBusy=false;document.querySelectorAll(".upd-btn").forEach(function(b){b.classList.remove("spin");});}
+  toast("Procurando atualização…");
+  if(IS_GAS){
+    gasRun("getMeta",[],function(m){
+      m=m||{};
+      if(m.appVersion&&m.appVersion!==APP_VERSION){end();toast("Nova versão do app encontrada. Atualizando…","success");setTimeout(applyUpdateNow,300);return;}
+      gasSoftRefresh(function(changed){
+        end();
+        toast(changed?"App atualizado com as últimas informações publicadas.":"Tudo certo: você já está com a versão mais recente.","success");
+      });
+    },function(err){end();toast("Não foi possível conectar ao servidor. Tente de novo.","error");});
+    return;
+  }
+  if(!/^https?:$/.test(location.protocol)){end();toast("Abra o app pelo link publicado para procurar atualização.","error");return;}
+  try{if(navigator.serviceWorker&&navigator.serviceWorker.getRegistration) navigator.serviceWorker.getRegistration().then(function(r){if(r) r.update();}).catch(function(){});}catch(e){}
+  var url=location.href.split("#")[0].split("?")[0];
+  fetch(url+(url.indexOf("?")<0?"?":"&")+"v="+Date.now(),{cache:"no-store",headers:{"Accept":"text/html"}})
+    .then(function(r){return r.ok?r.text():"";})
+    .then(function(html){
+      end();
+      if(!html||html.indexOf("__CUSTOM_STATE_START__")<0){toast("Não foi possível verificar agora. Tente de novo.","error");return;}
+      var rv=parseRemoteVersion(html);
+      if(rv.version&&rv.version!==LOADED_VERSION){
+        try{sessionStorage.removeItem("adalex_auto_upd");}catch(e){}
+        toast("Atualização encontrada. Atualizando…","success");setTimeout(applyUpdateNow,400);return;
+      }
+      toast("Tudo certo: você já está com a versão mais recente.","success");
+    })
+    .catch(function(){end();toast("Não foi possível conectar. Verifique a internet.","error");});
+};
 /* já abriu na versão nova? mostra as novidades uma vez */
 function showWhatsNewIfUpdated(){
   var seen="";
